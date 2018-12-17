@@ -4,19 +4,26 @@ using Microsoft.EntityFrameworkCore.Metadata;
 
 namespace EcommerceApi.Models
 {
-    public partial class ecommerceContext : DbContext
+    public partial class EcommerceContext : DbContext
     {
         public virtual DbSet<Customer> Customer { get; set; }
         public virtual DbSet<Location> Location { get; set; }
         public virtual DbSet<Product> Product { get; set; }
         public virtual DbSet<ProductType> ProductType { get; set; }
 
+        public EcommerceContext()
+        {
+        }
+
+        public EcommerceContext(DbContextOptions<EcommerceContext> options) : base(options)
+        {
+        }
+
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (!optionsBuilder.IsConfigured)
             {
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. See http://go.microsoft.com/fwlink/?LinkId=723263 for guidance on storing connection strings.
-                
+                // optionsBuilder.UseSqlServer(@"connection string");
             }
         }
 
