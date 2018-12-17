@@ -27,7 +27,7 @@ namespace EcommerceApi
         {
             services.AddMvc();
 
-            var connection = @"connection string";
+            var connection = Configuration["ConnectionString"];
             services.AddDbContext<EcommerceContext>(options => options.UseSqlServer(connection));
         }
 
