@@ -10,6 +10,7 @@ namespace EcommerceApi.Models
         public virtual DbSet<Location> Location { get; set; }
         public virtual DbSet<Product> Product { get; set; }
         public virtual DbSet<ProductType> ProductType { get; set; }
+        public virtual DbSet<ApplicationUser> ApplicationUsers { get; set; }
 
         public EcommerceContext()
         {

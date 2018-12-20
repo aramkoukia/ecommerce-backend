@@ -10,6 +10,14 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.EntityFrameworkCore;
 using EcommerceApi.Models;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using EcommerceApi.Middleware;
+using Microsoft.AspNetCore.HttpOverrides;
+using EcommerceApi.Services;
+using Microsoft.AspNetCore.SpaServices.Webpack;
 
 namespace EcommerceApi
 {
@@ -29,6 +37,32 @@ namespace EcommerceApi
 
             var connection = Configuration["ConnectionString"];
             services.AddDbContext<EcommerceContext>(options => options.UseSqlServer(connection));
+
+            // Configure Entity Framework Identity for Auth
+            services.AddIdentity<ApplicationUser, IdentityRole>()
+            .AddEntityFrameworkStores<EcommerceContext>()
+            .AddDefaultTokenProviders();
+
+            services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer(config =>
+            {
+                config.RequireHttpsMetadata = false;
+                config.SaveToken = true;
+
+                config.TokenValidationParameters = new TokenValidationParameters()
+                {
+                    ValidIssuer = Configuration["jwt:issuer"],
+                    ValidAudience = Configuration["jwt:issuer"],
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["jwt:key"]))
+                };
+            });
+
+            services.Configure<JwtOptions>(Configuration.GetSection("jwt"));
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -36,8 +70,40 @@ namespace EcommerceApi
         {
             if (env.IsDevelopment())
             {
+                // Configure Webpack Middleware (Ref: http://blog.stevensanderson.com/2016/05/02/angular2-react-knockout-apps-on-aspnet-core/)
+                //  - Intercepts requests for webpack bundles and routes them through Webpack - this prevents needing to run Webpack file watcher separately
+                //  - Enables Hot module replacement (HMR)
+                //app.UseWebpackDevMiddleware(new WebpackDevMiddlewareOptions
+                //{
+                //    HotModuleReplacement = true,
+                //    HotModuleReplacementClientOptions = new Dictionary<string, string> {{ "reload", "true" }},
+                //    ReactHotModuleReplacement = true,
+                //    ConfigFile = System.IO.Path.Combine(Configuration["webClientPath"], "webpack.config.js")
+                //});
+
                 app.UseDeveloperExceptionPage();
+                app.UseDatabaseErrorPage();
             }
+
+                        // If not requesting /api*, rewrite to / so SPA app will be returned
+            app.UseSpaFallback(new SpaFallbackOptions()
+            {
+                ApiPathPrefix = "/api",
+                RewritePath = "/"
+            });
+
+            app.UseDefaultFiles();
+            app.UseStaticFiles();
+
+            app.UseForwardedHeaders(new ForwardedHeadersOptions
+            {
+                // Read and use headers coming from reverse proxy: X-Forwarded-For X-Forwarded-Proto
+                // This is particularly important so that HttpContet.Request.Scheme will be correct behind a SSL terminating proxy
+                ForwardedHeaders = ForwardedHeaders.XForwardedFor |
+                ForwardedHeaders.XForwardedProto
+            });
+
+            app.UseAuthentication();
 
             app.UseMvc();
         }
