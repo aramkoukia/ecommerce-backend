@@ -35,8 +35,13 @@ namespace EcommerceApi
         {
             services.AddMvc();
 
-            var connection = Configuration["ConnectionString"];
-            services.AddDbContext<EcommerceContext>(options => options.UseSqlServer(connection));
+            services.AddEntityFrameworkSqlServer().AddDbContext<EcommerceContext>(options =>
+            {
+                options.UseSqlServer(Configuration.GetConnectionString("defaultConnection"));
+            });
+
+            // Configure Entity Framework Initializer for seeding
+            services.AddTransient<IDefaultDbContextInitializer, DefaultDbContextInitializer>();
 
             // Configure Entity Framework Identity for Auth
             services.AddIdentity<ApplicationUser, IdentityRole>()
@@ -62,7 +67,6 @@ namespace EcommerceApi
             });
 
             services.Configure<JwtOptions>(Configuration.GetSection("jwt"));
-
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
