@@ -21,7 +21,7 @@ namespace EcommerceApi.Controllers
 private readonly UserManager<ApplicationUser> _userManager;
         private readonly IOptions<IdentityOptions> _identityOptions;
         private readonly JwtOptions _jwtOptions;
-        private readonly IEmailSender _emailSender;
+        //private readonly IEmailSender _emailSender;
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly ILogger _logger;
 
@@ -29,20 +29,20 @@ private readonly UserManager<ApplicationUser> _userManager;
             UserManager<ApplicationUser> userManager,
             IOptions<IdentityOptions> identityOptions,
             IOptions<JwtOptions> jwtOptions,
-            IEmailSender emailSender,
+            //IEmailSender emailSender,
             SignInManager<ApplicationUser> signInManager,
             ILoggerFactory loggerFactory)
         {
             _userManager = userManager;
             _identityOptions = identityOptions;
             _jwtOptions = jwtOptions.Value;
-            _emailSender = emailSender;
+            //_emailSender = emailSender;
             _signInManager = signInManager;
             _logger = loggerFactory.CreateLogger<AuthController>();
         }
 
         [AllowAnonymous]
-        [HttpPost("~/api/auth/login")]
+        [HttpPost("api/auth/login")]
         [Produces("application/json")]
         public async Task<IActionResult> Login(string username, string password)
         {
@@ -89,60 +89,60 @@ private readonly UserManager<ApplicationUser> _userManager;
             return Ok(new { token = new JwtSecurityTokenHandler().WriteToken(token) });
         }
 
-        [AllowAnonymous]
-        [HttpPost("~/api/auth/register")]
-        public async Task<IActionResult> Register(NewUser model)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
+    //    [AllowAnonymous]
+    //    [HttpPost("~/api/auth/register")]
+    //    public async Task<IActionResult> Register(NewUser model)
+    //    {
+    //        if (!ModelState.IsValid)
+    //        {
+    //            return BadRequest(ModelState);
+    //        }
 
-            var user = new ApplicationUser { UserName = model.username, Email = model.username };
-            var result = await _userManager.CreateAsync(user, model.password);
-            if (result.Succeeded)
-            {
-                _logger.LogInformation($"New user registered (id: {user.Id})");
+    //        var user = new ApplicationUser { UserName = model.username, Email = model.username };
+    //        var result = await _userManager.CreateAsync(user, model.password);
+    //        if (result.Succeeded)
+    //        {
+    //            _logger.LogInformation($"New user registered (id: {user.Id})");
 
-                if (!user.EmailConfirmed)
-                {
-                    // Send email confirmation email
-                    var confirmToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-                    var emailConfirmUrl = Url.RouteUrl("ConfirmEmail", new { uid = user.Id, token = confirmToken }, this.Request.Scheme);
-                    await _emailSender.SendEmailAsync(model.username, "Please confirm your account",
-    $"Please confirm your account by clicking this <a href=\"{emailConfirmUrl}\">link</a>."
-                    );
+    //            if (!user.EmailConfirmed)
+    //            {
+    //                // Send email confirmation email
+    //                var confirmToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+    //                var emailConfirmUrl = Url.RouteUrl("ConfirmEmail", new { uid = user.Id, token = confirmToken }, this.Request.Scheme);
+    //                await _emailSender.SendEmailAsync(model.username, "Please confirm your account",
+    //$"Please confirm your account by clicking this <a href=\"{emailConfirmUrl}\">link</a>."
+    //                );
 
-                    _logger.LogInformation($"Sent email confirmation email (id: {user.Id})");
-                }
+    //                _logger.LogInformation($"Sent email confirmation email (id: {user.Id})");
+    //            }
 
-                // Create a new authentication ticket.
-                //var ticket = await CreateTicket(user);
+    //            // Create a new authentication ticket.
+    //            //var ticket = await CreateTicket(user);
 
-                _logger.LogInformation($"User logged in (id: {user.Id})");
+    //            _logger.LogInformation($"User logged in (id: {user.Id})");
 
-                return Ok();
-            }
-            else
-            {
-                return BadRequest(new { general = result.Errors.Select(x => x.Description) });
-            }
-        }
+    //            return Ok();
+    //        }
+    //        else
+    //        {
+    //            return BadRequest(new { general = result.Errors.Select(x => x.Description) });
+    //        }
+    //    }
 
-        [AllowAnonymous]
-        [HttpGet("~/api/auth/confirm", Name = "ConfirmEmail")]
-        public async Task<IActionResult> Confirm(string uid, string token)
-        {
-            var user = await _userManager.FindByIdAsync(uid);
-            var confirmResult = await _userManager.ConfirmEmailAsync(user, token);
-            if (confirmResult.Succeeded)
-            {
-                return Redirect("/?confirmed=1");
-            }
-            else
-            {
-                return Redirect("/error/email-confirm");
-            }
-        }
+    //    [AllowAnonymous]
+    //    [HttpGet("~/api/auth/confirm", Name = "ConfirmEmail")]
+    //    public async Task<IActionResult> Confirm(string uid, string token)
+    //    {
+    //        var user = await _userManager.FindByIdAsync(uid);
+    //        var confirmResult = await _userManager.ConfirmEmailAsync(user, token);
+    //        if (confirmResult.Succeeded)
+    //        {
+    //            return Redirect("/?confirmed=1");
+    //        }
+    //        else
+    //        {
+    //            return Redirect("/error/email-confirm");
+    //        }
+    //    }
     }
 }

@@ -43,6 +43,9 @@ namespace EcommerceApi
             // Configure Entity Framework Initializer for seeding
             services.AddTransient<IDefaultDbContextInitializer, DefaultDbContextInitializer>();
 
+            services.AddTransient<IEmailSender, EmailSender>();
+            services.Configure<EmailSenderOptions>(Configuration.GetSection("email"));
+
             // Configure Entity Framework Identity for Auth
             services.AddIdentity<ApplicationUser, IdentityRole>()
             .AddEntityFrameworkStores<EcommerceContext>()
@@ -89,12 +92,12 @@ namespace EcommerceApi
                 app.UseDatabaseErrorPage();
             }
 
-                        // If not requesting /api*, rewrite to / so SPA app will be returned
-            app.UseSpaFallback(new SpaFallbackOptions()
-            {
-                ApiPathPrefix = "/api",
-                RewritePath = "/"
-            });
+            // If not requesting /api*, rewrite to / so SPA app will be returned
+            //app.UseSpaFallback(new SpaFallbackOptions()
+            //{
+            //    ApiPathPrefix = "/api",
+            //    RewritePath = "/"
+            //});
 
             app.UseDefaultFiles();
             app.UseStaticFiles();
