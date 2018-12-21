@@ -32,15 +32,16 @@ namespace EcommerceApi.Models
 
         public async Task Seed()
         {
-            var email = "user@test.com";
+            var email = "aramkoukia@gmail.com";
+            var username = "aram";
             if (await _userManager.FindByEmailAsync(email) == null)
             {
                 var user = new ApplicationUser
                 {
-                    UserName = email,
+                    UserName = username,
                     Email = email,
                     EmailConfirmed = true,
-                    GivenName = "John Doe"
+                    GivenName = "Aram Koukia"
                 };
 
                 await _userManager.CreateAsync(user, "P2ssw0rd!");
