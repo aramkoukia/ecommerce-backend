@@ -5,6 +5,12 @@ namespace EcommerceApi.Models
 {
     public partial class Product
     {
+        public Product()
+        {
+            ProductInventory = new HashSet<ProductInventory>();
+            ProductType = new ProductType();
+    }
+
         public int ProductId { get; set; }
         public string ProductCode { get; set; }
         public string Barcode { get; set; }
@@ -17,7 +23,9 @@ namespace EcommerceApi.Models
         public decimal SalesPrice { get; set; }
         public decimal? PurchasePrice { get; set; }
         public DateTime ModifiedDate { get; set; }
-
         public ProductType ProductType { get; set; }
+
+        public ICollection<ProductInventory> ProductInventory { get; set; }
+
     }
 }

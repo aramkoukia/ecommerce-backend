@@ -26,7 +26,9 @@ namespace EcommerceApi.Controllers
         [HttpGet]
         public IEnumerable<Product> GetProduct()
         {
-            return _context.Product;
+            return _context.Product
+                .Include("ProductType")
+                .Include("ProductInventory");
         }
 
         // GET: api/Products/5

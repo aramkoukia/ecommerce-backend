@@ -11,10 +11,12 @@ namespace EcommerceApi.Models
             OrderTax = new HashSet<OrderTax>();
             OrderPayment = new HashSet<OrderPayment>();
             Customer = new Customer();
+            Location = new Location();
         }
 
         public int? OrderId { get; set; }
         public int? CustomerId { get; set; }
+        public int LocationId { get; set; }
         public DateTime OrderDate { get; set; }
         public decimal Total { get; set; }
         public decimal SubTotal { get; set; }
@@ -34,5 +36,6 @@ namespace EcommerceApi.Models
         public ICollection<OrderPayment> OrderPayment { get; set; }
 
         public Customer Customer { get; set; }
+        public Location Location { get; set; }
     }
 }

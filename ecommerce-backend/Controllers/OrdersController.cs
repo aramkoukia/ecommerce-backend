@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using EcommerceApi.Models;
@@ -29,7 +28,11 @@ namespace EcommerceApi.Controllers
         [HttpGet]
         public IEnumerable<Order> GetOrder()
         {
-            return _context.Order;
+            return _context.Order
+                .Include("OrderTax")
+                .Include("OrderDetail")
+                .Include("OrderPayment")
+                .Include("Customer");
         }
 
         // GET: api/Orders/5
@@ -101,6 +104,7 @@ namespace EcommerceApi.Controllers
             order.CreatedDate = DateTime.UtcNow;
             order.OrderDate = DateTime.UtcNow;
             order.Customer = null;
+            order.Location = null;
 
             _context.Order.Add(order);
             await _context.SaveChangesAsync();
