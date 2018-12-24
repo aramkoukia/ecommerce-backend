@@ -1,24 +1,21 @@
-﻿using System;
-using EcommerceApi.Extensions;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata;
 
 namespace EcommerceApi.Models
 {
     public partial class EcommerceContext : IdentityDbContext<ApplicationUser>
     {
+        public virtual DbSet<Contact> Contacts { get; set; }
         public virtual DbSet<Customer> Customer { get; set; }
         public virtual DbSet<Location> Location { get; set; }
-        public virtual DbSet<Tax> Tax { get; set; }
+        public virtual DbSet<Order> Order { get; set; }
+        public virtual DbSet<OrderDetail> OrderDetail { get; set; }
+        public virtual DbSet<OrderPayment> OrderPayment { get; set; }
+        public virtual DbSet<OrderTax> OrderTax { get; set; }
+        public virtual DbSet<PaymentType> PaymentType { get; set; }
         public virtual DbSet<Product> Product { get; set; }
         public virtual DbSet<ProductType> ProductType { get; set; }
-        public virtual DbSet<ApplicationUser> ApplicationUsers { get; set; }
-        public virtual DbSet<Contact> Contacts { get; set; }
-
-        public EcommerceContext()
-        {
-        }
+        public virtual DbSet<Tax> Tax { get; set; }
 
         public EcommerceContext(DbContextOptions<EcommerceContext> options) : base(options)
         {
