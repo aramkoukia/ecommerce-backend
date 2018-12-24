@@ -18,6 +18,7 @@ using EcommerceApi.Middleware;
 using Microsoft.AspNetCore.HttpOverrides;
 using EcommerceApi.Services;
 using Microsoft.AspNetCore.SpaServices.Webpack;
+using EcommerceApi.Extensions;
 
 namespace EcommerceApi
 {
@@ -70,6 +71,8 @@ namespace EcommerceApi
             });
 
             services.Configure<JwtOptions>(Configuration.GetSection("jwt"));
+
+            services.AddCors();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -102,6 +105,8 @@ namespace EcommerceApi
             app.UseDefaultFiles();
             app.UseStaticFiles();
 
+            app.ConfigureExceptionHandler();
+
             app.UseForwardedHeaders(new ForwardedHeadersOptions
             {
                 // Read and use headers coming from reverse proxy: X-Forwarded-For X-Forwarded-Proto
@@ -112,7 +117,14 @@ namespace EcommerceApi
 
             app.UseAuthentication();
 
+            app.UseCors(builder => builder
+                .AllowAnyOrigin()
+                .AllowAnyMethod()
+                .AllowAnyHeader()
+                .AllowCredentials());
+
             app.UseMvc();
+
         }
     }
 }

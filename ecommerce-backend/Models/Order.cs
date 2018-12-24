@@ -27,7 +27,7 @@ namespace EcommerceApi.Models
         public string PoNumber { get; set; }
         public string Status { get; set; }
         public DateTime? CreatedDate { get; set; }
-        public int? CreatedByUserId { get; set; }
+        public string CreatedByUserId { get; set; }
 
         public ICollection<OrderDetail> OrderDetail { get; set; }
         public ICollection<OrderTax> OrderTax { get; set; }

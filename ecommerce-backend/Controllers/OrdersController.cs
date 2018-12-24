@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using EcommerceApi.Models;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 
 namespace EcommerceApi.Controllers
 {
@@ -16,10 +17,12 @@ namespace EcommerceApi.Controllers
     public class OrdersController : Controller
     {
         private readonly EcommerceContext _context;
-
-        public OrdersController(EcommerceContext context)
+        private readonly UserManager<ApplicationUser> _userManager;
+        public OrdersController(EcommerceContext context,
+                                UserManager<ApplicationUser> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
 
         // GET: api/Orders
@@ -92,8 +95,12 @@ namespace EcommerceApi.Controllers
                 return BadRequest(ModelState);
             }
 
-            order.CreatedByUserId = 1; //todo: get from token
+            System.Security.Claims.ClaimsPrincipal currentUser = this.User;
+            var userId = _userManager.GetUserId(User);
+            order.CreatedByUserId = userId;
             order.CreatedDate = DateTime.UtcNow;
+            order.OrderDate = DateTime.UtcNow;
+            order.Customer = null;
 
             _context.Order.Add(order);
             await _context.SaveChangesAsync();

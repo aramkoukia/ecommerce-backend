@@ -12,6 +12,6 @@ namespace EcommerceApi.Models
         public int PaymentTypeId { get; set; }
         public int CreatoreUserId { get; set; }
         public DateTime CreatedDate { get; set; }
-        public int CreatedByUserId { get; set; }
+        public string CreatedByUserId { get; set; }
     }
 }
