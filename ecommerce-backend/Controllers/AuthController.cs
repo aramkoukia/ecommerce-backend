@@ -18,7 +18,7 @@ namespace EcommerceApi.Controllers
 {
     public class AuthController : Controller
     {
-private readonly UserManager<ApplicationUser> _userManager;
+        private readonly UserManager<ApplicationUser> _userManager;
         private readonly IOptions<IdentityOptions> _identityOptions;
         private readonly JwtOptions _jwtOptions;
         //private readonly IEmailSender _emailSender;

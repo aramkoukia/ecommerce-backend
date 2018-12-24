@@ -90,6 +90,9 @@ namespace EcommerceApi.Controllers
                 return BadRequest(ModelState);
             }
 
+            order.CreatedByUserId = 1; //todo: get from token
+            order.CreatedDate = DateTime.UtcNow;
+
             _context.Order.Add(order);
             await _context.SaveChangesAsync();
 

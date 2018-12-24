@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace EcommerceApi.Models
+﻿namespace EcommerceApi.Models
 {
     public partial class OrderDetail
     {
