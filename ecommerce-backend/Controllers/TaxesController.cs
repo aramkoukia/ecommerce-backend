@@ -4,9 +4,11 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using EcommerceApi.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace EcommerceApi.Controllers
 {
+    [Authorize]
     [Produces("application/json")]
     [Route("api/Taxes")]
     public class TaxesController : Controller

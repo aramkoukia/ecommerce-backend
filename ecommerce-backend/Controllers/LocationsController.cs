@@ -6,11 +6,13 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using EcommerceApi.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace EcommerceApi.Controllers
 {
     [Produces("application/json")]
     [Route("api/Locations")]
+    [Authorize]
     public class LocationsController : Controller
     {
         private readonly EcommerceContext _context;
