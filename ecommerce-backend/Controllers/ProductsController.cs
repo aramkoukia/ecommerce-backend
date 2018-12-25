@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using EcommerceApi.Models;
 using Microsoft.AspNetCore.Authorization;
 using EcommerceApi.ViewModel;
+using EcommerceApi.Repositories;
 
 namespace EcommerceApi.Controllers
 {
@@ -17,37 +18,19 @@ namespace EcommerceApi.Controllers
     public class ProductsController : Controller
     {
         private readonly EcommerceContext _context;
+        private readonly IProductRepository _productRepository;
 
-        public ProductsController(EcommerceContext context)
+        public ProductsController(EcommerceContext context, IProductRepository productRepository)
         {
             _context = context;
+            _productRepository = productRepository;
         }
 
         // GET: api/Products
         [HttpGet]
-        public async Task<IEnumerable<object>> GetProduct()
+        public async Task<IEnumerable<ProductViewModel>> GetProduct()
         {
-
-
-            return await _context
-                .Product
-                .AsNoTracking()
-                .Select(p => new ProductViewModel
-                {
-                   ProductId = p.ProductId,
-                   ProductCode = p.ProductCode,
-                   ProductName = p.ProductName,
-                   ChargeTaxes = p.ChargeTaxes,
-                   AllowOutOfStockPurchase = p.AllowOutOfStockPurchase,
-                   SalesPrice = p.SalesPrice,
-                   PurchasePrice = p.PurchasePrice,
-                   ModifiedDate = p.ModifiedDate,
-                   ProductTypeId = p.ProductTypeId,
-                   ProductTypeName = p.ProductType.ProductTypeName,
-                   // VancouverBalance = p.ProductInventory.FirstOrDefault(l => l.LocationId == 1) == null ? 0 : p.ProductInventory.FirstOrDefault(l => l.LocationId == 1).Balance,
-                   // AbbotsfordBalance = p.ProductInventory.FirstOrDefault(l => l.LocationId == 2) == null ? 0 : p.ProductInventory.FirstOrDefault(l => l.LocationId == 2).Balance,
-                })
-                .ToListAsync();
+            return await _productRepository.GetProducts();
         }
 
         // GET: api/Products/5

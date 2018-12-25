@@ -19,6 +19,7 @@ using Microsoft.AspNetCore.HttpOverrides;
 using EcommerceApi.Services;
 using Microsoft.AspNetCore.SpaServices.Webpack;
 using EcommerceApi.Extensions;
+using EcommerceApi.Repositories;
 
 namespace EcommerceApi
 {
@@ -45,6 +46,10 @@ namespace EcommerceApi
 
             // Configure Entity Framework Initializer for seeding
             services.AddTransient<IDefaultDbContextInitializer, DefaultDbContextInitializer>();
+
+            // Repositories
+            services.AddTransient<IProductRepository, ProductRepository>();
+
 
             services.AddTransient<IEmailSender, EmailSender>();
             services.Configure<EmailSenderOptions>(Configuration.GetSection("email"));
