@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using EcommerceApi.Models;
 using Microsoft.AspNetCore.Authorization;
+using EcommerceApi.ViewModel;
 
 namespace EcommerceApi.Controllers
 {
@@ -24,36 +25,29 @@ namespace EcommerceApi.Controllers
 
         // GET: api/Products
         [HttpGet]
-        public async Task<IEnumerable<Product>> GetProduct()
+        public async Task<IEnumerable<object>> GetProduct()
         {
-            return await _context.Product.FromSql($@"
-                SELECT Product.ProductId, 
-                       ProductCode, 
-	                   ProductName, 
-	                   ChargeTaxes, 
-	                   AllowOutOfStockPurchase, 
-	                   SalesPrice, 
-	                   PurchasePrice, 
-	                   Product.ModifiedDate, 
-	                   Product.ProductTypeId, 
-	                   ProductType.ProductTypeName,
-	                   ISNULL(Loc1.Balance,0) As VancouverBalance,
-	                   ISNULL(Loc2.Balance,0) As AbbotsfordBalance
-                FROM Product
-                INNER JOIN ProductType
-                ON Product.ProductTypeId = ProductType.ProductTypeId
-                LEFT JOIN (
-                  SELECT * FROM ProductInventory
-                  WHERE LocationId = 1
-                ) Loc1
-                ON Loc1.ProductId = Product.ProductId
-                LEFT JOIN (
-                  SELECT * FROM ProductInventory
-                  WHERE LocationId = 2
-                ) Loc2 
-                ON Loc2.ProductId = Product.ProductId
-            ")
-            .ToListAsync();
+
+
+            return await _context
+                .Product
+                .AsNoTracking()
+                .Select(p => new ProductViewModel
+                {
+                   ProductId = p.ProductId,
+                   ProductCode = p.ProductCode,
+                   ProductName = p.ProductName,
+                   ChargeTaxes = p.ChargeTaxes,
+                   AllowOutOfStockPurchase = p.AllowOutOfStockPurchase,
+                   SalesPrice = p.SalesPrice,
+                   PurchasePrice = p.PurchasePrice,
+                   ModifiedDate = p.ModifiedDate,
+                   ProductTypeId = p.ProductTypeId,
+                   ProductTypeName = p.ProductType.ProductTypeName,
+                   // VancouverBalance = p.ProductInventory.FirstOrDefault(l => l.LocationId == 1) == null ? 0 : p.ProductInventory.FirstOrDefault(l => l.LocationId == 1).Balance,
+                   // AbbotsfordBalance = p.ProductInventory.FirstOrDefault(l => l.LocationId == 2) == null ? 0 : p.ProductInventory.FirstOrDefault(l => l.LocationId == 2).Balance,
+                })
+                .ToListAsync();
         }
 
         // GET: api/Products/5
@@ -65,7 +59,7 @@ namespace EcommerceApi.Controllers
                 return BadRequest(ModelState);
             }
 
-            var product = await _context.Product.SingleOrDefaultAsync(m => m.ProductId == id);
+            var product = await _context.Product.AsNoTracking().SingleOrDefaultAsync(m => m.ProductId == id);
 
             if (product == null)
             {

@@ -29,6 +29,7 @@ namespace EcommerceApi.Controllers
         public async Task<IEnumerable<Order>> GetOrder()
         {
             return await _context.Order
+                .AsNoTracking()
                 .Include(p => p.OrderTax)
                 .Include(p => p.OrderDetail)
                 .Include(p => p.OrderPayment)

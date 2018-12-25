@@ -26,7 +26,7 @@ namespace EcommerceApi.Controllers
         [HttpGet]
         public IEnumerable<Customer> GetCustomer()
         {
-            return _context.Customer;
+            return _context.Customer.AsNoTracking();
         }
 
         // GET: api/Customers/5
@@ -38,7 +38,7 @@ namespace EcommerceApi.Controllers
                 return BadRequest(ModelState);
             }
 
-            var customer = await _context.Customer.SingleOrDefaultAsync(m => m.CustomerId == id);
+            var customer = await _context.Customer.AsNoTracking().SingleOrDefaultAsync(m => m.CustomerId == id);
 
             if (customer == null)
             {
