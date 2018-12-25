@@ -56,6 +56,7 @@ namespace EcommerceApi.Repositories
 	                                      GROUP BY OrderId) AS OrderPayment
 	                                    ON OrderPayment.OrderId = [Order].OrderId
                                     WHERE [Order].LocationId = @LocationId OR @LocationId IS NULL
+                                    ORDER BY [Order].[OrderId] DESC
                                  ";
                 conn.Open();
                 return await conn.QueryAsync<OrderViewModel>(query, new { LocationId = locationId });
