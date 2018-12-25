@@ -28,7 +28,7 @@ namespace EcommerceApi.Models
         public string Notes { get; set; }
         public string PoNumber { get; set; }
         public string Status { get; set; }
-        public DateTime? CreatedDate { get; set; }
+        public DateTime CreatedDate { get; set; }
         public string CreatedByUserId { get; set; }
 
         public ICollection<OrderDetail> OrderDetail { get; set; }
@@ -37,5 +37,13 @@ namespace EcommerceApi.Models
 
         public Customer Customer { get; set; }
         public Location Location { get; set; }
+    }
+
+    public enum OrderStatus {
+        Paid,
+        Unpaid,
+        OnHold,
+        Draft,
+        Account
     }
 }

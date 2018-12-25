@@ -114,6 +114,19 @@ namespace EcommerceApi.Controllers
             order.OrderDate = DateTime.UtcNow;
             order.Customer = null;
             order.Location = null;
+            if (order.Status.Equals(OrderStatus.Paid.ToString(), StringComparison.InvariantCultureIgnoreCase))
+            {
+                order.OrderPayment.Add(
+                    new OrderPayment
+                    {
+                        CreatedByUserId = userId,
+                        CreatedDate = order.CreatedDate,
+                        PaymentAmount = order.Total,
+                        PaymentDate = order.CreatedDate,
+                        PaymentTypeId = 1 // default credit/debit for now
+                    }
+                );
+            }
 
             _context.Order.Add(order);
             await _context.SaveChangesAsync();

@@ -10,7 +10,6 @@ namespace EcommerceApi.Models
         public decimal PaymentAmount { get; set; }
         public DateTime PaymentDate { get; set; }
         public int PaymentTypeId { get; set; }
-        public int CreatoreUserId { get; set; }
         public DateTime CreatedDate { get; set; }
         public string CreatedByUserId { get; set; }
     }
