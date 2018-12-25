@@ -73,7 +73,7 @@ namespace EcommerceApi
             });
 
             services.Configure<JwtOptions>(Configuration.GetSection("jwt"));
-
+            services.AddResponseCompression();
             services.AddCors();
         }
 
@@ -124,6 +124,8 @@ namespace EcommerceApi
                 .AllowAnyMethod()
                 .AllowAnyHeader()
                 .AllowCredentials());
+
+            app.UseResponseCompression();
 
             app.UseMvc();
         }
