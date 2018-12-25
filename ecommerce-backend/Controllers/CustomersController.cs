@@ -7,26 +7,30 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using EcommerceApi.Models;
 using Microsoft.AspNetCore.Authorization;
+using EcommerceApi.Repositories;
+using EcommerceApi.ViewModel;
 
 namespace EcommerceApi.Controllers
 {
     [Produces("application/json")]
     [Route("api/Customers")]
-    [Authorize]
+    // [Authorize]
     public class CustomersController : Controller
     {
         private readonly EcommerceContext _context;
+        private readonly ICustomerRepository _customerRepository;
 
-        public CustomersController(EcommerceContext context)
+        public CustomersController(EcommerceContext context, ICustomerRepository customerRepository)
         {
             _context = context;
+            _customerRepository = customerRepository;
         }
 
         // GET: api/Customers
         [HttpGet]
-        public IEnumerable<Customer> GetCustomer()
+        public async Task<IEnumerable<CustomerViewModel>> GetCustomer()
         {
-            return _context.Customer.AsNoTracking();
+            return await _customerRepository.GetCustomers();
         }
 
         // GET: api/Customers/5
