@@ -7,6 +7,8 @@ using Microsoft.EntityFrameworkCore;
 using EcommerceApi.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+using EcommerceApi.ViewModel;
+using EcommerceApi.Repositories;
 
 namespace EcommerceApi.Controllers
 {
@@ -17,24 +19,29 @@ namespace EcommerceApi.Controllers
     {
         private readonly EcommerceContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IOrderRepository _orderRepository;
+
         public OrdersController(EcommerceContext context,
-                                UserManager<ApplicationUser> userManager)
+                                UserManager<ApplicationUser> userManager,
+                                IOrderRepository orderRepository)
         {
             _context = context;
             _userManager = userManager;
+            _orderRepository = orderRepository;
         }
 
         // GET: api/Orders
         [HttpGet]
-        public async Task<IEnumerable<Order>> GetOrder()
+        public async Task<IEnumerable<OrderViewModel>> GetOrder()
         {
-            return await _context.Order
-                .AsNoTracking()
-                .Include(p => p.OrderTax)
-                .Include(p => p.OrderDetail)
-                .Include(p => p.OrderPayment)
-                .Include(p => p.Customer)
-                .ToListAsync();
+            return await _orderRepository.GetOrders(null);
+        }
+
+        // GET: api/Orders
+        [HttpGet("location/{locationId}")]
+        public async Task<IEnumerable<OrderViewModel>> GetOrderByLocation([FromRoute] int locationId)
+        {
+            return await _orderRepository.GetOrders(locationId);
         }
 
         // GET: api/Orders/5
