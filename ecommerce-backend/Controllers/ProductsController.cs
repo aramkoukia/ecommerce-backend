@@ -24,11 +24,12 @@ namespace EcommerceApi.Controllers
 
         // GET: api/Products
         [HttpGet]
-        public IEnumerable<Product> GetProduct()
+        public async Task<IEnumerable<Product>> GetProduct()
         {
-            return _context.Product
-                .Include("ProductType")
-                .Include("ProductInventory");
+            return await _context.Product
+                .Include(p => p.ProductType)
+                .Include(p => p.ProductInventory)
+                .ToListAsync();
         }
 
         // GET: api/Products/5

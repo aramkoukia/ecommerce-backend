@@ -26,13 +26,14 @@ namespace EcommerceApi.Controllers
 
         // GET: api/Orders
         [HttpGet]
-        public IEnumerable<Order> GetOrder()
+        public async Task<IEnumerable<Order>> GetOrder()
         {
-            return _context.Order
-                .Include("OrderTax")
-                .Include("OrderDetail")
-                .Include("OrderPayment")
-                .Include("Customer");
+            return await _context.Order
+                .Include(p => p.OrderTax)
+                .Include(p => p.OrderDetail)
+                .Include(p => p.OrderPayment)
+                .Include(p => p.Customer)
+                .ToListAsync();
         }
 
         // GET: api/Orders/5
