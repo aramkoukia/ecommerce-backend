@@ -26,10 +26,34 @@ namespace EcommerceApi.Controllers
         [HttpGet]
         public async Task<IEnumerable<Product>> GetProduct()
         {
-            return await _context.Product
-                .Include(p => p.ProductType)
-                .Include(p => p.ProductInventory)
-                .ToListAsync();
+            return await _context.Product.FromSql($@"
+                SELECT Product.ProductId, 
+                       ProductCode, 
+	                   ProductName, 
+	                   ChargeTaxes, 
+	                   AllowOutOfStockPurchase, 
+	                   SalesPrice, 
+	                   PurchasePrice, 
+	                   Product.ModifiedDate, 
+	                   Product.ProductTypeId, 
+	                   ProductType.ProductTypeName,
+	                   ISNULL(Loc1.Balance,0) As VancouverBalance,
+	                   ISNULL(Loc2.Balance,0) As AbbotsfordBalance
+                FROM Product
+                INNER JOIN ProductType
+                ON Product.ProductTypeId = ProductType.ProductTypeId
+                LEFT JOIN (
+                  SELECT * FROM ProductInventory
+                  WHERE LocationId = 1
+                ) Loc1
+                ON Loc1.ProductId = Product.ProductId
+                LEFT JOIN (
+                  SELECT * FROM ProductInventory
+                  WHERE LocationId = 2
+                ) Loc2 
+                ON Loc2.ProductId = Product.ProductId
+            ")
+            .ToListAsync();
         }
 
         // GET: api/Products/5
