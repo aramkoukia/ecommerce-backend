@@ -49,6 +49,7 @@ namespace EcommerceApi
 
             // Repositories
             services.AddTransient<IProductRepository, ProductRepository>();
+            services.AddTransient<IOrderRepository, OrderRepository>();
 
 
             services.AddTransient<IEmailSender, EmailSender>();
