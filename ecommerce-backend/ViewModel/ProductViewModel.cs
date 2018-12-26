@@ -16,5 +16,7 @@ namespace EcommerceApi.ViewModel
         public string ProductTypeName { get; set; }
         public decimal VancouverBalance { get; set; }
         public decimal AbbotsfordBalance { get; set; }
+        public string VancouverBinCode { get; set; }
+        public string AbbotsfordBinCode { get; set; }
     }
 }
