@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 
 namespace EcommerceApi.Models
 {
@@ -12,5 +11,7 @@ namespace EcommerceApi.Models
         public int PaymentTypeId { get; set; }
         public DateTime CreatedDate { get; set; }
         public string CreatedByUserId { get; set; }
+
+        public PaymentType PaymentType { get; set; }
     }
 }

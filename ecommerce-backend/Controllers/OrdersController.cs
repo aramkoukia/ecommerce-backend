@@ -12,7 +12,7 @@ using EcommerceApi.Repositories;
 
 namespace EcommerceApi.Controllers
 {
-    [Authorize]
+    // [Authorize]
     [Produces("application/json")]
     [Route("api/Orders")]
     public class OrdersController : Controller
@@ -54,9 +54,12 @@ namespace EcommerceApi.Controllers
             }
 
             var order = await _context.Order.AsNoTracking()
-                .Include( o => o.OrderDetail)
-                .Include(o => o.OrderTax)
+                .Include(o => o.OrderDetail)
+                    .ThenInclude(o =>o.Product)
+                .Include(t => t.OrderTax)
+                    .ThenInclude(t => t.Tax)
                 .Include(o => o.OrderPayment)
+                .Include(o => o.Customer)
                 .SingleOrDefaultAsync(m => m.OrderId == id);
 
             if (order == null)

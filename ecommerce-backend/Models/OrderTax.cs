@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace EcommerceApi.Models
+﻿namespace EcommerceApi.Models
 {
     public partial class OrderTax
     {
@@ -11,5 +8,6 @@ namespace EcommerceApi.Models
         public decimal TaxAmount { get; set; }
 
         public Order Order { get; set; }
+        public Tax Tax { get; set; }
     }
 }
