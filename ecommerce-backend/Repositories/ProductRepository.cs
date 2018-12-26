@@ -41,7 +41,9 @@ namespace EcommerceApi.Repositories
 	                                       Product.ProductTypeId, 
 	                                       ProductType.ProductTypeName,
 	                                       ISNULL(Loc1.Balance,0) As VancouverBalance,
-	                                       ISNULL(Loc2.Balance,0) As AbbotsfordBalance
+	                                       ISNULL(Loc2.Balance,0) As AbbotsfordBalance,
+                                           ISNULL(Loc1.BinCode,'') AS VancouverBinCode,
+                                           ISNULL(Loc2.BinCode,'') AS AbbotsfordBinCode
                                     FROM Product
                                     INNER JOIN ProductType
                                     ON Product.ProductTypeId = ProductType.ProductTypeId
