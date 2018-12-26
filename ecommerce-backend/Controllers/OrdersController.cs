@@ -53,7 +53,11 @@ namespace EcommerceApi.Controllers
                 return BadRequest(ModelState);
             }
 
-            var order = await _context.Order.SingleOrDefaultAsync(m => m.OrderId == id);
+            var order = await _context.Order.AsNoTracking()
+                .Include( o => o.OrderDetail)
+                .Include(o => o.OrderTax)
+                .Include(o => o.OrderPayment)
+                .SingleOrDefaultAsync(m => m.OrderId == id);
 
             if (order == null)
             {
