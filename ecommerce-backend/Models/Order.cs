@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace EcommerceApi.Models
 {
@@ -18,7 +19,13 @@ namespace EcommerceApi.Models
         public int? CustomerId { get; set; }
         public int LocationId { get; set; }
         public DateTime OrderDate { get; set; }
+
+        [Required]
+        [Range(1, 10000000, ErrorMessage = "Order total cannot be zero")]
         public decimal Total { get; set; }
+
+        [Required]
+        [Range(1, 10000000, ErrorMessage = "Order total cannot be zero")]
         public decimal SubTotal { get; set; }
         public decimal TotalDiscount { get; set; }
         public decimal? DiscountPercentage { get; set; }
