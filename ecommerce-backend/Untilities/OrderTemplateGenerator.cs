@@ -32,7 +32,7 @@ namespace EcommerceApi.Untilities
                                 <div class='center xsmall-font'>{PhoneNumbers}</div>
                                 <div class='center xsmall-font spaceafter-10'>{Website}</div>
                                
-                                <div class='fullwidth center smaller-font spaceafter-10'>{Note1}<div class='red'>{Note2}</div></div>
+                                <div class='fullwidth center smaller-font spaceafter-10'>{Note1}<span class='red'>{Note2}</span></div>
                                 <div class='fullwidth center smaller-font spaceafter-10'>{Note3}</div>
                                 <hr/>
                                 <div>LED Lights And Parts</div>
