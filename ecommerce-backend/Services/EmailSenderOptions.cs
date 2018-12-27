@@ -16,7 +16,6 @@ namespace EcommerceApi.Services
         // smtpConfig is in username:password@localhost:1025 format; extract the part
         var smtpConfigPartsRegEx = new Regex(@"(.*)\:(.*)@(.+)\:(.+)");
         var smtpConfigPartsMatch = smtpConfigPartsRegEx.Match(value);
-
         this.username = smtpConfigPartsMatch.Groups[1].Value;
         this.password = smtpConfigPartsMatch.Groups[2].Value;
         this.host = smtpConfigPartsMatch.Groups[3].Value;

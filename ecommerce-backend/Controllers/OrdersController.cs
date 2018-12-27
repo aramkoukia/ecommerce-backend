@@ -243,7 +243,6 @@ namespace EcommerceApi.Controllers
                 Objects = { objectSettings }
             };
 
-            // _converter.Convert(pdf);
             var file = _converter.Convert(pdf);
             var message = @"
                             Dear Customer,
@@ -275,8 +274,10 @@ namespace EcommerceApi.Controllers
 
                             www.lightsandparts.com | essi@lightsandparts.com
             ";
-            var stream = new MemoryStream(file);
-            await _emailSender.SendEmailAsync(order.Customer.Email, $"Pixel Print Ltd (LED Lights and Parts) Invoice No {order.OrderId}", null, message, stream, $"Invoice No {order.OrderId}");
+            var attachment = new MemoryStream(file);
+            var attachmentName = $"Invoice No {order.OrderId}";
+            var subject = $"Pixel Print Ltd (LED Lights and Parts) Invoice No {order.OrderId}";
+            await _emailSender.SendEmailAsync(order.Customer.Email, subject, null, message, attachment, attachmentName);
             return Ok();
         }
 

@@ -45,6 +45,7 @@ namespace EcommerceApi.Services
             using (SmtpClient client = new SmtpClient(this.Options.host, this.Options.port))
             {
                 client.UseDefaultCredentials = false;
+                client.DeliveryMethod = SmtpDeliveryMethod.Network;
                 client.Credentials = new NetworkCredential(this.Options.username, this.Options.password);
                 client.EnableSsl = this.Options.enableSSL;
                 await client.SendMailAsync(mailMessage);
