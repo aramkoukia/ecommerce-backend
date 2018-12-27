@@ -12,7 +12,7 @@ using EcommerceApi.Repositories;
 
 namespace EcommerceApi.Controllers
 {
-    // [Authorize]
+    [Authorize]
     [Produces("application/json")]
     [Route("api/Orders")]
     public class OrdersController : Controller
@@ -66,6 +66,57 @@ namespace EcommerceApi.Controllers
             if (order == null)
             {
                 return NotFound();
+            }
+
+            return Ok(order);
+        }
+
+        // PUT: api/Orders/5/Status
+        [HttpPut("{id}/Status")]
+        public async Task<IActionResult> PutOrder([FromRoute] int id, [FromBody] UpdateOrderStatus updateOrderStatus)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            if (updateOrderStatus == null || string.IsNullOrEmpty(updateOrderStatus.OrderStatus))
+            {
+                return BadRequest();
+            }
+
+            var order = await _context.Order.SingleOrDefaultAsync(m => m.OrderId == id);
+            order.Status = updateOrderStatus.OrderStatus;
+            if (order.Status.Equals(OrderStatus.Paid.ToString(), StringComparison.InvariantCultureIgnoreCase))
+            {
+                System.Security.Claims.ClaimsPrincipal currentUser = this.User;
+                var userId = _userManager.GetUserId(User);
+                order.OrderPayment.Add(
+                    new OrderPayment
+                    {
+                        CreatedByUserId = userId,
+                        CreatedDate = order.CreatedDate,
+                        PaymentAmount = order.Total,
+                        PaymentDate = order.CreatedDate,
+                        PaymentTypeId = 1 // default credit/debit for now
+                    }
+                );
+            }
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!OrderExists(id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
             }
 
             return Ok(order);
@@ -143,25 +194,25 @@ namespace EcommerceApi.Controllers
         }
 
         // DELETE: api/Orders/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteOrder([FromRoute] int id)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
+        //[HttpDelete("{id}")]
+        //public async Task<IActionResult> DeleteOrder([FromRoute] int id)
+        //{
+        //    if (!ModelState.IsValid)
+        //    {
+        //        return BadRequest(ModelState);
+        //    }
 
-            var order = await _context.Order.SingleOrDefaultAsync(m => m.OrderId == id);
-            if (order == null)
-            {
-                return NotFound();
-            }
+        //    var order = await _context.Order.SingleOrDefaultAsync(m => m.OrderId == id);
+        //    if (order == null)
+        //    {
+        //        return NotFound();
+        //    }
 
-            _context.Order.Remove(order);
-            await _context.SaveChangesAsync();
+        //    _context.Order.Remove(order);
+        //    await _context.SaveChangesAsync();
 
-            return Ok(order);
-        }
+        //    return Ok(order);
+        //}
 
         private bool OrderExists(int id)
         {
