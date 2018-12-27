@@ -22,6 +22,10 @@
     font-size: 80%;
 }
 
+.xsmall-font {
+    font-size: 60%;
+}
+
 .red {
     color: red;
 }
