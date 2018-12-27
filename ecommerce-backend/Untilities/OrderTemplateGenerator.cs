@@ -36,7 +36,7 @@ namespace EcommerceApi.Untilities
                                 <div class='fullwidth center smaller-font spaceafter-10'>{Note3}</div>
                                 <hr/>
                                 <div>LED Lights And Parts</div>
-                                <div spaceafter-10><b>Vancouver:</b> <br /> 
+                                <div class='xsmall-font spaceafter-10'><b>Vancouver:</b> <br /> 
                                      3695 E 1st Ave, <br />
                                      Vancouver, BC V5M 1C2 <br />
                                      Phone: +1 (604) 559-5000 <br />
