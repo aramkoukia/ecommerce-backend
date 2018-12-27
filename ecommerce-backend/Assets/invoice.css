@@ -43,3 +43,9 @@ td {
     border: none;
     padding: 10px;
 }
+
+@media print {
+    footer {
+        page-break-after: always;
+    }
+}

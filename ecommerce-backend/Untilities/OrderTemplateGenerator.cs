@@ -62,14 +62,14 @@ namespace EcommerceApi.Untilities
 
         foreach (var item in order.OrderDetail)
         {
-                sbCustomer.AppendFormat(@"<tr style='border-top: 1pt solid darkgray;'>
+                sbCustomer.AppendFormat(@"<tr>
                                 <td style='width:10%'>{0}</td>
                                 <td style='width:55%'>X {1}</td>
                                 <td style='width:20%' class='right'>${2}</td>
                                 <td style='width:15%' class='right'>${3}</td>
                                 </tr>", item.Amount.ToString("G29"), item.Product.ProductName, item.UnitPrice, item.TotalPrice);
         }
-            sbCustomer.AppendFormat(@"<tr style='border:'>
+            sbCustomer.AppendFormat(@"<tr style='border-top: 1pt solid darkgray;padding-top:10px'>
                         <td style='width:10%'></td>
                         <td style='width:55%'></td>
                         <td style='width:20%'>SubTotal:</td>
@@ -114,11 +114,11 @@ namespace EcommerceApi.Untilities
 
                     <div>{CustomerCopy}</div>
                     <hr class='spaceafter-30'/>   
-                    <div class='header'><p><b>Attention:</b>{Note4}</p></div>
-                    <div class='header'><p><b>Store policy:</b>{Note5}</p></div>
-                    <div class='header'><p><b>{Note6}</b></p></div>
-                </body>
-            </html>");
+                    <footer>
+                        <div class='header'><p><b>Attention:</b>{Note4}</p></div>
+                        <div class='header'><p><b>Store policy:</b>{Note5}</p></div>
+                        <div class='header'><p><b>{Note6}</b></p></div>
+                    </footer>");
 
             if (includeMerchantCopy)
             {
@@ -133,15 +133,13 @@ namespace EcommerceApi.Untilities
                     <div class='header'><p><b>Store policy:</b>{Note5}</p></div>
                     <div class='header'><p><b>Agreement: </b>{Note7}</p></div>
                     <div class='header'><p><b>{Note6}</b></p></div>
-
-                    <div class='header'><h3>Customer Signature: ___________________</h3></div>
-                    <br /><br />
-                    <div class='header'><h3>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Authorized By: ___________________</h3></div>
-
-                </body>
-            </html>");
-
+                    <br />
+                    <h4>Customer Signature: ___________________</h4>
+                    <br />
+                    <h4>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Authorized By: ___________________</h4>");
             }
+
+            sbFinal.Append("</body></ html>");
 
             return sbFinal.ToString();
         }
