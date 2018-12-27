@@ -204,7 +204,15 @@ namespace EcommerceApi.Controllers
         [HttpGet("{orderId}/email")]
         public async Task<IActionResult> EmailOrder([FromRoute] int orderId)
         {
-            var order = await _context.Order.AsNoTracking().SingleOrDefaultAsync(m => m.OrderId == orderId);
+            var order = await _context.Order.AsNoTracking()
+                .Include(o => o.OrderDetail)
+                    .ThenInclude(o => o.Product)
+                .Include(t => t.OrderTax)
+                    .ThenInclude(t => t.Tax)
+                .Include(o => o.OrderPayment)
+                .Include(o => o.Customer)
+                .Include(l => l.Location)
+                .SingleOrDefaultAsync(m => m.OrderId == orderId);
 
             var globalSettings = new GlobalSettings
             {
@@ -212,7 +220,7 @@ namespace EcommerceApi.Controllers
                 Orientation = Orientation.Portrait,
                 PaperSize = PaperKind.A4,
                 Margins = new MarginSettings { Top = 10 },
-                DocumentTitle = "PDF Report",
+                DocumentTitle = $"Order {order.OrderId}",
                 // Out = @"C:\PDFCreator\Employee_Report.pdf"
             };
 
@@ -241,7 +249,15 @@ namespace EcommerceApi.Controllers
         [HttpGet("{orderId}/print")]
         public async Task<IActionResult> PrintOrder([FromRoute] int orderId)
         {
-            var order = await _context.Order.AsNoTracking().SingleOrDefaultAsync(m => m.OrderId == orderId);
+            var order = await _context.Order.AsNoTracking()
+                .Include(o => o.OrderDetail)
+                    .ThenInclude(o => o.Product)
+                .Include(t => t.OrderTax)
+                    .ThenInclude(t => t.Tax)
+                .Include(o => o.OrderPayment)
+                .Include(o => o.Customer)
+                .Include(l => l.Location)
+                .SingleOrDefaultAsync(m => m.OrderId == orderId);
 
             var globalSettings = new GlobalSettings
             {
@@ -249,7 +265,7 @@ namespace EcommerceApi.Controllers
                 Orientation = Orientation.Portrait,
                 PaperSize = PaperKind.A4,
                 Margins = new MarginSettings { Top = 10 },
-                DocumentTitle = "PDF Report",
+                DocumentTitle = $"Order {order.OrderId}",
                 // Out = @"C:\PDFCreator\Employee_Report.pdf"
             };
 
@@ -258,8 +274,8 @@ namespace EcommerceApi.Controllers
                 PagesCount = true,
                 HtmlContent = OrderTemplateGenerator.GetHtmlString(order),
                 WebSettings = { DefaultEncoding = "utf-8", UserStyleSheet = Path.Combine(Directory.GetCurrentDirectory(), "assets", "styles.css") },
-                HeaderSettings = { FontName = "Arial", FontSize = 9, Right = "Page [page] of [toPage]", Line = true },
-                FooterSettings = { FontName = "Arial", FontSize = 9, Line = true, Center = "Report Footer" }
+                // HeaderSettings = { FontName = "Arial", FontSize = 9, Right = "Page [page] of [toPage]", Line = true },
+                FooterSettings = { FontName = "Arial", FontSize = 9, Line = true, Center = "Page [page] of [toPage]" }
             };
 
             var pdf = new HtmlToPdfDocument()

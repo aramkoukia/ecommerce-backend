@@ -1,7 +1,17 @@
-﻿.header {
+﻿body {
+    font-family: "Arial", "Verdana";
+}
+
+.center {
     text-align: center;
-    color: green;
-    padding-bottom: 35px;
+}
+
+.right {
+    text-align: right;
+}
+
+.red {
+    color: red;
 }
 
 table {
@@ -9,14 +19,9 @@ table {
     border-collapse: collapse;
 }
 
-td, th {
+td {
     border: 1px solid gray;
     padding: 15px;
     font-size: 22px;
     text-align: center;
-}
-
-table th {
-    background-color: green;
-    color: white;
 }
