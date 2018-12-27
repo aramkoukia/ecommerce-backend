@@ -15,12 +15,16 @@ namespace EcommerceApi.Untilities
         private static readonly string Note4 = "All products must be installed by certified electrician. We will not be responsible for any damage caused by incorrectly connecting or improper use of the material.";
         private static readonly string Note5 = "All returns are subject to a <b>10% restocking fees.</b> We accept return and exchange up to <b>7 Days</b> after the date of purchase in new condition, not energized and original packaging with original Invoice and receipt.";
         private static readonly string Note6 = "All Customer orders: No returns-No exchange.";
+        private static readonly string Note7 = "By signing below, you confirm that you have received all the products as per your requirement. Our company does not hold responsibility in case of any wrong order. I also agree with the above store policy.";
+        private static readonly string CustomerCopy = "Customer Copy";
+        private static readonly string MerchantCopy = "Merchant Copy";
 
-        public static string GetHtmlString(Order order)
+        public static string GetHtmlString(Order order, bool includeMerchantCopy)
         {
-            // var employees = DataStorage.GetAllEmployess();
-            var sb = new StringBuilder();
-            sb.Append($@"
+            var sbCustomer = new StringBuilder();
+            var sbFinal = new StringBuilder();
+
+            sbCustomer.Append($@"
                         <html>
                             <head>
                             </head>
@@ -32,7 +36,7 @@ namespace EcommerceApi.Untilities
                                 <div class='center xsmall-font'>{PhoneNumbers}</div>
                                 <div class='center xsmall-font spaceafter-10'>{Website}</div>
                                
-                                <div class='fullwidth center smaller-font spaceafter-10'>{Note1}<span class='red'>{Note2}</span></div>
+                                <div class='fullwidth center smaller-font spaceafter-10'>{Note1}&nbsp;<span class='red'>{Note2}</span></div>
                                 <div class='fullwidth center smaller-font spaceafter-10'>{Note3}</div>
                                 <hr/>
                                 <div>LED Lights And Parts</div>
@@ -58,14 +62,14 @@ namespace EcommerceApi.Untilities
 
         foreach (var item in order.OrderDetail)
         {
-            sb.AppendFormat(@"<tr border-top: 1pt solid darkgray;>
+                sbCustomer.AppendFormat(@"<tr style='border-top: 1pt solid darkgray;'>
                                 <td style='width:10%'>{0}</td>
                                 <td style='width:55%'>X {1}</td>
                                 <td style='width:20%' class='right'>${2}</td>
                                 <td style='width:15%' class='right'>${3}</td>
                                 </tr>", item.Amount.ToString("G29"), item.Product.ProductName, item.UnitPrice, item.TotalPrice);
         }
-        sb.AppendFormat(@"<tr style='border:'>
+            sbCustomer.AppendFormat(@"<tr style='border:'>
                         <td style='width:10%'></td>
                         <td style='width:55%'></td>
                         <td style='width:20%'>SubTotal:</td>
@@ -73,40 +77,42 @@ namespace EcommerceApi.Untilities
                         </tr>", order.SubTotal);
         foreach (var tax in order.OrderTax)
         {
-            sb.AppendFormat(@"<tr>
+                sbCustomer.AppendFormat(@"<tr>
                                 <td style='width:10%'></td>
                                 <td style='width:55%'></td>
                                 <td style='width:20%'>{0}:</td>
                                 <td style='width:15%' class='right'>${1}</td>
                                 </tr>", tax.Tax.TaxName, tax.TaxAmount);
         }
-        sb.AppendFormat(@"<tr>
+            sbCustomer.AppendFormat(@"<tr>
                         <td style='width:10%'></td>
                         <td style='width:55%'></td>
                         <td style='width:20%'><b>To Pay:</b></td>
                         <td style='width:15%' class='right'>${0}</td>
                         </tr>", order.Total);
 
-        sb.AppendFormat(@"<tr>
+            sbCustomer.AppendFormat(@"<tr>
                         <td style='width:10%'></td>
                         <td style='width:55%'></td>
                         <td style='width:20%'>Credit Card / Debit:</td>
                         <td style='width:15%' class='right'>${0}</td>
                         </tr>", order.OrderPayment.Sum(p=>p.PaymentAmount));
 
-        sb.AppendFormat(@"<tr>
+            sbCustomer.AppendFormat(@"<tr>
                         <td style='width:10%'></td>
                         <td style='width:55%'></td>
                         <td style='width:20%'><b>Remain:</b></td>
                         <td style='width:15%' class='right'>${0}</td>
                         </tr>", order.Total - order.OrderPayment.Sum(p => p.PaymentAmount));
 
-        sb.Append($@"
+            sbFinal.Append(sbCustomer);
+
+            sbFinal.Append($@"
                     </table>
 
                     <hr class='spaceafter-30'/>
 
-                    <div>Customer Copy</div>
+                    <div>{CustomerCopy}</div>
                     <hr class='spaceafter-30'/>   
                     <div class='header'><p><b>Attention:</b>{Note4}</p></div>
                     <div class='header'><p><b>Store policy:</b>{Note5}</p></div>
@@ -114,7 +120,30 @@ namespace EcommerceApi.Untilities
                 </body>
             </html>");
 
-            return sb.ToString();
+            if (includeMerchantCopy)
+            {
+                var sbMerchangt = new StringBuilder(sbCustomer.ToString());
+                sbFinal.Append(sbMerchangt.ToString());
+                sbFinal.Append($@"
+                    </table>
+                    <hr class='spaceafter-30'/>
+                    <div>{MerchantCopy}</div>
+                    <hr class='spaceafter-30'/>   
+                    <div class='header'><p><b>Attention:</b>{Note4}</p></div>
+                    <div class='header'><p><b>Store policy:</b>{Note5}</p></div>
+                    <div class='header'><p><b>Agreement: </b>{Note7}</p></div>
+                    <div class='header'><p><b>{Note6}</b></p></div>
+
+                    <div class='header'><h3>Customer Signature: ___________________</h3></div>
+                    <br /><br />
+                    <div class='header'><h3>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Authorized By: ___________________</h3></div>
+
+                </body>
+            </html>");
+
+            }
+
+            return sbFinal.ToString();
         }
     }
 }
