@@ -9,10 +9,14 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using EcommerceApi.ViewModel;
 using EcommerceApi.Repositories;
+using DinkToPdf.Contracts;
+using DinkToPdf;
+using EcommerceApi.Untilities;
+using System.IO;
 
 namespace EcommerceApi.Controllers
 {
-    [Authorize]
+    // [Authorize]
     [Produces("application/json")]
     [Route("api/Orders")]
     public class OrdersController : Controller
@@ -20,14 +24,17 @@ namespace EcommerceApi.Controllers
         private readonly EcommerceContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IOrderRepository _orderRepository;
+        private readonly IConverter _converter;
 
         public OrdersController(EcommerceContext context,
                                 UserManager<ApplicationUser> userManager,
-                                IOrderRepository orderRepository)
+                                IOrderRepository orderRepository,
+                                IConverter converter)
         {
             _context = context;
             _userManager = userManager;
             _orderRepository = orderRepository;
+            _converter = converter;
         }
 
         // GET: api/Orders
@@ -191,6 +198,43 @@ namespace EcommerceApi.Controllers
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetOrder", new { id = order.OrderId }, order);
+        }
+
+        // GET: api/Orders
+        [HttpGet("email/{orderId}")]
+        public async Task<IActionResult> EmailOrder([FromRoute] int orderId)
+        {
+            var order = await _context.Order.AsNoTracking().SingleOrDefaultAsync(m => m.OrderId == orderId);
+
+            var globalSettings = new GlobalSettings
+            {
+                ColorMode = ColorMode.Color,
+                Orientation = Orientation.Portrait,
+                PaperSize = PaperKind.A4,
+                Margins = new MarginSettings { Top = 10 },
+                DocumentTitle = "PDF Report",
+                // Out = @"C:\PDFCreator\Employee_Report.pdf"
+            };
+
+            var objectSettings = new ObjectSettings
+            {
+                PagesCount = true,
+                HtmlContent = OrderTemplateGenerator.GetHtmlString(),
+                WebSettings = { DefaultEncoding = "utf-8", UserStyleSheet = Path.Combine(Directory.GetCurrentDirectory(), "assets", "styles.css") },
+                HeaderSettings = { FontName = "Arial", FontSize = 9, Right = "Page [page] of [toPage]", Line = true },
+                FooterSettings = { FontName = "Arial", FontSize = 9, Line = true, Center = "Report Footer" }
+            };
+
+            var pdf = new HtmlToPdfDocument()
+            {
+                GlobalSettings = globalSettings,
+                Objects = { objectSettings }
+            };
+
+            // _converter.Convert(pdf);
+            var file = _converter.Convert(pdf);
+
+            return File(file, "application/pdf", $"Order-{order.OrderId}.pdf");
         }
 
         // DELETE: api/Orders/5

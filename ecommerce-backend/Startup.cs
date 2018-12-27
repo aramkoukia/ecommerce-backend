@@ -20,6 +20,10 @@ using EcommerceApi.Services;
 using Microsoft.AspNetCore.SpaServices.Webpack;
 using EcommerceApi.Extensions;
 using EcommerceApi.Repositories;
+using DinkToPdf;
+using DinkToPdf.Contracts;
+using EcommerceApi.Untilities;
+using System.IO;
 
 namespace EcommerceApi
 {
@@ -38,6 +42,11 @@ namespace EcommerceApi
             services.AddMvc()
                 .AddJsonOptions(options => 
                     options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
+
+            var context = new CustomAssemblyLoadContext();
+            context.LoadUnmanagedLibrary(Path.Combine(Directory.GetCurrentDirectory(), "libwkhtmltox.dll"));
+
+            services.AddSingleton(typeof(IConverter), new SynchronizedConverter(new PdfTools()));
 
             services.AddEntityFrameworkSqlServer().AddDbContext<EcommerceContext>(options =>
             {
