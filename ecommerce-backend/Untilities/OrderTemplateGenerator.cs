@@ -114,11 +114,9 @@ namespace EcommerceApi.Untilities
 
                     <div>{CustomerCopy}</div>
                     <hr class='spaceafter-30'/>   
-                    <footer>
-                        <div class='header'><p><b>Attention:</b>{Note4}</p></div>
-                        <div class='header'><p><b>Store policy:</b>{Note5}</p></div>
-                        <div class='header'><p><b>{Note6}</b></p></div>
-                    </footer>");
+                    <div class='header'><p><b>Attention:</b>{Note4}</p></div>
+                    <div class='header'><p><b>Store policy:</b>{Note5}</p></div>
+                    <div class='header' style='page-break-after: always;'><p><b>{Note6}</b></p></div>");
 
             if (includeMerchantCopy)
             {
