@@ -58,15 +58,14 @@ namespace EcommerceApi.Untilities
 
         foreach (var item in order.OrderDetail)
         {
-            sb.AppendFormat(@"<tr>
+            sb.AppendFormat(@"<tr border-top: 1pt solid darkgray;>
                                 <td style='width:10%'>{0}</td>
                                 <td style='width:55%'>X {1}</td>
                                 <td style='width:20%' class='right'>${2}</td>
                                 <td style='width:15%' class='right'>${3}</td>
                                 </tr>", item.Amount.ToString("G29"), item.Product.ProductName, item.UnitPrice, item.TotalPrice);
         }
-        sb.AppendFormat(@"<hr />
-                            <tr>
+        sb.AppendFormat(@"<tr style='border:'>
                         <td style='width:10%'></td>
                         <td style='width:55%'></td>
                         <td style='width:20%'>SubTotal:</td>
