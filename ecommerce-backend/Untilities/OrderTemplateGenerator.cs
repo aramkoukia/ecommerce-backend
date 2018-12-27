@@ -1,9 +1,6 @@
 ﻿using EcommerceApi.Models;
-using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace EcommerceApi.Untilities
 {
@@ -34,18 +31,19 @@ namespace EcommerceApi.Untilities
                                 <div class='center'>{CompanyName}</div>
                                 <div class='center'>{PhoneNumbers}</div>
                                 <div class='center'>{Website}</div>
-                                <div class='center'>{Note1}<div class='red'>{Note2}</div></div>
-                                <div class='center'>{Note3}</div>
+                               
+                                <div class='center smaller-font'>{Note1}<div class='red'>{Note2}</div></div>
+                                <div class='center smaller-font'>{Note3}</div>
                                 <hr/>
                                 
                                 <div>Address goes here</div>
-                                <div class='right'>Customer Name goes here</div>
+                                <div class='right'>${order.Customer.CompanyName}</div>
                                 <div>Invoice #{order.OrderId}</div>
                                 <div>Sale Date: {order.OrderDate}</div>
                                 <div>User: {order.CreatedByUserId}</div>
                                 <div>Card No: ****</div>
                                 <div>Auth No: ****</div>
-                                <hr/>
+                                <hr class='spaceafter-30'/>
                                 <h3 class='right'>{order.Status}</h3>    
                                 <hr/>
                                 
@@ -57,25 +55,60 @@ namespace EcommerceApi.Untilities
                                         foreach (var item in order.OrderDetail)
                                         {
                                             sb.AppendFormat(@"<tr>
-                                                                <td>{0}</td>
-                                                                <td>X {1}</td>
-                                                                <td>${2}</td>
-                                                                <td>${3}</td>
+                                                                <td style='width:10%'>{0}</td>
+                                                                <td style='width:70%'>X {1}</td>
+                                                                <td style='width:10%'>${2}</td>
+                                                                <td style='width:10%'>${3}</td>
                                                               </tr>", item.Amount, item.Product.ProductName, item.UnitPrice, item.TotalPrice);
                                         }
+                                        sb.AppendFormat(@"<tr>
+                                                        <td style='width:10%'></td>
+                                                        <td style='width:70%'></td>
+                                                        <td style='width:10%'>SubTotal:</td>
+                                                        <td style='width:10%'>${0}</td>
+                                                        </tr>", order.SubTotal);
+                                        foreach (var tax in order.OrderTax)
+                                        {
+                                            sb.AppendFormat(@"<tr>
+                                                                <td style='width:10%'></td>
+                                                                <td style='width:70%'></td>
+                                                                <td style='width:10%'>{0}:</td>
+                                                                <td style='width:10%'>${1}</td>
+                                                                </tr>", tax.Tax.TaxName, tax.TaxAmount);
+                                        }
+                                        sb.AppendFormat(@"<tr>
+                                                        <td style='width:10%'></td>
+                                                        <td style='width:70%'></td>
+                                                        <td style='width:10%'><b>To Pay:</b></td>
+                                                        <td style='width:10%'>${0}</td>
+                                                        </tr>", order.Total);
 
-                                sb.Append($@"
-                                </table>
-                                <hr/>
+                                        sb.AppendFormat(@"<tr>
+                                                        <td style='width:10%'></td>
+                                                        <td style='width:70%'></td>
+                                                        <td style='width:10%'><b>Creadit Card / Debit:</b></td>
+                                                        <td style='width:10%'>${0}</td>
+                                                        </tr>", order.OrderPayment.Sum(p=>p.PaymentAmount));
 
-                                <hr/>
-                                <div>Customer Copy</div>
-                                <hr/>   
-                                <div class='header'><p><b>Attention:</b>{Note4}</p></div>
-                                <div class='header'><p><b>Store policy:</b>{Note5}</p></div>
-                                <div class='header'><p><b>{Note6}</b></p></div>
-                            </body>
-                        </html>");
+                                        sb.AppendFormat(@"<tr>
+                                                        <td style='width:10%'></td>
+                                                        <td style='width:70%'></td>
+                                                        <td style='width:10%'><b>Remain:</b></td>
+                                                        <td style='width:10%'>${0}</td>
+                                                        </tr>", order.Total - order.OrderPayment.Sum(p => p.PaymentAmount));
+
+                                        sb.Append($@"
+                                                    </table>
+                                                    <hr/>
+
+                                                    <hr class='spaceafter-30'/>
+                                                    <div>Customer Copy</div>
+                                                    <hr class='spaceafter-30'/>   
+                                                    <div class='header'><p><b>Attention:</b>{Note4}</p></div>
+                                                    <div class='header'><p><b>Store policy:</b>{Note5}</p></div>
+                                                    <div class='header'><p><b>{Note6}</b></p></div>
+                                                </body>
+                                            </html>");
 
             return sb.ToString();
         }

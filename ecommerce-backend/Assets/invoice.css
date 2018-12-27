@@ -10,18 +10,32 @@
     text-align: right;
 }
 
+.spaceafter-10 {
+    margin-bottom:10px;
+}
+
+.spaceafter-30 {
+    margin-bottom: 30px;
+}
+
+.smaller-font {
+    font-size: 80%;
+}
+
 .red {
     color: red;
 }
 
+.fullwidth {
+    width:100%;
+}
+
 table {
-    width: 80%;
+    width: 100%;
     border-collapse: collapse;
 }
 
 td {
-    border: 1px solid gray;
-    padding: 15px;
-    font-size: 22px;
-    text-align: center;
+    border: none;
+    padding: 10px;
 }
