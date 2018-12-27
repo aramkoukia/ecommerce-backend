@@ -201,8 +201,45 @@ namespace EcommerceApi.Controllers
         }
 
         // GET: api/Orders
-        [HttpGet("email/{orderId}")]
+        [HttpGet("{orderId}/email")]
         public async Task<IActionResult> EmailOrder([FromRoute] int orderId)
+        {
+            var order = await _context.Order.AsNoTracking().SingleOrDefaultAsync(m => m.OrderId == orderId);
+
+            var globalSettings = new GlobalSettings
+            {
+                ColorMode = ColorMode.Color,
+                Orientation = Orientation.Portrait,
+                PaperSize = PaperKind.A4,
+                Margins = new MarginSettings { Top = 10 },
+                DocumentTitle = "PDF Report",
+                // Out = @"C:\PDFCreator\Employee_Report.pdf"
+            };
+
+            var objectSettings = new ObjectSettings
+            {
+                PagesCount = true,
+                HtmlContent = OrderTemplateGenerator.GetHtmlString(),
+                WebSettings = { DefaultEncoding = "utf-8", UserStyleSheet = Path.Combine(Directory.GetCurrentDirectory(), "assets", "styles.css") },
+                HeaderSettings = { FontName = "Arial", FontSize = 9, Right = "Page [page] of [toPage]", Line = true },
+                FooterSettings = { FontName = "Arial", FontSize = 9, Line = true, Center = "Report Footer" }
+            };
+
+            var pdf = new HtmlToPdfDocument()
+            {
+                GlobalSettings = globalSettings,
+                Objects = { objectSettings }
+            };
+
+            // _converter.Convert(pdf);
+            var file = _converter.Convert(pdf);
+
+            return File(file, "application/pdf", $"Order-{order.OrderId}.pdf");
+        }
+
+        // GET: api/Orders
+        [HttpGet("{orderId}/print")]
+        public async Task<IActionResult> PrintOrder([FromRoute] int orderId)
         {
             var order = await _context.Order.AsNoTracking().SingleOrDefaultAsync(m => m.OrderId == orderId);
 
