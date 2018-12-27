@@ -13,6 +13,7 @@ using DinkToPdf.Contracts;
 using DinkToPdf;
 using EcommerceApi.Untilities;
 using System.IO;
+using EcommerceApi.Services;
 
 namespace EcommerceApi.Controllers
 {
@@ -25,16 +26,19 @@ namespace EcommerceApi.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IOrderRepository _orderRepository;
         private readonly IConverter _converter;
+        private readonly IEmailSender _emailSender;
 
         public OrdersController(EcommerceContext context,
                                 UserManager<ApplicationUser> userManager,
                                 IOrderRepository orderRepository,
-                                IConverter converter)
+                                IConverter converter,
+                                IEmailSender emailSender)
         {
             _context = context;
             _userManager = userManager;
             _orderRepository = orderRepository;
             _converter = converter;
+            _emailSender = emailSender;
         }
 
         // GET: api/Orders
@@ -241,8 +245,39 @@ namespace EcommerceApi.Controllers
 
             // _converter.Convert(pdf);
             var file = _converter.Convert(pdf);
+            var message = @"
+                            Dear Customer,
 
-            return File(file, "application/pdf", $"Order-{order.OrderId}.pdf");
+
+                            Attached is your current invoice from LED Lights and Parts (Pixel Print Ltd). 
+
+                            If you have a credit account this invoice will be marked Awaiting payment. 
+
+                            If you already paid this invoice will be marked PAID. and no further action is required. 
+
+                            If you requested the quote, the invoice will be marked HOLD. 
+
+                            If you returned or exchanged the invoice will be marked as Return/Exchange or Credit. 
+
+                            Thank you for working with LED Lights and Parts! We\'re happy to work with you to solve any of your lighting challenges. 
+
+                            Sincerely,
+
+                            Shaney
+
+                            3695 East 1st Ave Vancouver, BC V5M 1C2
+
+                            Tel: (604) 559-5000
+
+                            Cel: (778) 839-3352
+
+                            Fax: (604) 559-5008
+
+                            www.lightsandparts.com | essi@lightsandparts.com
+            ";
+            var stream = new MemoryStream(file);
+            await _emailSender.SendEmailAsync(order.Customer.Email, $"Pixel Print Ltd (LED Lights and Parts) Invoice No {order.OrderId}", null, message, stream, $"Invoice No {order.OrderId}");
+            return Ok();
         }
 
         // GET: api/Orders

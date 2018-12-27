@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Options;
+using System.IO;
 using System.Net;
 using System.Net.Mail;
 using System.Text;
@@ -15,15 +16,24 @@ namespace EcommerceApi.Services
 
         public EmailSenderOptions Options { get; }
 
-        public async Task SendEmailAsync(string toEmail, string subject, string htmlMessage, string textMessage = null)
+        public async Task SendEmailAsync(string toEmail, string subject, string htmlMessage, string textMessage = null, Stream attachment = null, string attachmentName = null)
         {
-            MailMessage mailMessage = new MailMessage();
-            mailMessage.From = new MailAddress(this.Options.emailFromAddress, this.Options.emailFromName);
+            MailMessage mailMessage = new MailMessage
+            {
+                From = new MailAddress(this.Options.emailFromAddress, this.Options.emailFromName),
+                Body = textMessage,
+                BodyEncoding = Encoding.UTF8,
+                Subject = subject,
+                SubjectEncoding = Encoding.UTF8
+            };
+
             mailMessage.To.Add(toEmail);
-            mailMessage.Body = textMessage;
-            mailMessage.BodyEncoding = Encoding.UTF8;
-            mailMessage.Subject = subject;
-            mailMessage.SubjectEncoding = Encoding.UTF8;
+
+            if (!string.IsNullOrEmpty(attachmentName))
+            {
+                var file = new Attachment(attachment, attachmentName);
+                mailMessage.Attachments.Add(file);
+            }
 
             if (!string.IsNullOrEmpty(htmlMessage))
             {
