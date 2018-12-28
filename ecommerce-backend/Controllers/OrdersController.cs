@@ -17,7 +17,7 @@ using EcommerceApi.Services;
 
 namespace EcommerceApi.Controllers
 {
-    // [Authorize]
+    [Authorize]
     [Produces("application/json")]
     [Route("api/Orders")]
     public class OrdersController : Controller
@@ -233,8 +233,8 @@ namespace EcommerceApi.Controllers
                 PagesCount = true,
                 HtmlContent = OrderTemplateGenerator.GetHtmlString(order, false),
                 WebSettings = { DefaultEncoding = "utf-8", UserStyleSheet = Path.Combine(Directory.GetCurrentDirectory(), "assets", "invoice.css") },
-                HeaderSettings = { FontName = "Arial", FontSize = 9, Right = "Page [page] of [toPage]", Line = true },
-                FooterSettings = { FontName = "Arial", FontSize = 9, Line = true, Center = "Report Footer" }
+                // HeaderSettings = { FontName = "Arial", FontSize = 9, Right = "Page [page] of [toPage]", Line = true },
+                // FooterSettings = { FontName = "Arial", FontSize = 9, Line = true, Center = "Report Footer" }
             };
 
             var pdf = new HtmlToPdfDocument()
@@ -275,7 +275,7 @@ namespace EcommerceApi.Controllers
                             www.lightsandparts.com | essi@lightsandparts.com
             ";
             var attachment = new MemoryStream(file);
-            var attachmentName = $"Invoice No {order.OrderId}";
+            var attachmentName = $"Invoice No {order.OrderId}.pdf";
             var subject = $"Pixel Print Ltd (LED Lights and Parts) Invoice No {order.OrderId}";
             await _emailSender.SendEmailAsync(order.Customer.Email, subject, null, message, attachment, attachmentName);
             return Ok();
@@ -311,7 +311,7 @@ namespace EcommerceApi.Controllers
                 HtmlContent = OrderTemplateGenerator.GetHtmlString(order, true),
                 WebSettings = { DefaultEncoding = "utf-8", UserStyleSheet = Path.Combine(Directory.GetCurrentDirectory(), "assets", "invoice.css") },
                 // HeaderSettings = { FontName = "Arial", FontSize = 9, Right = "Page [page] of [toPage]", Line = true },
-                FooterSettings = { FontName = "Arial", FontSize = 9, Line = true, Center = "Page [page] of [toPage]" }
+                // FooterSettings = { FontName = "Arial", FontSize = 9, Line = true, Center = "Page [page] of [toPage]" }
             };
 
             var pdf = new HtmlToPdfDocument()

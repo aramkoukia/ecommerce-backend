@@ -23,7 +23,8 @@ namespace EcommerceApi.Untilities
         {
             var sbCustomer = new StringBuilder();
             var sbFinal = new StringBuilder();
-
+            var pageBreak = includeMerchantCopy ? "style='page-break-after: always;'" : "";
+            
             sbCustomer.Append($@"
                         <html>
                             <head>
@@ -116,7 +117,7 @@ namespace EcommerceApi.Untilities
                     <hr class='spaceafter-30'/>   
                     <div class='header'><p><b>Attention:</b>{Note4}</p></div>
                     <div class='header'><p><b>Store policy:</b>{Note5}</p></div>
-                    <div class='header' style='page-break-after: always;'><p><b>{Note6}</b></p></div>");
+                    <div class='header' {pageBreak}><p><b>{Note6}</b></p></div>");
 
             if (includeMerchantCopy)
             {
@@ -134,7 +135,7 @@ namespace EcommerceApi.Untilities
                     <br />
                     <h4>Customer Signature: ___________________</h4>
                     <br />
-                    <h4>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Authorized By: ___________________</h4>");
+                    <h4>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Authorized By: ___________________</h4>");
             }
 
             sbFinal.Append("</body></ html>");
