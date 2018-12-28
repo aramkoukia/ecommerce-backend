@@ -25,7 +25,7 @@ namespace EcommerceApi
                 if (env.IsDevelopment())
                 {
                     // Seed the database in development mode
-                    dbInitializer.Seed().GetAwaiter().GetResult();
+                    dbInitializer.Seed(scope.ServiceProvider).GetAwaiter().GetResult();
                 }
             }
 

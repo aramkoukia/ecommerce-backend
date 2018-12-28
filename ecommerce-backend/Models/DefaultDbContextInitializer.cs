@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -30,10 +31,26 @@ namespace EcommerceApi.Models
             _context.Database.Migrate();
         }
 
-        public async Task Seed()
+        public async Task Seed(IServiceProvider serviceProvider)
         {
+            //adding custom roles
+            var RoleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+            var UserManager = serviceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+            string[] roleNames = { "Admin", "Store Manager", "Sales Employee", "Inventory Employee" };
+            IdentityResult roleResult;
+
+            foreach (var roleName in roleNames)
+            {
+                //creating the roles and seeding them to the database
+                var roleExist = await RoleManager.RoleExistsAsync(roleName);
+                if (!roleExist)
+                {
+                    roleResult = await RoleManager.CreateAsync(new IdentityRole(roleName));
+                }
+            }
+
             var email = "aramkoukia@gmail.com";
-            var username = "aram";
+            var username = "aramkoukia";
             if (await _userManager.FindByEmailAsync(email) == null)
             {
                 var user = new ApplicationUser
@@ -47,16 +64,70 @@ namespace EcommerceApi.Models
                 await _userManager.CreateAsync(user, "P2ssw0rd!");
             }
 
-            if (_context.Contacts.Any())
+            email = "sales@gmail.com";
+            username = "sales";
+            if (await _userManager.FindByEmailAsync(email) == null)
             {
-                foreach (var u in _context.Contacts)
+                var user = new ApplicationUser
                 {
-                    _context.Remove(u);
-                }
+                    UserName = username,
+                    Email = email,
+                    EmailConfirmed = true,
+                    GivenName = "Sales User"
+                };
+
+                await _userManager.CreateAsync(user, "P2ssw0rd!");
+                await UserManager.AddToRoleAsync(user, "Sales Employee");
             }
 
-            _context.Contacts.Add(new Contact() { LastName = "Finkley", FirstName = "Adam", Phone = "555-555-5555", Email = "adam@somewhere.com" });
-            _context.Contacts.Add(new Contact() { LastName = "Biles", FirstName = "Steven", Phone = "555-555-5555", Email = "sbiles@somewhere.com" });
+            email = "inventory@gmail.com";
+            username = "inventory";
+            if (await _userManager.FindByEmailAsync(email) == null)
+            {
+                var user = new ApplicationUser
+                {
+                    UserName = username,
+                    Email = email,
+                    EmailConfirmed = true,
+                    GivenName = "Inventory User"
+                };
+
+                await _userManager.CreateAsync(user, "P2ssw0rd!");
+                await UserManager.AddToRoleAsync(user, "Inventory Employee");
+            }
+
+            email = "manager@gmail.com";
+            username = "manager";
+            if (await _userManager.FindByEmailAsync(email) == null)
+            {
+                var user = new ApplicationUser
+                {
+                    UserName = username,
+                    Email = email,
+                    EmailConfirmed = true,
+                    GivenName = "Manager User"
+                };
+
+                await _userManager.CreateAsync(user, "P2ssw0rd!");
+                await UserManager.AddToRoleAsync(user, "Store Manager");
+            }
+
+            //email = "info@lightsandparts.com";
+            //username = "essishaney";
+            //if (await _userManager.FindByEmailAsync(email) == null)
+            //{
+            //    var user = new ApplicationUser
+            //    {
+            //        UserName = username,
+            //        Email = email,
+            //        EmailConfirmed = true,
+            //        GivenName = "Essi Shaney"
+            //    };
+
+            //    await _userManager.CreateAsync(user, "P2ssw0rd!");
+            //    await UserManager.AddToRoleAsync(user, "Admin");
+            //}
+
             _context.SaveChanges();
         }
     }
@@ -65,6 +136,6 @@ namespace EcommerceApi.Models
     {
         bool EnsureCreated();
         void Migrate();
-        Task Seed();
+        Task Seed(IServiceProvider serviceProvider);
     }
 }
