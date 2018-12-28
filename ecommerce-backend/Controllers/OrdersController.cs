@@ -245,34 +245,34 @@ namespace EcommerceApi.Controllers
 
             var file = _converter.Convert(pdf);
             var message = @"
-                            Dear Customer,
+Dear Customer,
 
 
-                            Attached is your current invoice from LED Lights and Parts (Pixel Print Ltd). 
+Attached is your current invoice from LED Lights and Parts (Pixel Print Ltd). 
 
-                            If you have a credit account this invoice will be marked Awaiting payment. 
+If you have a credit account this invoice will be marked Awaiting payment. 
 
-                            If you already paid this invoice will be marked PAID. and no further action is required. 
+If you already paid this invoice will be marked PAID. and no further action is required. 
 
-                            If you requested the quote, the invoice will be marked HOLD. 
+If you requested the quote, the invoice will be marked HOLD. 
 
-                            If you returned or exchanged the invoice will be marked as Return/Exchange or Credit. 
+If you returned or exchanged the invoice will be marked as Return/Exchange or Credit. 
 
-                            Thank you for working with LED Lights and Parts! We\'re happy to work with you to solve any of your lighting challenges. 
+Thank you for working with LED Lights and Parts! We\'re happy to work with you to solve any of your lighting challenges. 
 
-                            Sincerely,
+Sincerely,
 
-                            Shaney
+Shaney
 
-                            3695 East 1st Ave Vancouver, BC V5M 1C2
+3695 East 1st Ave Vancouver, BC V5M 1C2
 
-                            Tel: (604) 559-5000
+Tel: (604) 559-5000
 
-                            Cel: (778) 839-3352
+Cel: (778) 839-3352
 
-                            Fax: (604) 559-5008
+Fax: (604) 559-5008
 
-                            www.lightsandparts.com | essi@lightsandparts.com
+www.lightsandparts.com | essi@lightsandparts.com
             ";
             var attachment = new MemoryStream(file);
             var attachmentName = $"Invoice No {order.OrderId}.pdf";
