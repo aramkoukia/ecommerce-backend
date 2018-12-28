@@ -283,6 +283,7 @@ namespace EcommerceApi.Controllers
 
         // GET: api/Orders
         [HttpGet("{orderId}/print")]
+        [AllowAnonymous]
         public async Task<IActionResult> PrintOrder([FromRoute] int orderId)
         {
             var order = await _context.Order.AsNoTracking()
