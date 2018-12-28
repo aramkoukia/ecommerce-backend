@@ -135,7 +135,7 @@ namespace EcommerceApi.Untilities
                     <br />
                     <h4>Customer Signature: ___________________</h4>
                     <br />
-                    <h4>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Authorized By: ___________________</h4>");
+                    <h4>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Authorized By: ___________________</h4>");
             }
 
             sbFinal.Append("</body></ html>");
