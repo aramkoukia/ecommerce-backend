@@ -35,10 +35,17 @@ namespace EcommerceApi
                 .AddJsonOptions(options => 
                     options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
 
-            var context = new CustomAssemblyLoadContext();
-            context.LoadUnmanagedLibrary(Path.Combine(Directory.GetCurrentDirectory(), "libwkhtmltox.dll"));
+            try
+            {
+                var context = new CustomAssemblyLoadContext();
+                context.LoadUnmanagedLibrary(Path.Combine(Directory.GetCurrentDirectory(), "libwkhtmltox.dll"));
 
-            services.AddSingleton(typeof(IConverter), new SynchronizedConverter(new PdfTools()));
+                services.AddSingleton(typeof(IConverter), new SynchronizedConverter(new PdfTools()));
+            }
+            catch
+            {
+                // cannot load this locally, catching and ignoring it for now
+            }
 
             services.AddEntityFrameworkSqlServer().AddDbContext<EcommerceContext>(options =>
             {
