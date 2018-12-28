@@ -9,5 +9,6 @@ namespace EcommerceApi.Models
         public int LocationId { get; set; }
         public decimal Balance { get; set; }
         public DateTime ModifiedDate { get; set; }
+        public string BinCode { get; set; }
     }
 }

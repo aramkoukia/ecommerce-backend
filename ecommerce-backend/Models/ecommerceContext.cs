@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using EcommerceApi.Models;
 
 namespace EcommerceApi.Models
 {
@@ -16,6 +17,8 @@ namespace EcommerceApi.Models
         public virtual DbSet<Product> Product { get; set; }
         public virtual DbSet<ProductType> ProductType { get; set; }
         public virtual DbSet<Tax> Tax { get; set; }
+        public virtual DbSet<ProductInventory> ProductInventory { get; set; }
+        public virtual DbSet<ProductInventoryHistory> ProductInventoryHistory { get; set; }
 
         public EcommerceContext(DbContextOptions<EcommerceContext> options) : base(options)
         {
