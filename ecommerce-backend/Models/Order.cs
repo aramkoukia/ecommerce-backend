@@ -48,7 +48,6 @@ namespace EcommerceApi.Models
 
     public enum OrderStatus {
         Paid,
-        Unpaid,
         OnHold,
         Draft,
         Account

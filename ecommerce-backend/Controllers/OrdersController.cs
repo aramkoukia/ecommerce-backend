@@ -97,7 +97,6 @@ namespace EcommerceApi.Controllers
             }
 
             var order = await _context.Order.SingleOrDefaultAsync(m => m.OrderId == id);
-            order.Status = updateOrderStatus.OrderStatus;
             if (order.Status.Equals(OrderStatus.Paid.ToString(), StringComparison.InvariantCultureIgnoreCase))
             {
                 System.Security.Claims.ClaimsPrincipal currentUser = this.User;
@@ -113,6 +112,19 @@ namespace EcommerceApi.Controllers
                     }
                 );
             }
+
+            // When order is makred as Draft from OnHold we should add them to inventory
+            if (updateOrderStatus.OrderStatus == OrderStatus.Draft.ToString() &&
+               order.Status == OrderStatus.OnHold.ToString())
+            {
+              var done = await AddToInventory(order, updateOrderStatus);
+            }
+            else
+            {
+                var done = await UpdateInventory(order);
+            }
+
+            order.Status = updateOrderStatus.OrderStatus;
 
             try
             {
@@ -198,10 +210,56 @@ namespace EcommerceApi.Controllers
                 );
             }
 
+            var done = await UpdateInventory(order);
+
             _context.Order.Add(order);
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetOrder", new { id = order.OrderId }, order);
+        }
+
+        private async Task<bool> UpdateInventory(Order order)
+        {
+            if (order.Status == OrderStatus.Draft.ToString())
+            {
+                return true;
+            }
+
+            foreach (var item in order.OrderDetail)
+            {
+                var productInventory = await _context.ProductInventory.FirstOrDefaultAsync(m =>
+                    m.ProductId == item.ProductId &&
+                    m.LocationId == order.LocationId);
+
+                if (productInventory != null)
+                {
+                    productInventory.Balance = productInventory.Balance - item.Amount;
+                    productInventory.ModifiedDate = order.CreatedDate;
+                }
+            }
+            return true;
+        }
+
+        private async Task<bool> AddToInventory(Order order, UpdateOrderStatus updateOrderStatus)
+        {
+            if (updateOrderStatus.OrderStatus != OrderStatus.Draft.ToString())
+            {
+                return true;
+            }
+
+            foreach (var item in order.OrderDetail)
+            {
+                var productInventory = await _context.ProductInventory.FirstOrDefaultAsync(m =>
+                    m.ProductId == item.ProductId &&
+                    m.LocationId == order.LocationId);
+
+                if (productInventory != null)
+                {
+                    productInventory.Balance = productInventory.Balance + item.Amount;
+                    productInventory.ModifiedDate = order.CreatedDate;
+                }
+            }
+            return true;
         }
 
         // GET: api/Orders
