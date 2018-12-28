@@ -36,7 +36,8 @@ namespace EcommerceApi.Controllers
         public async Task<IEnumerable<string>> Get(string id)
         {
             System.Security.Claims.ClaimsPrincipal currentUser = this.User;
-            var user = await _userManager.GetUserAsync(User);
+            var userId = _userManager.GetUserId(currentUser);
+            var user = await _userManager.FindByEmailAsync(userId);
             return await _userManager.GetRolesAsync(user);
         }
     }
