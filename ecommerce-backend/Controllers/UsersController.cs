@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using EcommerceApi.Models;
@@ -32,6 +29,15 @@ namespace EcommerceApi.Controllers
         public async Task<IEnumerable<ApplicationUser>> Get()
         {
             return await _userManager.Users.ToListAsync();
+        }
+
+        // GET: api/User/id/Roles
+        [HttpGet("{id}/Roles")]
+        public async Task<IEnumerable<string>> Get(string id)
+        {
+            System.Security.Claims.ClaimsPrincipal currentUser = this.User;
+            var user = await _userManager.GetUserAsync(User);
+            return await _userManager.GetRolesAsync(user);
         }
     }
 }
