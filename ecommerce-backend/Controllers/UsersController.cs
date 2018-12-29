@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using EcommerceApi.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+using System.Linq;
 
 namespace EcommerceApi.Controllers
 {
@@ -31,7 +32,9 @@ namespace EcommerceApi.Controllers
             var users  = await _userManager.Users.ToListAsync();
             foreach (var user in users)
             {
-                user.Roles = await _userManager.GetRolesAsync(user);
+                var locations = _context.UserLocation.AsNoTracking().Include(l => l.Location).Where(u => u.UserId == user.Id).Select(l=> l.Location.LocationName);
+                user.Roles = string.Join(", ", await _userManager.GetRolesAsync(user));
+                user.Locations = string.Join(", ", locations);
             }
             return users;
         }

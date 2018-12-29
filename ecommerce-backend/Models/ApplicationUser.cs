@@ -9,6 +9,9 @@ namespace EcommerceApi.Models
         public string GivenName { get; set; }
 
         [NotMapped]
-        public IList<string> Roles { get; set; }
+        public string Roles { get; set; }
+
+        [NotMapped]
+        public string Locations { get; set; }
     }
 }
