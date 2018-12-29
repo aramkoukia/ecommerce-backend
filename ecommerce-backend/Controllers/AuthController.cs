@@ -109,7 +109,7 @@ namespace EcommerceApi.Controllers
             return Ok(
                 new {
                     token = new JwtSecurityTokenHandler().WriteToken(token),
-                    permissions = permissions,
+                    permissions,
                 });
         }
 

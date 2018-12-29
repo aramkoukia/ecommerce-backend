@@ -128,6 +128,33 @@ namespace EcommerceApi.Models
                 await _roleManager.AddClaimAsync(role, new Claim(CustomClaimTypes.Permission, "View Reports"));
             }
 
+            role = await _roleManager.FindByNameAsync("Store Manager");
+            if (role != null)
+            {
+                await _roleManager.AddClaimAsync(role, new Claim(CustomClaimTypes.Permission, "View New Order"));
+                await _roleManager.AddClaimAsync(role, new Claim(CustomClaimTypes.Permission, "View Orders"));
+                await _roleManager.AddClaimAsync(role, new Claim(CustomClaimTypes.Permission, "View Products"));
+                await _roleManager.AddClaimAsync(role, new Claim(CustomClaimTypes.Permission, "View Inventory"));
+                await _roleManager.AddClaimAsync(role, new Claim(CustomClaimTypes.Permission, "View Customers"));
+                await _roleManager.AddClaimAsync(role, new Claim(CustomClaimTypes.Permission, "View Reports"));
+            }
+
+            role = await _roleManager.FindByNameAsync("Sales Employee");
+            if (role != null)
+            {
+                await _roleManager.AddClaimAsync(role, new Claim(CustomClaimTypes.Permission, "View New Order"));
+                await _roleManager.AddClaimAsync(role, new Claim(CustomClaimTypes.Permission, "View Orders"));
+                await _roleManager.AddClaimAsync(role, new Claim(CustomClaimTypes.Permission, "View Products"));
+                await _roleManager.AddClaimAsync(role, new Claim(CustomClaimTypes.Permission, "View Customers"));
+            }
+
+            role = await _roleManager.FindByNameAsync("Inventory Employee");
+            if (role != null)
+            {
+                await _roleManager.AddClaimAsync(role, new Claim(CustomClaimTypes.Permission, "View Products"));
+                await _roleManager.AddClaimAsync(role, new Claim(CustomClaimTypes.Permission, "View Inventory"));
+            }
+
             //email = "info@lightsandparts.com";
             //username = "essishaney";
             //if (await _userManager.FindByEmailAsync(email) == null)
