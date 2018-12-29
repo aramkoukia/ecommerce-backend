@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Identity;
 
 namespace EcommerceApi.Controllers
 {
-    [Authorize()]
+    // [Authorize()]
     [Produces("application/json")]
     [Route("api/Users")]
     public class UsersController : Controller
@@ -28,7 +28,12 @@ namespace EcommerceApi.Controllers
         [HttpGet]
         public async Task<IEnumerable<ApplicationUser>> Get()
         {
-            return await _userManager.Users.ToListAsync();
+            var users  = await _userManager.Users.ToListAsync();
+            foreach (var user in users)
+            {
+                user.Roles = await _userManager.GetRolesAsync(user);
+            }
+            return users;
         }
 
         // GET: api/User/id/Roles
