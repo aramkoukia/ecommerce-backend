@@ -73,6 +73,7 @@ namespace EcommerceApi.Controllers
 
             _logger.LogInformation($"User logged in (id: {user.Id})");
 
+            var permissions = new List<string>();
             // Generate and issue a JWT token
             var claims = new List<Claim> {
                 new Claim(ClaimTypes.Name, user.Email),
@@ -89,7 +90,7 @@ namespace EcommerceApi.Controllers
                     var roleClaims = await _roleManager.GetClaimsAsync(role);
                     if (roleClaims != null && roleClaims.Any())
                     {
-                        claims.AddRange(roleClaims);
+                        permissions.AddRange(roleClaims.Select(c => c.Value));
                     }
                 }
             }
@@ -105,7 +106,11 @@ namespace EcommerceApi.Controllers
               expires: DateTime.Now.AddMinutes(30),
               signingCredentials: creds);
 
-            return Ok(new { token = new JwtSecurityTokenHandler().WriteToken(token) });
+            return Ok(
+                new {
+                    token = new JwtSecurityTokenHandler().WriteToken(token),
+                    permissions = claims,
+                });
         }
 
     //    [AllowAnonymous]
