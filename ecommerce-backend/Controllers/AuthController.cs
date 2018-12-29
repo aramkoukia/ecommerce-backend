@@ -13,30 +13,34 @@ using System.Text;
 using EcommerceApi.Models;
 using EcommerceApi.Services;
 using EcommerceApi.ViewModel;
+using System.Collections.Generic;
 
 namespace EcommerceApi.Controllers
 {
     public class AuthController : Controller
     {
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly RoleManager<IdentityRole> _roleManager;
         private readonly IOptions<IdentityOptions> _identityOptions;
         private readonly JwtOptions _jwtOptions;
-        //private readonly IEmailSender _emailSender;
+        private readonly IEmailSender _emailSender;
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly ILogger _logger;
 
         public AuthController(
             UserManager<ApplicationUser> userManager,
+            RoleManager<IdentityRole> roleManager,
             IOptions<IdentityOptions> identityOptions,
             IOptions<JwtOptions> jwtOptions,
-            //IEmailSender emailSender,
+            IEmailSender emailSender,
             SignInManager<ApplicationUser> signInManager,
             ILoggerFactory loggerFactory)
         {
             _userManager = userManager;
+            _roleManager = roleManager;
             _identityOptions = identityOptions;
             _jwtOptions = jwtOptions.Value;
-            //_emailSender = emailSender;
+            _emailSender = emailSender;
             _signInManager = signInManager;
             _logger = loggerFactory.CreateLogger<AuthController>();
         }
@@ -70,12 +74,27 @@ namespace EcommerceApi.Controllers
             _logger.LogInformation($"User logged in (id: {user.Id})");
 
             // Generate and issue a JWT token
-            var claims = new [] {
+            var claims = new List<Claim> {
                 new Claim(ClaimTypes.Name, user.Email),
                 new Claim(JwtRegisteredClaimNames.Sub, user.Email),
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
-              };
-          
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+            };
+
+            var roles = await _userManager.GetRolesAsync(user);
+            foreach (var roleName in roles)
+            {
+                var role = await _roleManager.FindByNameAsync(roleName);
+                if (role != null)
+                {
+                    var roleClaims = await _roleManager.GetClaimsAsync(role);
+                    if (roleClaims != null && roleClaims.Any())
+                    {
+                        claims.AddRange(roleClaims);
+                    }
+                }
+            }
+            
+
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtOptions.key));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 

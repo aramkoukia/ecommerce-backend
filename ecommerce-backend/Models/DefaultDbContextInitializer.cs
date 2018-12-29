@@ -2,8 +2,8 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using System;
-using System.Collections.Generic;
-using System.Linq;
+using System.IO;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace EcommerceApi.Models
@@ -112,6 +112,22 @@ namespace EcommerceApi.Models
                 await UserManager.AddToRoleAsync(user, "Store Manager");
             }
 
+
+            var role = await _roleManager.FindByNameAsync("Admin");
+            if(role != null)
+            {
+                await _roleManager.AddClaimAsync(role, new Claim(CustomClaimTypes.Permission, "View New Order"));
+                await _roleManager.AddClaimAsync(role, new Claim(CustomClaimTypes.Permission, "View Orders"));
+                await _roleManager.AddClaimAsync(role, new Claim(CustomClaimTypes.Permission, "View Products"));
+                await _roleManager.AddClaimAsync(role, new Claim(CustomClaimTypes.Permission, "View Inventory"));
+                await _roleManager.AddClaimAsync(role, new Claim(CustomClaimTypes.Permission, "View Customers"));
+                await _roleManager.AddClaimAsync(role, new Claim(CustomClaimTypes.Permission, "View Discounts"));
+                await _roleManager.AddClaimAsync(role, new Claim(CustomClaimTypes.Permission, "View Locations"));
+                await _roleManager.AddClaimAsync(role, new Claim(CustomClaimTypes.Permission, "View Taxes"));
+                await _roleManager.AddClaimAsync(role, new Claim(CustomClaimTypes.Permission, "View Users"));
+                await _roleManager.AddClaimAsync(role, new Claim(CustomClaimTypes.Permission, "View Reports"));
+            }
+
             //email = "info@lightsandparts.com";
             //username = "essishaney";
             //if (await _userManager.FindByEmailAsync(email) == null)
@@ -130,6 +146,11 @@ namespace EcommerceApi.Models
 
             _context.SaveChanges();
         }
+    }
+
+    internal class CustomClaimTypes
+    {
+        public static string Permission = "http://github.com/claims/permission";
     }
 
     public interface IDefaultDbContextInitializer
