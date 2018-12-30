@@ -20,6 +20,8 @@ namespace EcommerceApi.Models
         public virtual DbSet<ProductInventory> ProductInventory { get; set; }
         public virtual DbSet<ProductInventoryHistory> ProductInventoryHistory { get; set; }
         public virtual DbSet<UserLocation> UserLocation { get; set; }
+        public virtual DbSet<Purchase> Purchase { get; set; }
+        public virtual DbSet<PurchaseDetail> PurchaseDetail { get; set; }
 
         public EcommerceContext(DbContextOptions<EcommerceContext> options) : base(options)
         {

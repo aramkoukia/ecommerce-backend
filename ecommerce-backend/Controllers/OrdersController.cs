@@ -17,7 +17,7 @@ using EcommerceApi.Services;
 
 namespace EcommerceApi.Controllers
 {
-    [Authorize]
+    // [Authorize]
     [Produces("application/json")]
     [Route("api/Orders")]
     public class OrdersController : Controller

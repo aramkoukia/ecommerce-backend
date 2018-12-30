@@ -12,7 +12,7 @@ namespace EcommerceApi.Controllers
 {
     [Produces("application/json")]
     [Route("api/Locations")]
-    [Authorize]
+    // [Authorize]
     public class LocationsController : Controller
     {
         private readonly EcommerceContext _context;

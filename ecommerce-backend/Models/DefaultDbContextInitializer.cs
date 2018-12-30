@@ -36,7 +36,7 @@ namespace EcommerceApi.Models
             //adding custom roles
             var RoleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
             var UserManager = serviceProvider.GetRequiredService<UserManager<ApplicationUser>>();
-            string[] roleNames = { "Admin", "Store Manager", "Sales Employee", "Inventory Employee" };
+            string[] roleNames = { "Admin", "Store Manager", "Sales Employee", "Inventory Employee", "Supply Employee" };
             IdentityResult roleResult;
 
             foreach (var roleName in roleNames)
@@ -118,6 +118,8 @@ namespace EcommerceApi.Models
             {
                 await _roleManager.AddClaimAsync(role, new Claim(CustomClaimTypes.Permission, "View New Order"));
                 await _roleManager.AddClaimAsync(role, new Claim(CustomClaimTypes.Permission, "View Orders"));
+                await _roleManager.AddClaimAsync(role, new Claim(CustomClaimTypes.Permission, "View New Purchase"));
+                await _roleManager.AddClaimAsync(role, new Claim(CustomClaimTypes.Permission, "View Purchases"));
                 await _roleManager.AddClaimAsync(role, new Claim(CustomClaimTypes.Permission, "View Products"));
                 await _roleManager.AddClaimAsync(role, new Claim(CustomClaimTypes.Permission, "View Inventory"));
                 await _roleManager.AddClaimAsync(role, new Claim(CustomClaimTypes.Permission, "View Customers"));
@@ -153,6 +155,13 @@ namespace EcommerceApi.Models
             {
                 await _roleManager.AddClaimAsync(role, new Claim(CustomClaimTypes.Permission, "View Products"));
                 await _roleManager.AddClaimAsync(role, new Claim(CustomClaimTypes.Permission, "View Inventory"));
+            }
+
+            role = await _roleManager.FindByNameAsync("Supply Employee");
+            if (role != null)
+            {
+                await _roleManager.AddClaimAsync(role, new Claim(CustomClaimTypes.Permission, "View New Purchase"));
+                await _roleManager.AddClaimAsync(role, new Claim(CustomClaimTypes.Permission, "View Purchases"));
             }
 
             //email = "info@lightsandparts.com";
