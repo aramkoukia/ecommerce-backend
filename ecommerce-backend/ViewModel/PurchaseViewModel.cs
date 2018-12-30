@@ -9,6 +9,7 @@ namespace EcommerceApi.ViewModel
         public decimal Total { get; set; }
         public decimal SubTotal { get; set; }
         public string Notes { get; set; }
+        public string Supplier { get; set; }
         public DateTime DeliveryDate { get; set; }
         public string CreatedByUserId { get; set; }
     }

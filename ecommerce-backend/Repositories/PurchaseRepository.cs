@@ -31,15 +31,13 @@ namespace EcommerceApi.Repositories
             {
                 string query = $@"
                                     SELECT [Purchase].[PurchaseId]
-                                          ,[CustomerId]
-                                          ,[Purchase].[LocationId]
+                                          ,[Supplier]
                                           ,[PurchaseDate]
                                           ,[Total]
                                           ,[SubTotal]
                                           ,[Notes]
                                           ,[DeliveryDate]
                                           ,[CreatedByUserId]
-	                                      Location.LocationName
                                     FROM [Purchase]
                                  ";
                 conn.Open();
