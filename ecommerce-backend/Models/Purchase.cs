@@ -15,7 +15,7 @@ namespace EcommerceApi.Models
         public string Supplier { get; set; }
         public int LocationId { get; set; }
         public DateTime PurchaseDate { get; set; }
-        public DateTime DeliveryDateDate { get; set; }
+        public DateTime DeliveryDate { get; set; }
 
         [Required]
         [Range(1, 10000000, ErrorMessage = "Purchase total cannot be zero")]
