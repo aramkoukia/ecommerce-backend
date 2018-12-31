@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.28307.136
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EcommerceApi", "ecommerce-backend\EcommerceApi.csproj", "{F7469E05-1FB7-4044-8E23-69765456F7F6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EcommerceApi", "ecommerce-backend\EcommerceApi.csproj", "{F7469E05-1FB7-4044-8E23-69765456F7F6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebJob", "WebJob\WebJob.csproj", "{6422AD6E-F8FC-4586-BA86-1B3D0CC0FC51}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{F7469E05-1FB7-4044-8E23-69765456F7F6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F7469E05-1FB7-4044-8E23-69765456F7F6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F7469E05-1FB7-4044-8E23-69765456F7F6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6422AD6E-F8FC-4586-BA86-1B3D0CC0FC51}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6422AD6E-F8FC-4586-BA86-1B3D0CC0FC51}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6422AD6E-F8FC-4586-BA86-1B3D0CC0FC51}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6422AD6E-F8FC-4586-BA86-1B3D0CC0FC51}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
