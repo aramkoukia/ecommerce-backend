@@ -28,5 +28,27 @@ namespace EcommerceApi.Controllers
         {
             return await _reportRepository.CurrentMonthSummary();
         }
+
+        // GET: api/Reports/MonthlySales
+        [HttpGet("MonthlySales")]
+        public async Task<IEnumerable<ChartRecordsViewModel>> GetMonthlySales()
+        {
+            return await _reportRepository.MonthlySales();
+        }
+
+        // GET: api/Reports/MonthlyPurchases
+        [HttpGet("MonthlyPurchases")]
+        public async Task<IEnumerable<ChartRecordsViewModel>> GetMonthlyPurchases()
+        {
+            return await _reportRepository.MonthlyPurchases();
+        }
+
+        // GET: api/Reports/DailySales
+        [HttpGet("DailySales")]
+        public async Task<IEnumerable<ChartRecordsViewModel>> GetDailySales()
+        {
+            return await _reportRepository.DailySales();
+        }
+
     }
 }

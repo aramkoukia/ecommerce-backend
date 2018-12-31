@@ -54,5 +54,119 @@ namespace EcommerceApi.Repositories
                 return await conn.QueryAsync<CurrentMonthSummaryViewModel>(query);
             }
         }
+
+        public async Task<IEnumerable<ChartRecordsViewModel>> MonthlySales()
+        {
+            using (IDbConnection conn = Connection)
+            {
+                string query = $@"
+                                SELECT A.Month AS Label, ISNULL(B.OrderTotal,0) / 1000 AS Value
+                                FROM (SELECT 1 AS MONTH
+                                UNION 
+                                SELECT 2 
+                                UNION 
+                                SELECT 3 
+                                UNION 
+                                SELECT 4 
+                                UNION 
+                                SELECT 5 
+                                UNION 
+                                SELECT 6 
+                                UNION 
+                                SELECT 7 
+                                UNION 
+                                SELECT 8 
+                                UNION 
+                                SELECT 9 
+                                UNION 
+                                SELECT 10 
+                                UNION 
+                                SELECT 11 
+                                UNION 
+                                SELECT 12 ) A 
+                                LEFT JOIN (
+	                                SELECT datepart(month,OrderDate) AS Month, Sum(Total) as OrderTotal 
+	                                FROM [Order] 
+	                                WHERE Status IN ('Account', 'Paid')
+	                                GROUP BY datepart(month,OrderDate))B
+                                ON A.month = B.month
+                                 ";
+                conn.Open();
+                return await conn.QueryAsync<ChartRecordsViewModel>(query);
+            }
+        }
+
+        public async Task<IEnumerable<ChartRecordsViewModel>> MonthlyPurchases()
+        {
+            using (IDbConnection conn = Connection)
+            {
+                string query = $@"
+                                SELECT A.Month AS Label, ISNULL(B.PurchaseTotal,0) / 1000 AS Value
+                                FROM (SELECT 1 AS MONTH
+                                UNION 
+                                SELECT 2 
+                                UNION 
+                                SELECT 3 
+                                UNION 
+                                SELECT 4 
+                                UNION 
+                                SELECT 5 
+                                UNION 
+                                SELECT 6 
+                                UNION 
+                                SELECT 7 
+                                UNION 
+                                SELECT 8 
+                                UNION 
+                                SELECT 9 
+                                UNION 
+                                SELECT 10 
+                                UNION 
+                                SELECT 11 
+                                UNION 
+                                SELECT 12 ) A 
+                                LEFT JOIN (
+	                                SELECT datepart(month,PurchaseDate) AS Month, Sum(Total) as PurchaseTotal 
+	                                FROM [Purchase] 
+	                                GROUP BY datepart(month,PurchaseDate))B
+                                ON A.month = B.month
+                                 ";
+                conn.Open();
+                return await conn.QueryAsync<ChartRecordsViewModel>(query);
+            }
+        }
+
+        public async Task<IEnumerable<ChartRecordsViewModel>> DailySales()
+        {
+            using (IDbConnection conn = Connection)
+            {
+                string query = $@"
+                    SELECT LEFT(WeekDayName, 2) As Label, ISNULL(Value, 0) / 1000 AS Value FROM (
+                    SELECT 'Monday' AS WeekDayName, 1 AS SortOrder
+                    UNION
+                    SELECT 'Tuesday', 2 AS SortOrder
+                    UNION
+                    SELECT 'Wednesday', 3 AS SortOrder
+                    UNION
+                    SELECT 'Thursday', 4 AS SortOrder
+                    UNION
+                    SELECT 'Friday', 5 AS SortOrder
+                    UNION
+                    SELECT 'Saturday', 6 AS SortOrder
+                    UNION
+                    SELECT 'Sunday', 7 AS SortOrder) AS AllDays
+                    LEFT JOIN (
+                    SELECT DATENAME(dw,OrderDate) AS Label, SUM(Total) AS Value, CONVERT(date, OrderDate) AS ConvertedOrderDate
+                    FROM [Order]
+                    WHERE [Order].OrderDate > DATEADD(DAY, -7, GETDATE())
+                    AND Status IN ('Paid', 'Account')
+                    GROUP BY datename(dw,OrderDate), CONVERT(date ,OrderDate)) Sales
+                    on AllDays.WeekDayName = Sales.Label
+                    ORDER BY Sales.ConvertedOrderDate
+                                 ";
+                conn.Open();
+                return await conn.QueryAsync<ChartRecordsViewModel>(query);
+            }
+        }
     }
 }
