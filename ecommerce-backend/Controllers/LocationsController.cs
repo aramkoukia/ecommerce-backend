@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
@@ -12,7 +11,7 @@ namespace EcommerceApi.Controllers
 {
     [Produces("application/json")]
     [Route("api/Locations")]
-    // [Authorize]
+    [Authorize]
     public class LocationsController : Controller
     {
         private readonly EcommerceContext _context;

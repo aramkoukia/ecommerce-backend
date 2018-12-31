@@ -9,15 +9,10 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using EcommerceApi.ViewModel;
 using EcommerceApi.Repositories;
-using DinkToPdf.Contracts;
-using DinkToPdf;
-using EcommerceApi.Untilities;
-using System.IO;
-using EcommerceApi.Services;
 
 namespace EcommerceApi.Controllers
 {
-    // [Authorize]
+    [Authorize]
     [Produces("application/json")]
     [Route("api/Purchases")]
     public class PurchasesController : Controller

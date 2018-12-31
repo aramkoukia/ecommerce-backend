@@ -9,7 +9,7 @@ using System.Linq;
 
 namespace EcommerceApi.Controllers
 {
-    // [Authorize()]
+    [Authorize()]
     [Produces("application/json")]
     [Route("api/Users")]
     public class UsersController : Controller
