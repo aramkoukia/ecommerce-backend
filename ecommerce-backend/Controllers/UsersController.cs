@@ -6,6 +6,7 @@ using EcommerceApi.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using System.Linq;
+using System;
 
 namespace EcommerceApi.Controllers
 {
@@ -16,13 +17,16 @@ namespace EcommerceApi.Controllers
     {
         private readonly EcommerceContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly RoleManager<IdentityRole> _roleManager;
 
         public UsersController(
             EcommerceContext context,
+            RoleManager<IdentityRole> roleManager,
             UserManager<ApplicationUser> userManager)
         {
             _context = context;
             _userManager = userManager;
+            _roleManager = roleManager;
         }
 
         // GET: api/Users
@@ -47,6 +51,48 @@ namespace EcommerceApi.Controllers
             var userId = _userManager.GetUserId(currentUser);
             var user = await _userManager.FindByEmailAsync(userId);
             return await _userManager.GetRolesAsync(user);
+        }
+
+        // PUT: api/Users/Permissions
+        [HttpPut("Permissions")]
+        public async Task<IActionResult> PutUserPermissions([FromBody] UpdateUserPermissionViewModel userInfo)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            // Udate user roles
+            var user = await _userManager.FindByEmailAsync(userInfo.Email);
+            var allRoles = _roleManager.Roles.ToList();
+
+            foreach (var role in allRoles)
+            {
+                if (userInfo.RoleIds.Contains(role.Id))
+                {
+                    await _userManager.AddToRoleAsync(user, role.Name);
+                }
+                else
+                {
+                    await _userManager.RemoveFromRoleAsync(user, role.Name);
+                }
+            }
+
+            // Update location assignment
+            var userLocations = _context.UserLocation.Where(m => m.UserId == user.Id);
+            _context.UserLocation.RemoveRange(userLocations);
+
+            var userLocationList = userInfo.LocationIds.Select(l =>
+                new UserLocation {
+                    LocationId = l,
+                    UserId = user.Id
+                });
+
+            _context.UserLocation.AddRange(userLocationList);
+
+            await _context.SaveChangesAsync();
+
+            return Ok(userInfo);
         }
     }
 }
