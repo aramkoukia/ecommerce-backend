@@ -43,14 +43,20 @@ namespace EcommerceApi.Controllers
             return users;
         }
 
-        // GET: api/User/id/Roles
+        // GET: api/Users/id/Roles
         [HttpGet("{id}/Roles")]
-        public async Task<IEnumerable<string>> Get(string id)
+        public async Task<IEnumerable<string>> GetUserRoles(string email)
         {
-            System.Security.Claims.ClaimsPrincipal currentUser = this.User;
-            var userId = _userManager.GetUserId(currentUser);
-            var user = await _userManager.FindByEmailAsync(userId);
+            var user = await _userManager.FindByEmailAsync(email);
             return await _userManager.GetRolesAsync(user);
+        }
+
+        // GET: api/Users/id/Locations
+        [HttpGet("{id}/Locations")]
+        public async Task<IEnumerable<UserLocation>> GetUserLocations(string email)
+        {
+            var user = await _userManager.FindByEmailAsync(email);
+            return await _context.UserLocation.Where(l => l.UserId == user.Id).ToListAsync();
         }
 
         // PUT: api/Users/Permissions
