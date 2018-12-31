@@ -127,6 +127,7 @@ namespace EcommerceApi.Models
                 await _roleManager.AddClaimAsync(role, new Claim(CustomClaimTypes.Permission, "View Locations"));
                 await _roleManager.AddClaimAsync(role, new Claim(CustomClaimTypes.Permission, "View Taxes"));
                 await _roleManager.AddClaimAsync(role, new Claim(CustomClaimTypes.Permission, "View Users"));
+                await _roleManager.AddClaimAsync(role, new Claim(CustomClaimTypes.Permission, "View Roles"));
                 await _roleManager.AddClaimAsync(role, new Claim(CustomClaimTypes.Permission, "View Reports"));
             }
 
