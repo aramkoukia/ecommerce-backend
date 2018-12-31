@@ -17,7 +17,9 @@ namespace WebJob
                 .ConfigureWebJobs(b =>
                 {
                     b.AddAzureStorageCoreServices()
+                    .AddTimers()
                     .AddAzureStorage();
+                    
                     //.AddServiceBus()
                     //.AddEventHubs();
                 })
@@ -32,11 +34,11 @@ namespace WebJob
                     b.AddConsole();
 
                     // If this key exists in any config, use it to enable App Insights
-                    string appInsightsKey = context.Configuration["APPINSIGHTS_INSTRUMENTATIONKEY"];
-                    if (!string.IsNullOrEmpty(appInsightsKey))
-                    {
+                    // string appInsightsKey = context.Configuration["APPINSIGHTS_INSTRUMENTATIONKEY"];
+                    //if (!string.IsNullOrEmpty(appInsightsKey))
+                    //{
                         //b.AddApplicationInsights(o => o.InstrumentationKey = appInsightsKey);
-                    }
+                    //}
                 })
                 .ConfigureServices(services =>
                 {

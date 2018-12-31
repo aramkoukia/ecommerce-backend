@@ -13,9 +13,9 @@ namespace WebJob
             this.logger = logger;
         }
 
-        public void ProcessQueueMessage([TimerTrigger("* * * * *")]TimerInfo timerInfo)
+        public static void TimerJob([TimerTrigger("00:00:30")] TimerInfo timer)
         {
-            logger.LogInformation(DateTime.Now.ToString());
+            Console.WriteLine("Timer job fired!");
         }
     }
 }
