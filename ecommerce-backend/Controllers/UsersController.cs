@@ -44,7 +44,7 @@ namespace EcommerceApi.Controllers
         }
 
         // GET: api/Users/id/Roles
-        [HttpGet("{id}/Roles")]
+        [HttpGet("{email}/Roles")]
         public async Task<IEnumerable<string>> GetUserRoles(string email)
         {
             var user = await _userManager.FindByEmailAsync(email);
@@ -52,7 +52,7 @@ namespace EcommerceApi.Controllers
         }
 
         // GET: api/Users/id/Locations
-        [HttpGet("{id}/Locations")]
+        [HttpGet("{email}/Locations")]
         public async Task<IEnumerable<UserLocation>> GetUserLocations(string email)
         {
             var user = await _userManager.FindByEmailAsync(email);
