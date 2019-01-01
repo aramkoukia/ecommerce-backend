@@ -106,7 +106,7 @@ namespace EcommerceApi.Repositories
             {
                 string query = $@"
 SELECT * FROM (
-SELECT OrderDate AS Date, 'Order' AS TransactionType, -1 * OrderDetail.Amount, Location.LocationName, CreatedByUserId As [User] FROM [Order]
+SELECT OrderDate AS Date, 'Order' AS TransactionType, (-1 * OrderDetail.Amount) AS Amount, Location.LocationName, CreatedByUserId As UserName FROM [Order]
 INNER JOIN OrderDetail
 	On [Order].OrderId = OrderDetail.OrderId
 INNER JOIN Location
