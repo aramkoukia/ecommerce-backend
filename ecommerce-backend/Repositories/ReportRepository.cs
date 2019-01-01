@@ -60,36 +60,38 @@ namespace EcommerceApi.Repositories
             using (IDbConnection conn = Connection)
             {
                 string query = $@"
-                                SELECT A.Month AS Label, ISNULL(B.OrderTotal,0) / 1000 AS Value
-                                FROM (SELECT 1 AS MONTH
-                                UNION 
-                                SELECT 2 
-                                UNION 
-                                SELECT 3 
-                                UNION 
-                                SELECT 4 
-                                UNION 
-                                SELECT 5 
-                                UNION 
-                                SELECT 6 
-                                UNION 
-                                SELECT 7 
-                                UNION 
-                                SELECT 8 
-                                UNION 
-                                SELECT 9 
-                                UNION 
-                                SELECT 10 
-                                UNION 
-                                SELECT 11 
-                                UNION 
-                                SELECT 12 ) A 
-                                LEFT JOIN (
-	                                SELECT datepart(month,OrderDate) AS Month, Sum(Total) as OrderTotal 
-	                                FROM [Order] 
-	                                WHERE Status IN ('Account', 'Paid')
-	                                GROUP BY datepart(month,OrderDate))B
-                                ON A.month = B.month
+SELECT * FROM (
+SELECT A.Month AS Label, ISNULL(B.OrderTotal,0) / 1000 AS Value, Year
+FROM (SELECT 1 AS MONTH
+UNION 
+SELECT 2 
+UNION 
+SELECT 3 
+UNION 
+SELECT 4 
+UNION 
+SELECT 5 
+UNION 
+SELECT 6 
+UNION 
+SELECT 7 
+UNION 
+SELECT 8 
+UNION 
+SELECT 9 
+UNION 
+SELECT 10 
+UNION 
+SELECT 11 
+UNION 
+SELECT 12 ) A 
+LEFT JOIN (
+	SELECT datepart(month,OrderDate) AS Month, datepart(year,OrderDate) AS Year, Sum(Total) as OrderTotal 
+	FROM [Order] 
+	WHERE Status IN ('Account', 'Paid')
+	GROUP BY datepart(month,OrderDate), datepart(year,OrderDate)) B
+ON A.month = B.month) t
+Order By Year, Label
                                  ";
                 conn.Open();
                 return await conn.QueryAsync<ChartRecordsViewModel>(query);
@@ -101,35 +103,37 @@ namespace EcommerceApi.Repositories
             using (IDbConnection conn = Connection)
             {
                 string query = $@"
-                                SELECT A.Month AS Label, ISNULL(B.PurchaseTotal,0) / 1000 AS Value
-                                FROM (SELECT 1 AS MONTH
-                                UNION 
-                                SELECT 2 
-                                UNION 
-                                SELECT 3 
-                                UNION 
-                                SELECT 4 
-                                UNION 
-                                SELECT 5 
-                                UNION 
-                                SELECT 6 
-                                UNION 
-                                SELECT 7 
-                                UNION 
-                                SELECT 8 
-                                UNION 
-                                SELECT 9 
-                                UNION 
-                                SELECT 10 
-                                UNION 
-                                SELECT 11 
-                                UNION 
-                                SELECT 12 ) A 
-                                LEFT JOIN (
-	                                SELECT datepart(month,PurchaseDate) AS Month, Sum(Total) as PurchaseTotal 
-	                                FROM [Purchase] 
-	                                GROUP BY datepart(month,PurchaseDate))B
-                                ON A.month = B.month
+SELECT * FROM (
+SELECT A.Month AS Label, ISNULL(B.PurchaseTotal,0) / 1000 AS Value, Year
+FROM (SELECT 1 AS MONTH
+UNION 
+SELECT 2 
+UNION 
+SELECT 3 
+UNION 
+SELECT 4 
+UNION 
+SELECT 5 
+UNION 
+SELECT 6 
+UNION 
+SELECT 7 
+UNION 
+SELECT 8 
+UNION 
+SELECT 9 
+UNION 
+SELECT 10 
+UNION 
+SELECT 11 
+UNION 
+SELECT 12 ) A 
+LEFT JOIN (
+	SELECT datepart(month,PurchaseDate) AS Month, datepart(year,PurchaseDate) AS Year, Sum(Total) as PurchaseTotal 
+	FROM [Purchase] 
+	GROUP BY datepart(month,PurchaseDate), datepart(year,PurchaseDate)) B
+ON A.month = B.month) t
+Order By Year, Label
                                  ";
                 conn.Open();
                 return await conn.QueryAsync<ChartRecordsViewModel>(query);
