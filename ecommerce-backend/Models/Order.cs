@@ -15,7 +15,7 @@ namespace EcommerceApi.Models
             Location = new Location();
         }
 
-        public int? OrderId { get; set; }
+        public int OrderId { get; set; }
         public int? CustomerId { get; set; }
         public int LocationId { get; set; }
         public DateTime OrderDate { get; set; }
@@ -37,6 +37,7 @@ namespace EcommerceApi.Models
         public string Status { get; set; }
         public DateTime CreatedDate { get; set; }
         public string CreatedByUserId { get; set; }
+        public int? OriginalOrderId { get; set; }
 
         public ICollection<OrderDetail> OrderDetail { get; set; }
         public ICollection<OrderTax> OrderTax { get; set; }
