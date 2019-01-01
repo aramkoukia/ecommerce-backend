@@ -51,6 +51,7 @@ namespace EcommerceApi.Models
         Paid,
         OnHold,
         Draft,
-        Account
+        Account,
+        Return
     }
 }

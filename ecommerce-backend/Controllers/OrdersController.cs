@@ -196,7 +196,8 @@ namespace EcommerceApi.Controllers
             order.OrderDate = DateTime.UtcNow;
             order.Customer = null;
             order.Location = null;
-            if (order.Status.Equals(OrderStatus.Paid.ToString(), StringComparison.InvariantCultureIgnoreCase))
+            if (order.Status.Equals(OrderStatus.Paid.ToString(), StringComparison.InvariantCultureIgnoreCase) ||
+               ( order.Status.Equals(OrderStatus.Return.ToString(), StringComparison.InvariantCultureIgnoreCase) && await OriginalOrderWasPaid(order.OriginalOrderId)))
             {
                 order.OrderPayment.Add(
                     new OrderPayment
@@ -216,6 +217,20 @@ namespace EcommerceApi.Controllers
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetOrder", new { id = order.OrderId }, order);
+        }
+
+        private async Task<bool> OriginalOrderWasPaid(int? originalOrderId)
+        {
+            if (!originalOrderId.HasValue)
+            {
+                return false;
+            }
+
+            var originalOrder = await _context.Order.SingleOrDefaultAsync(m => m.OrderId == originalOrderId.Value);
+            if (originalOrder != null && originalOrder.Status.Equals(OrderStatus.Paid.ToString(), StringComparison.InvariantCultureIgnoreCase)) {
+                return true;
+            }
+            return false;
         }
 
         private async Task<bool> UpdateInventory(Order order)
