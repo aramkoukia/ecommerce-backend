@@ -33,21 +33,16 @@ namespace EcommerceApi.Controllers
 
         // GET: api/Products/5
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetProduct([FromRoute] int id)
+        public async Task<ProductViewModel> GetProduct([FromRoute] int id)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
+            return await _productRepository.GetProduct(id);
+        }
 
-            var product = await _context.Product.AsNoTracking().SingleOrDefaultAsync(m => m.ProductId == id);
-
-            if (product == null)
-            {
-                return NotFound();
-            }
-
-            return Ok(product);
+        // GET: api/Products/5/Transactions
+        [HttpGet("{id}/Transactions")]
+        public async Task<IEnumerable<ProductTransactionViewModel>> GetProductTransactions([FromRoute] int id)
+        {
+            return await _productRepository.GetProductTransactions(id);
         }
 
         // PUT: api/Products/5
