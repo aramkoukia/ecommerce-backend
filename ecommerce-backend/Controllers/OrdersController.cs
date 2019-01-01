@@ -48,11 +48,18 @@ namespace EcommerceApi.Controllers
             return await _orderRepository.GetOrders(null);
         }
 
-        // GET: api/Orders
+        // GET: api/Orders/Location/{locationId}
         [HttpGet("location/{locationId}")]
         public async Task<IEnumerable<OrderViewModel>> GetOrderByLocation([FromRoute] int locationId)
         {
             return await _orderRepository.GetOrders(locationId);
+        }
+
+        // GET: api/Orders/Customer/{customerId}
+        [HttpGet("customer/{customerId}")]
+        public async Task<IEnumerable<OrderViewModel>> GetOrderByCustomer([FromRoute] int customerId)
+        {
+            return await _orderRepository.GetOrdersByCustomer(customerId);
         }
 
         // GET: api/Orders/5

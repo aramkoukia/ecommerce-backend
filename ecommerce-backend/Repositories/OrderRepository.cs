@@ -62,5 +62,43 @@ namespace EcommerceApi.Repositories
                 return await conn.QueryAsync<OrderViewModel>(query, new { LocationId = locationId });
             }
         }
+
+        public async Task<IEnumerable<OrderViewModel>> GetOrdersByCustomer(int customerId)
+        {
+            using (IDbConnection conn = Connection)
+            {
+                string query = $@"
+                                    SELECT [Order].[OrderId]
+                                          ,[CustomerId]
+                                          ,[Order].[LocationId]
+                                          ,[OrderDate]
+                                          ,[Total]
+                                          ,[SubTotal]
+                                          ,[TotalDiscount]
+                                          ,[DiscountPercentage]
+                                          ,[DiscountAmount]
+                                          ,[DiscountId]
+                                          ,[PstNumber]
+                                          ,[Notes]
+                                          ,[PoNumber]
+                                          ,[Status]
+                                          ,[CreatedByUserId]
+	                                      ,ISNULL(OrderPayment.PaidAmount, 0) AS PaidAmount,
+	                                      Location.LocationName
+                                    FROM [Order]
+                                    INNER JOIN Location
+	                                    ON Location.LocationId = [Order].LocationId
+                                    LEFT JOIN 
+	                                    ( SELECT OrderId, SUM(PaymentAmount) AS PaidAmount 
+	                                      FROM OrderPayment
+	                                      GROUP BY OrderId) AS OrderPayment
+	                                    ON OrderPayment.OrderId = [Order].OrderId
+                                    WHERE [Order].CustomerId = @CustomerId
+                                    ORDER BY [Order].[OrderId] DESC
+                                 ";
+                conn.Open();
+                return await conn.QueryAsync<OrderViewModel>(query, new { CustomerId = customerId });
+            }
+        }
     }
 }

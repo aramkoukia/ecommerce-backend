@@ -7,5 +7,6 @@ namespace EcommerceApi.Repositories
     public interface ICustomerRepository
     {
         Task<IEnumerable<CustomerViewModel>> GetCustomers();
+        Task<CustomerViewModel> GetCustomer(int customerId);
     }
 }
