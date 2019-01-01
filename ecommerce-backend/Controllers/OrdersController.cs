@@ -240,6 +240,13 @@ namespace EcommerceApi.Controllers
                 return true;
             }
 
+            // if order is refund we add to inventory
+            var addOrUpdate = -1;
+            if (order.Status == OrderStatus.Return.ToString())
+            {
+                addOrUpdate = 1;
+            }
+
             foreach (var item in order.OrderDetail)
             {
                 var productInventory = await _context.ProductInventory.FirstOrDefaultAsync(m =>
@@ -248,7 +255,7 @@ namespace EcommerceApi.Controllers
 
                 if (productInventory != null)
                 {
-                    productInventory.Balance = productInventory.Balance - item.Amount;
+                    productInventory.Balance = productInventory.Balance + (addOrUpdate * item.Amount);
                     productInventory.ModifiedDate = order.CreatedDate;
                 }
             }
