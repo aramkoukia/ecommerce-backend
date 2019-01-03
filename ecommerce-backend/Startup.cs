@@ -61,6 +61,7 @@ namespace EcommerceApi
             services.AddTransient<IPurchaseRepository, PurchaseRepository>();
             services.AddTransient<ICustomerRepository, CustomerRepository>();
             services.AddTransient<IReportRepository, ReportRepository>();
+            services.AddTransient(_ => new AppDb(Configuration.GetConnectionString("mysqlConnection")));
 
             services.AddTransient<IEmailSender, EmailSender>();
             services.Configure<EmailSenderOptions>(Configuration.GetSection("email"));

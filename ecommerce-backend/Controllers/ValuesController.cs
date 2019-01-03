@@ -1,4 +1,6 @@
 ﻿using System.Collections.Generic;
+using System.Threading.Tasks;
+using EcommerceApi.Repositories;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EcommerceApi.Controllers
@@ -6,11 +8,20 @@ namespace EcommerceApi.Controllers
     [Route("api/[controller]")]
     public class ValuesController : Controller
     {
+        private AppDb _db;
+        public ValuesController(AppDb db)
+        {
+            _db = db;
+        }
         // GET api/values
         [HttpGet]
-        public IEnumerable<string> Get()
+        public async Task<IActionResult> GetAsync()
         {
-            return new string[] { "value1", "value2" };
+            await _db.Connection.OpenAsync();
+            var query = new CustomerQueries(_db);
+            var result = await query.GetAllCustomers();
+
+            return new OkObjectResult(result);
         }
 
         // GET api/values/5

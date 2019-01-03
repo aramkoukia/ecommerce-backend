@@ -13,7 +13,7 @@ namespace WebJob
             this.logger = logger;
         }
 
-        public static void TimerJob([TimerTrigger("00:00:30")] TimerInfo timer)
+        public static void TimerJob([TimerTrigger("00:10:00")] TimerInfo timer)
         {
             Console.WriteLine("Timer job fired!");
         }
