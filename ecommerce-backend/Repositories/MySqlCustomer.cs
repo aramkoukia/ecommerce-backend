@@ -8,10 +8,6 @@ namespace EcommerceApi.Repositories
 {
     public class MySqlCustomer
     {
-        public int Id { get; set; }
-        public string Title { get; set; }
-        public string Content { get; set; }
-
         [JsonIgnore]
         public AppDb Db { get; set; }
 
@@ -40,32 +36,5 @@ namespace EcommerceApi.Repositories
         public string _pos_customer_accountlimit { get; set; }
         public string _pos_customer_secemail { get; set; }
         public string _pos_customer_contractorlink { get; set; }
-
-        private void BindId(MySqlCommand cmd)
-        {
-            cmd.Parameters.Add(new MySqlParameter
-            {
-                ParameterName = "@id",
-                DbType = DbType.Int32,
-                Value = Id,
-            });
-        }
-
-        private void BindParams(MySqlCommand cmd)
-        {
-            cmd.Parameters.Add(new MySqlParameter
-            {
-                ParameterName = "@title",
-                DbType = DbType.String,
-                Value = Title,
-            });
-            cmd.Parameters.Add(new MySqlParameter
-            {
-                ParameterName = "@content",
-                DbType = DbType.String,
-                Value = Content,
-            });
-        }
-
     }
 }

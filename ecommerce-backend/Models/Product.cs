@@ -17,7 +17,7 @@ namespace EcommerceApi.Models
         public string Sku { get; set; }
         public string ProductName { get; set; }
         public string ProductDescription { get; set; }
-        public int ProductTypeId { get; set; }
+        public int? ProductTypeId { get; set; }
         public bool ChargeTaxes { get; set; }
         public bool AllowOutOfStockPurchase { get; set; }
         public decimal SalesPrice { get; set; }

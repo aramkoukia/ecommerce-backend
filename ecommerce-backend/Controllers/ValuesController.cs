@@ -23,7 +23,8 @@ namespace EcommerceApi.Controllers
         public async Task<IActionResult> GetAsync()
         {
             // await SyncCustomers();
-            await SyncOrders();
+            // await SyncOrders();
+            await SyncProducts();
             return Ok();
         }
 
@@ -159,29 +160,66 @@ namespace EcommerceApi.Controllers
             _db.Connection.Close();
         }
 
-        // GET api/values/5
-        [HttpGet("{id}")]
-        public string Get(int id)
+        private async Task SyncProducts()
         {
-            return "value";
+            await _db.Connection.OpenAsync();
+            var query = new ProductQueries(_db);
+            var products = await query.GetAllProducts();
+            foreach (var product in products)
+            {
+                decimal price = 0;
+                if (!string.IsNullOrEmpty(product._price))
+                {
+                    decimal.TryParse(product._price, out price);
+                }
+                int typeId = 0;
+                if (!string.IsNullOrEmpty(product._cat_id))
+                {
+                    int.TryParse(product._cat_id, out typeId);
+                }
+
+                var found = await _context.Product.FindAsync(int.Parse(product.id.ToString()));
+                if (found == null)
+                {
+                    var newProduct = new Product
+                    {
+                        AllowOutOfStockPurchase = true,
+                        Barcode = product._sku,
+                        ChargeTaxes = true,
+                        ModifiedDate = DateTime.Now,
+                        ProductCode = product._sku,
+                        ProductDescription = "",
+                        ProductId = int.Parse(product.id.ToString()),
+                        ProductName = product.post_title,
+                        ProductTypeId = typeId,
+                        PurchasePrice = 0,
+                        Sku = product._sku,
+                        SalesPrice = price
+                    };
+
+                    if (typeId > 0)
+                    {
+
+                        newProduct.ProductType = new ProductType
+                        {
+                            ProductTypeId = typeId,
+                            ModifiedDate = DateTime.Now,
+                            ProductTypeName = product._category
+                        };
+                    }
+                    else {
+                        newProduct.ProductType = null;
+                    }
+                    await _context.Product.AddAsync(newProduct);
+                    await _context.SaveChangesAsync();
+                }
+                else
+                {
+                    // await _context.SaveChangesAsync();
+                }
+            }
+            _db.Connection.Close();
         }
 
-        // POST api/values
-        [HttpPost]
-        public void Post([FromBody]string value)
-        {
-        }
-
-        // PUT api/values/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody]string value)
-        {
-        }
-
-        // DELETE api/values/5
-        [HttpDelete("{id}")]
-        public void Delete(int id)
-        {
-        }
     }
 }
