@@ -49,10 +49,31 @@ SELECT p.id,
 FROM wp_posts p 
 where p.post_type IN ( '_pos_sale')     
 ";
-            return await ReadAllAsync(await cmd.ExecuteReaderAsync());
+            return await ReadAllOrdersAsync(await cmd.ExecuteReaderAsync());
         }
 
-        private async Task<List<MySqlOrder>> ReadAllAsync(DbDataReader reader)
+        public async Task<List<MySqlOrderPayment>> GetAllOrderPayments()
+        {
+            var cmd = Db.Connection.CreateCommand();
+            cmd.CommandText = @"
+SELECT p.id, 
+    p.post_date,
+    (select meta_value from wp_postmeta where post_id = p.id and meta_key = '_pos_payment_amount' limit 1) as _pos_payment_amount,
+    (select meta_value from wp_postmeta where post_id = p.id and meta_key = '_pos_payment_order_id' limit 1) as _pos_payment_order_id,
+    (select meta_value from wp_postmeta where post_id = p.id and meta_key = '_pos_payment_paymentType_id' limit 1) as _pos_payment_paymentType_id,
+    (select meta_value from wp_postmeta where post_id = p.id and meta_key = '_pos_payment_customer_id' limit 1) as _pos_payment_customer_id,
+    (select meta_value from wp_postmeta where post_id = p.id and meta_key = '_pos_payment_lastFour' limit 1) as _pos_payment_lastFour,
+    (select meta_value from wp_postmeta where post_id = p.id and meta_key = '_pos_payment_AuthCode' limit 1) as _pos_payment_AuthCode,
+    (select meta_value from wp_postmeta where post_id = p.id and meta_key = '_pos_payment_comment' limit 1) as _pos_payment_comment,
+    (select meta_value from wp_postmeta where post_id = p.id and meta_key = '_pos_payment_chequeNo' limit 1) as _pos_payment_chequeNo,
+    p.post_author
+FROM wp_posts p 
+where p.post_type IN ( '_pos_payment') 
+";
+            return await ReadAllOrderPaymentsAsync(await cmd.ExecuteReaderAsync());
+        }
+
+        private async Task<List<MySqlOrder>> ReadAllOrdersAsync(DbDataReader reader)
         {
             var posts = new List<MySqlOrder>();
             using (reader)
@@ -87,6 +108,33 @@ where p.post_type IN ( '_pos_sale')
                         _pos_sale_tax_0 = await reader.IsDBNullAsync(23) ? string.Empty : await reader.GetFieldValueAsync<string>(23),
                         wp_old_date = await reader.IsDBNullAsync(24) ? string.Empty : await reader.GetFieldValueAsync<string>(24),
                         post_date = await reader.GetFieldValueAsync<DateTime>(25),
+                    };
+                    posts.Add(post);
+                }
+            }
+            return posts;
+        }
+
+        private async Task<List<MySqlOrderPayment>> ReadAllOrderPaymentsAsync(DbDataReader reader)
+        {
+            var posts = new List<MySqlOrderPayment>();
+            using (reader)
+            {
+                while (await reader.ReadAsync())
+                {
+                    var post = new MySqlOrderPayment(Db)
+                    {
+                        id = await reader.GetFieldValueAsync<UInt64>(0),
+                        post_date = await reader.GetFieldValueAsync<DateTime>(1),
+                        _pos_payment_amount = await reader.IsDBNullAsync(2) ? string.Empty : await reader.GetFieldValueAsync<string>(2),
+                        _pos_payment_order_id = await reader.IsDBNullAsync(3) ? string.Empty : await reader.GetFieldValueAsync<string>(3),
+                        _pos_payment_paymentType_id = await reader.IsDBNullAsync(4) ? string.Empty : await reader.GetFieldValueAsync<string>(4),
+                        // _pos_payment_customer_id = await reader.GetFieldValueAsync<UInt64>(5),
+                        _pos_payment_lastFour = await reader.IsDBNullAsync(6) ? string.Empty : await reader.GetFieldValueAsync<string>(6),
+                        _pos_payment_AuthCode = await reader.IsDBNullAsync(7) ? string.Empty : await reader.GetFieldValueAsync<string>(7),
+                        _pos_payment_comment = await reader.IsDBNullAsync(8) ? string.Empty : await reader.GetFieldValueAsync<string>(8),
+                        _pos_payment_chequeNo = await reader.IsDBNullAsync(9) ? string.Empty : await reader.GetFieldValueAsync<string>(9),
+                        post_author = await reader.GetFieldValueAsync<UInt64>(10),
                     };
                     posts.Add(post);
                 }

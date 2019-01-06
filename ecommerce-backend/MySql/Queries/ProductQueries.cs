@@ -28,10 +28,19 @@ SELECT p.id, p.post_title,
 	FROM wp_posts p 
 where p.post_type IN ( 'product')
 ";
-            return await ReadAllAsync(await cmd.ExecuteReaderAsync());
+            return await ReadAllProductsAsync(await cmd.ExecuteReaderAsync());
         }
 
-        private async Task<List<MySqlProduct>> ReadAllAsync(DbDataReader reader)
+        public async Task<List<MySqlProductInventories>> GetAllProductInventories()
+        {
+            var cmd = Db.Connection.CreateCommand();
+            cmd.CommandText = @"
+                select id, product_id, warehouse_id, stock from wp_inventory_manager_product_warehouse
+            ";
+            return await ReadAllProductInventoriesAsync(await cmd.ExecuteReaderAsync());
+        }
+
+        private async Task<List<MySqlProduct>> ReadAllProductsAsync(DbDataReader reader)
         {
             var posts = new List<MySqlProduct>();
             using (reader)
@@ -46,6 +55,26 @@ where p.post_type IN ( 'product')
                         _sku = await reader.IsDBNullAsync(3) ? string.Empty : await reader.GetFieldValueAsync<string>(3),
                         _cat_id = await reader.IsDBNullAsync(4) ? string.Empty : await reader.GetFieldValueAsync<string>(4),
                         _category = await reader.IsDBNullAsync(5) ? string.Empty : await reader.GetFieldValueAsync<string>(5)
+                    };
+                    posts.Add(post);
+                }
+            }
+            return posts;
+        }
+
+        private async Task<List<MySqlProductInventories>> ReadAllProductInventoriesAsync(DbDataReader reader)
+        {
+            var posts = new List<MySqlProductInventories>();
+            using (reader)
+            {
+                while (await reader.ReadAsync())
+                {
+                    var post = new MySqlProductInventories(Db)
+                    {
+                        id = await reader.GetFieldValueAsync<int>(0),
+                        product_id = await reader.GetFieldValueAsync<int>(1),
+                        warehouse_id = await reader.GetFieldValueAsync<int>(2),
+                        stock = await reader.IsDBNullAsync(3) ? string.Empty : await reader.GetFieldValueAsync<string>(3)
                     };
                     posts.Add(post);
                 }

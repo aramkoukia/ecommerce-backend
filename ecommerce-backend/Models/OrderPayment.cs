@@ -11,7 +11,10 @@ namespace EcommerceApi.Models
         public int PaymentTypeId { get; set; }
         public DateTime CreatedDate { get; set; }
         public string CreatedByUserId { get; set; }
-
+        public string AuthCode { get; set; }
+        public string CreditCard { get; set; }
+        public string Notes { get; set; }
+        public string ChequeNo { get; set; }
         public PaymentType PaymentType { get; set; }
     }
 }

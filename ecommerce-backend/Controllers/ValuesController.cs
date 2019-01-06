@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using EcommerceApi.Models;
 using EcommerceApi.Repositories;
 using Microsoft.AspNetCore.Mvc;
+using System.Linq;
 
 namespace EcommerceApi.Controllers
 {
@@ -24,7 +25,9 @@ namespace EcommerceApi.Controllers
         {
             // await SyncCustomers();
             // await SyncOrders();
-            await SyncProducts();
+            await SyncOrderPayments();
+            // await SyncProducts();
+            // await SyncProductInventory();
             return Ok();
         }
 
@@ -160,6 +163,51 @@ namespace EcommerceApi.Controllers
             _db.Connection.Close();
         }
 
+        private async Task SyncOrderPayments()
+        {
+            await _db.Connection.OpenAsync();
+            var query = new OrderQueries(_db);
+            var orders = await query.GetAllOrderPayments();
+            foreach (var order in orders)
+            {
+                try
+                {
+                    var found = _context.OrderPayment.FirstOrDefault(o => o.OrderId == int.Parse(order._pos_payment_order_id.ToString())
+                                                              && o.PaymentAmount == decimal.Parse(order._pos_payment_amount.ToString())
+                                                              && o.AuthCode == order._pos_payment_AuthCode.ToString());
+                    if (found == null)
+                    {
+
+                        var newOrder = new OrderPayment
+                        {
+                            CreatedByUserId = order.post_author.ToString(),
+                            CreatedDate = order.post_date,
+                            CreditCard = order._pos_payment_lastFour,
+                            OrderId = int.Parse(order._pos_payment_order_id.ToString()),
+                            PaymentAmount = decimal.Parse(order._pos_payment_amount),
+                            PaymentDate = order.post_date,
+                            PaymentTypeId = int.Parse(order._pos_payment_paymentType_id.ToString()),
+                            AuthCode = order._pos_payment_AuthCode,
+                            Notes = order._pos_payment_comment,
+                            ChequeNo = order._pos_payment_chequeNo
+                        };
+                        newOrder.PaymentType = null;
+                        await _context.OrderPayment.AddAsync(newOrder);
+                        await _context.SaveChangesAsync();
+                    }
+                    else
+                    {
+                        // await _context.SaveChangesAsync();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                }
+            }
+            _db.Connection.Close();
+        }
+
         private async Task SyncProducts()
         {
             await _db.Connection.OpenAsync();
@@ -216,6 +264,39 @@ namespace EcommerceApi.Controllers
                 else
                 {
                     // await _context.SaveChangesAsync();
+                }
+            }
+            _db.Connection.Close();
+        }
+
+        private async Task SyncProductInventory()
+        {
+            await _db.Connection.OpenAsync();
+            var query = new ProductQueries(_db);
+            var products = await query.GetAllProductInventories();
+            foreach (var product in products)
+            {
+                var found = _context.ProductInventory.FirstOrDefault(p => p.LocationId == int.Parse(product.warehouse_id.ToString()) && p.ProductId == int.Parse(product.product_id.ToString()));
+                if (found == null)
+                {
+                    var productExists = await _context.Product.FindAsync(int.Parse(product.product_id.ToString()));
+                    if (productExists != null) { 
+                        var newProduct = new ProductInventory
+                        {
+                            ProductId = int.Parse(product.product_id.ToString()),
+                            Balance = string.IsNullOrEmpty(product.stock) ? 0 : decimal.Parse(product.stock),
+                            BinCode = "",
+                            LocationId = int.Parse(product.warehouse_id.ToString()),
+                            ModifiedDate = DateTime.Now,
+                        };
+                        await _context.ProductInventory.AddAsync(newProduct);
+                        await _context.SaveChangesAsync();
+                    }
+                }
+                else
+                {
+                    found.Balance = string.IsNullOrEmpty(product.stock) ? 0 : decimal.Parse(product.stock);
+                    await _context.SaveChangesAsync();
                 }
             }
             _db.Connection.Close();
