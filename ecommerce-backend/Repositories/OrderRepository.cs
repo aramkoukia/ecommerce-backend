@@ -25,7 +25,7 @@ namespace EcommerceApi.Repositories
             _config = config;
         }
 
-        public async Task<IEnumerable<OrderViewModel>> GetOrders(int? locationId)
+        public async Task<IEnumerable<OrderViewModel>> GetOrders(bool showAll, int? locationId)
         {
             using (IDbConnection conn = Connection)
             {
@@ -55,11 +55,12 @@ namespace EcommerceApi.Repositories
 	                                      FROM OrderPayment
 	                                      GROUP BY OrderId) AS OrderPayment
 	                                    ON OrderPayment.OrderId = [Order].OrderId
-                                    WHERE [Order].LocationId = @LocationId OR @LocationId IS NULL
+                                    WHERE (@ShowAll == false OR OrderDate >= Dateadd(month, -6, GetDate()))
+										  AND ([Order].LocationId = @LocationId OR @LocationId IS NULL)
                                     ORDER BY [Order].[OrderId] DESC
                                  ";
                 conn.Open();
-                return await conn.QueryAsync<OrderViewModel>(query, new { LocationId = locationId });
+                return await conn.QueryAsync<OrderViewModel>(query, new { LocationId = locationId, ShowAll = showAll });
             }
         }
 

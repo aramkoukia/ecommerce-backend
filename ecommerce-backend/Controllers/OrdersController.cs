@@ -43,16 +43,16 @@ namespace EcommerceApi.Controllers
 
         // GET: api/Orders
         [HttpGet]
-        public async Task<IEnumerable<OrderViewModel>> GetOrder()
+        public async Task<IEnumerable<OrderViewModel>> GetOrder(bool showAllOrders)
         {
-            return await _orderRepository.GetOrders(null);
+            return await _orderRepository.GetOrders(showAllOrders, null);
         }
 
         // GET: api/Orders/Location/{locationId}
         [HttpGet("location/{locationId}")]
-        public async Task<IEnumerable<OrderViewModel>> GetOrderByLocation([FromRoute] int locationId)
+        public async Task<IEnumerable<OrderViewModel>> GetOrderByLocation([FromRoute] int locationId, bool showAllOrders)
         {
-            return await _orderRepository.GetOrders(locationId);
+            return await _orderRepository.GetOrders(showAllOrders, locationId);
         }
 
         // GET: api/Orders/Customer/{customerId}

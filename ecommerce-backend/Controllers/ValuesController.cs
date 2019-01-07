@@ -5,6 +5,7 @@ using EcommerceApi.Models;
 using EcommerceApi.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using System.Linq;
+using Microsoft.AspNetCore.Identity;
 
 namespace EcommerceApi.Controllers
 {
@@ -13,71 +14,107 @@ namespace EcommerceApi.Controllers
     {
         private AppDb _db;
         private readonly EcommerceContext _context;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        public ValuesController(EcommerceContext context, AppDb db)
+        public ValuesController(EcommerceContext context, AppDb db, UserManager<ApplicationUser> userManager)
         {
             _context = context;
             _db = db;
+            _userManager = userManager;
         }
         // GET api/values
         [HttpGet]
         public async Task<IActionResult> GetAsync()
         {
             var errorList = new List<string>();
+
             try
             {
-                await SyncProducts();
+                await SyncUsers();
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
                 errorList.Add("products:" + ex.ToString());
             }
 
-            try
-            {
-                await SyncProductInventory();
-            }
-            catch (Exception ex)
-            {
-                errorList.Add("product inventory:" + ex.ToString());
-            }
+            //try
+            //{
+            //    await SyncProducts();
+            //}
+            //catch (Exception ex) {
+            //    errorList.Add("products:" + ex.ToString());
+            //}
 
-            try
-            {
-                await SyncCustomers();
-            }
-            catch (Exception ex)
-            {
-                errorList.Add("customers:" + ex.ToString());
-            }
+            //try
+            //{
+            //    await SyncProductInventory();
+            //}
+            //catch (Exception ex)
+            //{
+            //    errorList.Add("product inventory:" + ex.ToString());
+            //}
 
-            try
-            {
-                await SyncOrders();
-            }
-            catch (Exception ex)
-            {
-                errorList.Add("orders:" + ex.ToString());
-            }
+            //try
+            //{
+            //    await SyncCustomers();
+            //}
+            //catch (Exception ex)
+            //{
+            //    errorList.Add("customers:" + ex.ToString());
+            //}
 
-            try
-            {
-                await SyncOrderPayments();
-            }
-            catch (Exception ex)
-            {
-                errorList.Add("order payments:" + ex.ToString());
-            }
+            //try
+            //{
+            //    await SyncOrders();
+            //}
+            //catch (Exception ex)
+            //{
+            //    errorList.Add("orders:" + ex.ToString());
+            //}
 
-            try
-            {
-                await SyncOrderTaxes();
-            }
-            catch (Exception ex)
-            {
-                errorList.Add("order taxes:" + ex.ToString());
-            }
+            //try
+            //{
+            //    await SyncOrderPayments();
+            //}
+            //catch (Exception ex)
+            //{
+            //    errorList.Add("order payments:" + ex.ToString());
+            //}
+
+            //try
+            //{
+            //    await SyncOrderTaxes();
+            //}
+            //catch (Exception ex)
+            //{
+            //    errorList.Add("order taxes:" + ex.ToString());
+            //}
 
             return Ok(errorList);
+        }
+
+        private async Task SyncUsers()
+        {
+            await _db.Connection.OpenAsync();
+            var query = new UserQueries(_db);
+            var users = await query.GetAllUsers();
+            foreach (var user in users)
+            {
+                var givenName = string.IsNullOrWhiteSpace(user.first_name + " " + user.last_name) ? user.user_login : user.first_name + " " + user.last_name;
+                if (await _userManager.FindByEmailAsync(user.user_email) == null)
+                {
+                    var u = new ApplicationUser
+                    {
+                        UserName = user.user_login,
+                        Email = user.user_email,
+                        EmailConfirmed = true,
+                        GivenName = givenName
+                    };
+
+                    await _userManager.CreateAsync(u, "P2ssw0rd!");
+                }
+            }
+            _db.Connection.Close();
         }
 
         private async Task SyncCustomers()
