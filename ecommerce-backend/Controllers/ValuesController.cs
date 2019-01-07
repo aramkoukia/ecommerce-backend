@@ -23,11 +23,42 @@ namespace EcommerceApi.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAsync()
         {
-            // await SyncCustomers();
-            // await SyncOrders();
-            await SyncOrderPayments();
-            // await SyncProducts();
-            // await SyncProductInventory();
+            try
+            {
+                await SyncProducts();
+            }
+            catch (Exception) { }
+
+            try
+            {
+                await SyncProductInventory();
+            }
+            catch (Exception) { }
+
+            try
+            {
+                await SyncCustomers();
+            }
+            catch (Exception){}
+
+            try
+            {
+                await SyncOrders();
+            }
+            catch (Exception) { }
+
+            try
+            {
+                await SyncOrderPayments();
+            }
+            catch (Exception) { }
+
+            try
+            {
+                await SyncOrderTaxes();
+            }
+            catch (Exception) { }
+
             return Ok();
         }
 
@@ -158,6 +189,56 @@ namespace EcommerceApi.Controllers
                 else
                 {
                    // await _context.SaveChangesAsync();
+                }
+            }
+            _db.Connection.Close();
+        }
+
+        private async Task SyncOrderTaxes()
+        {
+            await _db.Connection.OpenAsync();
+            var query = new OrderQueries(_db);
+            var orders = await query.GetAllOrders();
+            foreach (var order in orders)
+            {
+                decimal taxGst = 0;
+                if (!string.IsNullOrEmpty(order._pos_sale_tax_GST))
+                {
+                    decimal.TryParse(order._pos_sale_tax_GST, out taxGst);
+                }
+                decimal taxPst = 0;
+                if (!string.IsNullOrEmpty(order._pos_sale_tax_PST))
+                {
+                    decimal.TryParse(order._pos_sale_tax_PST, out taxPst);
+                }
+
+                var found = await _context.OrderTax.FindAsync(int.Parse(order.id.ToString()));
+                if (found == null)
+                {
+                    if(taxPst > 0) { 
+                        var orderTaxGst  = new OrderTax
+                        {
+                            OrderId = int.Parse(order.id.ToString()),
+                            TaxAmount = taxGst,
+                            TaxId = 1
+                        };
+                        await _context.OrderTax.AddAsync(orderTaxGst);
+                    }
+                    if (taxPst > 0)
+                    {
+                        var orderTaxPst = new OrderTax
+                        {
+                            OrderId = int.Parse(order.id.ToString()),
+                            TaxAmount = taxPst,
+                            TaxId = 2
+                        };
+                        await _context.OrderTax.AddAsync(orderTaxPst);
+                    }
+                    await _context.SaveChangesAsync();
+                }
+                else
+                {
+                    // await _context.SaveChangesAsync();
                 }
             }
             _db.Connection.Close();
