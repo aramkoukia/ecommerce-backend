@@ -55,7 +55,7 @@ namespace EcommerceApi.Repositories
 	                                      FROM OrderPayment
 	                                      GROUP BY OrderId) AS OrderPayment
 	                                    ON OrderPayment.OrderId = [Order].OrderId
-                                    WHERE (@ShowAll == false OR OrderDate >= Dateadd(month, -6, GetDate()))
+                                    WHERE (@ShowAll != 0 OR OrderDate >= Dateadd(month, -6, GetDate()))
 										  AND ([Order].LocationId = @LocationId OR @LocationId IS NULL)
                                     ORDER BY [Order].[OrderId] DESC
                                  ";
