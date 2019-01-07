@@ -37,58 +37,59 @@ namespace EcommerceApi.Controllers
                 errorList.Add("products:" + ex.ToString());
             }
 
-            //try
-            //{
-            //    await SyncProducts();
-            //}
-            //catch (Exception ex) {
-            //    errorList.Add("products:" + ex.ToString());
-            //}
+            try
+            {
+                await SyncProducts();
+            }
+            catch (Exception ex)
+            {
+                errorList.Add("products:" + ex.ToString());
+            }
 
-            //try
-            //{
-            //    await SyncProductInventory();
-            //}
-            //catch (Exception ex)
-            //{
-            //    errorList.Add("product inventory:" + ex.ToString());
-            //}
+            try
+            {
+                await SyncProductInventory();
+            }
+            catch (Exception ex)
+            {
+                errorList.Add("product inventory:" + ex.ToString());
+            }
 
-            //try
-            //{
-            //    await SyncCustomers();
-            //}
-            //catch (Exception ex)
-            //{
-            //    errorList.Add("customers:" + ex.ToString());
-            //}
+            try
+            {
+                await SyncCustomers();
+            }
+            catch (Exception ex)
+            {
+                errorList.Add("customers:" + ex.ToString());
+            }
 
-            //try
-            //{
-            //    await SyncOrders();
-            //}
-            //catch (Exception ex)
-            //{
-            //    errorList.Add("orders:" + ex.ToString());
-            //}
+            try
+            {
+                await SyncOrders();
+            }
+            catch (Exception ex)
+            {
+                errorList.Add("orders:" + ex.ToString());
+            }
 
-            //try
-            //{
-            //    await SyncOrderPayments();
-            //}
-            //catch (Exception ex)
-            //{
-            //    errorList.Add("order payments:" + ex.ToString());
-            //}
+            try
+            {
+                await SyncOrderPayments();
+            }
+            catch (Exception ex)
+            {
+                errorList.Add("order payments:" + ex.ToString());
+            }
 
-            //try
-            //{
-            //    await SyncOrderTaxes();
-            //}
-            //catch (Exception ex)
-            //{
-            //    errorList.Add("order taxes:" + ex.ToString());
-            //}
+            try
+            {
+                await SyncOrderTaxes();
+            }
+            catch (Exception ex)
+            {
+                errorList.Add("order taxes:" + ex.ToString());
+            }
 
             return Ok(errorList);
         }
