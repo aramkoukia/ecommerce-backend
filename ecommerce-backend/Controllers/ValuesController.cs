@@ -96,7 +96,11 @@ namespace EcommerceApi.Controllers
 
         private async Task SyncUsers()
         {
-            await _db.Connection.OpenAsync();
+            if(_db.Connection.State == System.Data.ConnectionState.Closed)
+            { 
+                await _db.Connection.OpenAsync();
+            }
+
             var query = new UserQueries(_db);
             var users = await query.GetAllUsers();
             foreach (var user in users)
@@ -120,7 +124,11 @@ namespace EcommerceApi.Controllers
 
         private async Task SyncCustomers()
         {
-            await _db.Connection.OpenAsync();
+            if (_db.Connection.State == System.Data.ConnectionState.Closed)
+            {
+                await _db.Connection.OpenAsync();
+            }
+
             var query = new CustomerQueries(_db);
             var customers = await query.GetAllCustomers();
             foreach (var customer in customers)
@@ -183,7 +191,11 @@ namespace EcommerceApi.Controllers
 
         private async Task SyncOrders()
         {
-            await _db.Connection.OpenAsync();
+            if (_db.Connection.State == System.Data.ConnectionState.Closed)
+            {
+                await _db.Connection.OpenAsync();
+            }
+
             var query = new OrderQueries(_db);
             var orders = await query.GetAllOrders();
             foreach (var order in orders)
@@ -252,7 +264,11 @@ namespace EcommerceApi.Controllers
 
         private async Task SyncOrderTaxes()
         {
-            await _db.Connection.OpenAsync();
+            if (_db.Connection.State == System.Data.ConnectionState.Closed)
+            {
+                await _db.Connection.OpenAsync();
+            }
+
             var query = new OrderQueries(_db);
             var orders = await query.GetAllOrders();
             foreach (var order in orders)
@@ -302,7 +318,11 @@ namespace EcommerceApi.Controllers
 
         private async Task SyncOrderPayments()
         {
-            await _db.Connection.OpenAsync();
+            if (_db.Connection.State == System.Data.ConnectionState.Closed)
+            {
+                await _db.Connection.OpenAsync();
+            }
+
             var query = new OrderQueries(_db);
             var orders = await query.GetAllOrderPayments();
             foreach (var order in orders)
@@ -347,7 +367,11 @@ namespace EcommerceApi.Controllers
 
         private async Task SyncProducts()
         {
-            await _db.Connection.OpenAsync();
+            if (_db.Connection.State == System.Data.ConnectionState.Closed)
+            {
+                await _db.Connection.OpenAsync();
+            }
+
             var query = new ProductQueries(_db);
             var products = await query.GetAllProducts();
             foreach (var product in products)
@@ -408,7 +432,11 @@ namespace EcommerceApi.Controllers
 
         private async Task SyncProductInventory()
         {
-            await _db.Connection.OpenAsync();
+            if (_db.Connection.State == System.Data.ConnectionState.Closed)
+            {
+                await _db.Connection.OpenAsync();
+            }
+
             var query = new ProductQueries(_db);
             var products = await query.GetAllProductInventories();
             foreach (var product in products)
