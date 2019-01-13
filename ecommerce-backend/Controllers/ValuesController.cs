@@ -235,8 +235,7 @@ namespace EcommerceApi.Controllers
                         CreatedByUserId = order._pos_sale_user,
                         CreatedDate = order.post_date,
                         CustomerId = customerId,
-                        DiscountAmount = discount,
-                        DiscountPercentage = 0,
+                        TotalDiscount = discount,
                         LocationId = location,
                         Notes = order._pos_sale_note,
                         OrderDate = order.post_date,
@@ -245,7 +244,6 @@ namespace EcommerceApi.Controllers
                         PstNumber = "",
                         Status = order._pos_status,
                         SubTotal = subtotal, 
-                        TotalDiscount = discount,
                         OrderId = int.Parse(order.id.ToString()),
                         Total= total
                     };
