@@ -50,6 +50,10 @@ namespace EcommerceApi.Models
             }
 
             var email = "aramkoukia@gmail.com";
+            var aram = await _userManager.FindByEmailAsync(email);
+            await UserManager.AddToRoleAsync(aram, "Admin");
+
+            email = "aramkoukia@gmail.com";
             var username = "aramkoukia";
             if (await _userManager.FindByEmailAsync(email) == null)
             {
@@ -62,6 +66,7 @@ namespace EcommerceApi.Models
                 };
 
                 await _userManager.CreateAsync(user, "P2ssw0rd!");
+                await UserManager.AddToRoleAsync(user, "Admin");
             }
 
             email = "sales@gmail.com";

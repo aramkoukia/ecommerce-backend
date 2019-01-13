@@ -28,9 +28,6 @@ namespace EcommerceApi.Models
         [Range(1, 10000000, ErrorMessage = "Order total cannot be zero")]
         public decimal SubTotal { get; set; }
         public decimal TotalDiscount { get; set; }
-        public decimal? DiscountPercentage { get; set; }
-        public decimal? DiscountAmount { get; set; }
-        public int? DiscountId { get; set; }
         public string PstNumber { get; set; }
         public string Notes { get; set; }
         public string PoNumber { get; set; }

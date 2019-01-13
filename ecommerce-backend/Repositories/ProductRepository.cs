@@ -45,7 +45,7 @@ namespace EcommerceApi.Repositories
                                            ISNULL(Loc1.BinCode,'') AS VancouverBinCode,
                                            ISNULL(Loc2.BinCode,'') AS AbbotsfordBinCode
                                     FROM Product
-                                    INNER JOIN ProductType
+                                    LEFT JOIN ProductType
                                     ON Product.ProductTypeId = ProductType.ProductTypeId
                                     LEFT JOIN (
                                       SELECT * FROM ProductInventory
