@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using EcommerceApi.Models;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 
 namespace EcommerceApi.Controllers
 {
@@ -15,9 +16,13 @@ namespace EcommerceApi.Controllers
     public class LocationsController : Controller
     {
         private readonly EcommerceContext _context;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        public LocationsController(EcommerceContext context)
+        public LocationsController(
+            EcommerceContext context,
+            UserManager<ApplicationUser> userManager)
         {
+            _userManager = userManager;
             _context = context;
         }
 
@@ -26,6 +31,22 @@ namespace EcommerceApi.Controllers
         public IEnumerable<Location> GetLocation()
         {
             return _context.Location;
+        }
+
+        // GET: api/Locations/ForUser
+        [HttpGet("ForUser")]
+        public async Task<IEnumerable<Location>> GetUserLocations()
+        {
+            System.Security.Claims.ClaimsPrincipal currentUser = this.User;
+            var userId = _userManager.GetUserId(User);
+            var userLocations = await _context.UserLocation.Where(l => l.UserId == userId).ToListAsync();
+
+            if (userLocations == null || !userLocations.Any())
+            {
+                return new List<Location>();
+            }
+
+            return _context.Location.Where(loc => userLocations.Select(l => l.LocationId).Contains(loc.LocationId));
         }
 
         // GET: api/Locations/5
