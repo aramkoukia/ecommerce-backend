@@ -11,6 +11,7 @@
         public string DiscountType { get; set; }
         public decimal DiscountAmount { get; set; }
         public decimal DiscountPercent { get; set; }
+        public decimal TotalDiscount { get; set; }
         public decimal Total { get; set; }
         public Order Order { get; set; }
         public Product Product { get; set; }
