@@ -38,9 +38,8 @@ namespace EcommerceApi.Controllers
         public async Task<IEnumerable<Location>> GetUserLocations()
         {
             System.Security.Claims.ClaimsPrincipal currentUser = this.User;
-            var userId = _userManager.GetUserId(User);
-            var userLocations = await _context.UserLocation.Where(l => l.UserId == userId).ToListAsync();
-
+            var user = await _userManager.FindByEmailAsync(currentUser.Identity.Name);
+            var userLocations = await _context.UserLocation.Where(l => l.UserId == user.Id).ToListAsync();
             if (userLocations == null || !userLocations.Any())
             {
                 return new List<Location>();
