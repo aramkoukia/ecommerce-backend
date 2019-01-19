@@ -31,6 +31,13 @@ namespace EcommerceApi.Controllers
             return await _productRepository.GetProducts();
         }
 
+        // GET: api/Products/Available
+        [HttpGet("Available")]
+        public async Task<IEnumerable<ProductViewModel>> GetAvailableProduct()
+        {
+            return await _productRepository.GetAvailableProducts();
+        }
+
         // GET: api/Products/5
         [HttpGet("{id}")]
         public async Task<ProductViewModel> GetProduct([FromRoute] int id)

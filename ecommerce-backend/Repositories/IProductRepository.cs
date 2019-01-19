@@ -7,6 +7,7 @@ namespace EcommerceApi.Repositories
     public interface IProductRepository
     {
         Task<IEnumerable<ProductViewModel>> GetProducts();
+        Task<IEnumerable<ProductViewModel>> GetAvailableProducts();
         Task<ProductViewModel> GetProduct(int productId);
         Task<IEnumerable<ProductTransactionViewModel>> GetProductTransactions(int productId);
     }
