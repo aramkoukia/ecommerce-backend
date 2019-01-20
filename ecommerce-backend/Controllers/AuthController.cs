@@ -118,8 +118,8 @@ namespace EcommerceApi.Controllers
         {
             var user = await _userManager.FindByNameAsync(username);
             var token = await _userManager.GeneratePasswordResetTokenAsync(user);
-            var retult = await _userManager.ResetPasswordAsync(user, token, password);
-            return Ok(retult);
+            var result = await _userManager.ResetPasswordAsync(user, token, password);
+            return Ok(result);
         }
 
         //    [AllowAnonymous]
