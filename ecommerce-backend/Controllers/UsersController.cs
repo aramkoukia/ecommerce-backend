@@ -100,5 +100,14 @@ namespace EcommerceApi.Controllers
 
             return Ok(userInfo);
         }
+
+        [HttpPut("resetpassword")]
+        public async Task<IActionResult> ResetPassword(ResetPasswordViewModel passwordResetInfo)
+        {
+            var user = await _userManager.FindByNameAsync(passwordResetInfo.Email);
+            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+            var result = await _userManager.ResetPasswordAsync(user, token, passwordResetInfo.NewPassword);
+            return Ok(result);
+        }
     }
 }

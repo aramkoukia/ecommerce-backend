@@ -113,15 +113,6 @@ namespace EcommerceApi.Controllers
                 });
         }
 
-        [HttpPost("api/auth/resetpassword")]
-        public async Task<IActionResult> ResetPassword(string username, string password)
-        {
-            var user = await _userManager.FindByNameAsync(username);
-            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
-            var result = await _userManager.ResetPasswordAsync(user, token, password);
-            return Ok(result);
-        }
-
         //    [AllowAnonymous]
         //    [HttpPost("~/api/auth/register")]
         //    public async Task<IActionResult> Register(NewUser model)
