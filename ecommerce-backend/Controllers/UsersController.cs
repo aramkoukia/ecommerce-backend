@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using System.Linq;
 using System;
+using EcommerceApi.Services;
 
 namespace EcommerceApi.Controllers
 {
@@ -18,15 +19,18 @@ namespace EcommerceApi.Controllers
         private readonly EcommerceContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
+        private readonly IEmailSender _emailSender;
 
         public UsersController(
             EcommerceContext context,
             RoleManager<IdentityRole> roleManager,
+            IEmailSender emailSender,
             UserManager<ApplicationUser> userManager)
         {
             _context = context;
             _userManager = userManager;
             _roleManager = roleManager;
+            _emailSender = emailSender;
         }
 
         // GET: api/Users
@@ -104,9 +108,15 @@ namespace EcommerceApi.Controllers
         [HttpPut("resetpassword")]
         public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordViewModel passwordResetInfo)
         {
-            var user = await _userManager.FindByNameAsync(passwordResetInfo.Email);
+            var user = await _userManager.FindByEmailAsync(passwordResetInfo.Email);
             var token = await _userManager.GeneratePasswordResetTokenAsync(user);
             var result = await _userManager.ResetPasswordAsync(user, token, passwordResetInfo.NewPassword);
+            if (result.Succeeded)
+            {
+                await _emailSender.SendEmailAsync(
+                    passwordResetInfo.Email,
+                    "Passweord Reset", $"Your password is reset. <br> Your new password is: {passwordResetInfo.NewPassword}");
+            }
             return Ok(result);
         }
     }
