@@ -102,7 +102,7 @@ namespace EcommerceApi.Controllers
         }
 
         [HttpPut("resetpassword")]
-        public async Task<IActionResult> ResetPassword(ResetPasswordViewModel passwordResetInfo)
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordViewModel passwordResetInfo)
         {
             var user = await _userManager.FindByNameAsync(passwordResetInfo.Email);
             var token = await _userManager.GeneratePasswordResetTokenAsync(user);
