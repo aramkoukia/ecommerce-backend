@@ -25,7 +25,7 @@ namespace EcommerceApi.Repositories
             _config = config;
         }
 
-        public async Task<IEnumerable<CustomerViewModel>> GetCustomers()
+        public async Task<IEnumerable<CustomerViewModel>> GetCustomersWithBalance()
         {
             using (IDbConnection conn = Connection)
             {
@@ -49,6 +49,19 @@ namespace EcommerceApi.Repositories
                                 ) CustomerAccount
                                 ON CustomerAccount.CustomerId = Customer.CustomerId
                                  ";
+                conn.Open();
+                return await conn.QueryAsync<CustomerViewModel>(query);
+            }
+        }
+
+        public async Task<IEnumerable<CustomerViewModel>> GetCustomers()
+        {
+            using (IDbConnection conn = Connection)
+            {
+                string query = $@"
+                                SELECT Customer.*
+                                FROM Customer
+                                ";
                 conn.Open();
                 return await conn.QueryAsync<CustomerViewModel>(query);
             }

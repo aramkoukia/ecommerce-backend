@@ -32,6 +32,12 @@ namespace EcommerceApi.Controllers
             return await _customerRepository.GetCustomers();
         }
 
+        [HttpGet("WithBalance")]
+        public async Task<IEnumerable<CustomerViewModel>> GetCustomerWithBalance()
+        {
+            return await _customerRepository.GetCustomersWithBalance();
+        }
+
         // GET: api/Customers/5
         [HttpGet("{id}")]
         public async Task<IActionResult> GetCustomer([FromRoute] int id)
