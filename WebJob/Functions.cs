@@ -15,7 +15,7 @@ namespace WebJob
             this.logger = logger;
         }
 
-        public static void TimerJob([TimerTrigger("12:00:00")] TimerInfo timer)
+        public static void TimerJob([TimerTrigger("24:00:00")] TimerInfo timer)
         {
             Console.WriteLine("Timer job fired!");
 
