@@ -39,6 +39,7 @@ namespace EcommerceApi.Repositories
                                           ,[DeliveryDate]
                                           ,[CreatedByUserId]
                                     FROM [Purchase]
+                                    ORDER BY CreatedDate DESC
                                  ";
                 conn.Open();
                 return await conn.QueryAsync<PurchaseViewModel>(query);
