@@ -36,6 +36,7 @@ namespace EcommerceApi.Repositories
                                           ,[Total]
                                           ,[SubTotal]
                                           ,[Notes]
+                                          ,[Status]
                                           ,[DeliveryDate]
                                           ,[CreatedByUserId]
                                     FROM [Purchase]
