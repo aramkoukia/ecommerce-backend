@@ -6,6 +6,7 @@ using EcommerceApi.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using System.Linq;
 using Microsoft.AspNetCore.Identity;
+using EcommerceApi.Services;
 
 namespace EcommerceApi.Controllers
 {
@@ -15,12 +16,14 @@ namespace EcommerceApi.Controllers
         private AppDb _db;
         private readonly EcommerceContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IEmailSender _emailSender;
 
-        public SyncController(EcommerceContext context, AppDb db, UserManager<ApplicationUser> userManager)
+        public SyncController(EcommerceContext context, AppDb db, UserManager<ApplicationUser> userManager, IEmailSender emailSender)
         {
             _context = context;
             _db = db;
             _userManager = userManager;
+            _emailSender = emailSender;
         }
 
         [HttpGet("Products")]
@@ -97,6 +100,7 @@ namespace EcommerceApi.Controllers
                 errorList.Add("order taxes:" + ex.ToString());
             }
 
+            await _emailSender.SendEmailAsync("aramkoukia@gmail.com", "Sync Finished: Products", $"Sync Finished: Products. {string.Join(",", errorList)}");
             return Ok(errorList);
         }
 
@@ -146,6 +150,7 @@ namespace EcommerceApi.Controllers
                 errorList.Add("order taxes:" + ex.ToString());
             }
 
+            await _emailSender.SendEmailAsync("aramkoukia@gmail.com", "Sync Finished: Products Inventory", $"Sync Finished: Products Inventory. {string.Join(",", errorList)}");
             return Ok(errorList);
         }
 
@@ -223,6 +228,8 @@ namespace EcommerceApi.Controllers
             {
                 errorList.Add("order taxes:" + ex.ToString());
             }
+
+            await _emailSender.SendEmailAsync("aramkoukia@gmail.com", "Sync Finished: Customers", $"Sync Finished: Customers. {string.Join(",", errorList)}");
 
             return Ok(errorList);
         }

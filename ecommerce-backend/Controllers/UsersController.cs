@@ -115,7 +115,7 @@ namespace EcommerceApi.Controllers
             {
                 await _emailSender.SendEmailAsync(
                     passwordResetInfo.Email,
-                    "Passweord Reset", $"Your password is reset. <br> Your new password is: {passwordResetInfo.NewPassword}");
+                    "Password Reset", $"Your password is reset. <br> Your new password is: {passwordResetInfo.NewPassword}");
             }
             return Ok(result);
         }
