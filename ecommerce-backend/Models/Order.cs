@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace EcommerceApi.Models
 {
@@ -35,6 +36,9 @@ namespace EcommerceApi.Models
         public DateTime CreatedDate { get; set; }
         public string CreatedByUserId { get; set; }
         public int? OriginalOrderId { get; set; }
+
+        [NotMapped]
+        public int PaymentTypeId { get; set; }
 
         public ICollection<OrderDetail> OrderDetail { get; set; }
         public ICollection<OrderTax> OrderTax { get; set; }

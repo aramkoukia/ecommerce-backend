@@ -43,14 +43,19 @@ namespace EcommerceApi.Repositories
                                           ,[Status]
                                           ,[CreatedByUserId]
 	                                      ,ISNULL(OrderPayment.PaidAmount, 0) AS PaidAmount,
-	                                      Location.LocationName
+	                                      Location.LocationName,
+                                          PaymentTypeName
                                     FROM [Order]
                                     INNER JOIN Location
 	                                    ON Location.LocationId = [Order].LocationId
                                     LEFT JOIN 
-	                                    ( SELECT OrderId, SUM(PaymentAmount) AS PaidAmount 
-	                                      FROM OrderPayment
-	                                      GROUP BY OrderId) AS OrderPayment
+	                                    ( 
+                                            SELECT OrderId, SUM(PaymentAmount) AS PaidAmount , PaymentTypeName
+                                            FROM OrderPayment
+                                            INNER JOIN PaymentType
+	                                            ON PaymentType.PaymentTypeId = OrderPayment.PaymentTypeId 
+                                            GROUP BY OrderId, PaymentTypeName
+                                        ) AS OrderPayment
 	                                    ON OrderPayment.OrderId = [Order].OrderId
                                     WHERE (@ShowAll != 0 OR OrderDate >= Dateadd(month, -6, GetDate()))
 										  AND ([Order].LocationId = @LocationId OR @LocationId IS NULL)
@@ -79,14 +84,19 @@ namespace EcommerceApi.Repositories
                                           ,[Status]
                                           ,[CreatedByUserId]
 	                                      ,ISNULL(OrderPayment.PaidAmount, 0) AS PaidAmount,
-	                                      Location.LocationName
+	                                      Location.LocationName,
+                                          PaymentTypeName
                                     FROM [Order]
                                     INNER JOIN Location
 	                                    ON Location.LocationId = [Order].LocationId
                                     LEFT JOIN 
-	                                    ( SELECT OrderId, SUM(PaymentAmount) AS PaidAmount 
-	                                      FROM OrderPayment
-	                                      GROUP BY OrderId) AS OrderPayment
+	                                    ( 
+                                            SELECT OrderId, SUM(PaymentAmount) AS PaidAmount , PaymentTypeName
+                                            FROM OrderPayment
+                                            INNER JOIN PaymentType
+	                                            ON PaymentType.PaymentTypeId = OrderPayment.PaymentTypeId 
+                                            GROUP BY OrderId, PaymentTypeName
+                                        ) AS OrderPayment
 	                                    ON OrderPayment.OrderId = [Order].OrderId
                                     WHERE [Order].CustomerId = @CustomerId
                                     ORDER BY [Order].[OrderId] DESC

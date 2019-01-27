@@ -20,5 +20,6 @@ namespace EcommerceApi.ViewModel
         public string CreatedByUserId { get; set; }
         public decimal PaidAmount { get; set; }
         public string LocationName { get; set; }
+        public string PaymentTypeName { get; set; }
     }
 }

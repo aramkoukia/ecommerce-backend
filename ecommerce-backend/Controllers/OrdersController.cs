@@ -204,7 +204,7 @@ namespace EcommerceApi.Controllers
             order.Customer = null;
             order.Location = null;
             if (order.Status.Equals(OrderStatus.Paid.ToString(), StringComparison.InvariantCultureIgnoreCase) ||
-               ( order.Status.Equals(OrderStatus.Return.ToString(), StringComparison.InvariantCultureIgnoreCase) && await OriginalOrderWasPaid(order.OriginalOrderId)))
+               (order.Status.Equals(OrderStatus.Return.ToString(), StringComparison.InvariantCultureIgnoreCase) && await OriginalOrderWasPaid(order.OriginalOrderId)))
             {
                 order.OrderPayment.Add(
                     new OrderPayment
@@ -213,7 +213,7 @@ namespace EcommerceApi.Controllers
                         CreatedDate = order.CreatedDate,
                         PaymentAmount = order.Total,
                         PaymentDate = order.CreatedDate,
-                        PaymentTypeId = 1 // default credit/debit for now
+                        PaymentTypeId = order.PaymentTypeId
                     }
                 );
             }
