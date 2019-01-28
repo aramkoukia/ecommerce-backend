@@ -92,6 +92,8 @@ namespace EcommerceApi.Controllers
                     }
                     else
                     {
+                        found.ModifiedDate = DateTime.Now;
+                        found.SalesPrice = price;
                         // await _context.SaveChangesAsync();
                     }
                 }
