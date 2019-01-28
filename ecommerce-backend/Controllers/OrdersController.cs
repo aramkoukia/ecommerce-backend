@@ -115,7 +115,7 @@ namespace EcommerceApi.Controllers
                         CreatedDate = order.CreatedDate,
                         PaymentAmount = order.Total,
                         PaymentDate = order.CreatedDate,
-                        PaymentTypeId = 1 // default credit/debit for now
+                        PaymentTypeId = updateOrderStatus.PaymentTypeId
                     }
                 );
             }
