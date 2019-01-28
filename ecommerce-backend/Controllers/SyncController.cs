@@ -30,6 +30,8 @@ namespace EcommerceApi.Controllers
         public async Task<IActionResult> SyncProducts()
         {
             var errorList = new List<string>();
+            var productsCreated = 0;
+            var productsUpdated = 0;
             try
             {
                 if (_db.Connection.State == System.Data.ConnectionState.Closed)
@@ -55,6 +57,7 @@ namespace EcommerceApi.Controllers
                     var found = await _context.Product.FindAsync(int.Parse(product.id.ToString()));
                     if (found == null)
                     {
+                        productsCreated++;
                         var newProduct = new Product
                         {
                             AllowOutOfStockPurchase = true,
@@ -92,6 +95,7 @@ namespace EcommerceApi.Controllers
                     }
                     else
                     {
+                        productsUpdated++;
                         found.ModifiedDate = DateTime.Now;
                         found.SalesPrice = price;
                         await _context.SaveChangesAsync();
@@ -104,7 +108,7 @@ namespace EcommerceApi.Controllers
                 errorList.Add("order taxes:" + ex.ToString());
             }
 
-            await _emailSender.SendEmailAsync("aramkoukia@gmail.com", "Sync Finished: Products", $"Sync Finished: Products. {string.Join(",", errorList)}");
+            await _emailSender.SendEmailAsync("aramkoukia@gmail.com", "Sync Finished: Products", $"Sync Finished: Products. \n Products Created: {productsCreated}. \n Products Updated: {productsUpdated}. \n Errors: {string.Join(",", errorList)}");
             return Ok(errorList);
         }
 
@@ -162,6 +166,8 @@ namespace EcommerceApi.Controllers
         public async Task<IActionResult> SyncCustomers()
         {
             var errorList = new List<string>();
+            var customersCreated = 0;
+            var customersUpdated = 0;
             try
             {
                 if (_db.Connection.State == System.Data.ConnectionState.Closed)
@@ -179,6 +185,7 @@ namespace EcommerceApi.Controllers
                     var found = await _context.Customer.FindAsync(int.Parse(customer.id.ToString()));
                     if (found == null)
                     {
+                        customersCreated++;
                         var newCustomer = new Customer
                         {
                             Address = customer._pos_customer_address,
@@ -205,6 +212,7 @@ namespace EcommerceApi.Controllers
                     }
                     else
                     {
+                        customersUpdated++;
                         found.Address = customer._pos_customer_address;
                         found.City = customer._pos_customer_city;
                         found.CompanyName = customer._pos_customer_company_name;
@@ -233,7 +241,7 @@ namespace EcommerceApi.Controllers
                 errorList.Add("order taxes:" + ex.ToString());
             }
 
-            await _emailSender.SendEmailAsync("aramkoukia@gmail.com", "Sync Finished: Customers", $"Sync Finished: Customers. {string.Join(",", errorList)}");
+            await _emailSender.SendEmailAsync("aramkoukia@gmail.com", "Sync Finished: Customers", $"Sync Finished: Customers.  \n Customers Created: {customersCreated}. \n Customers Updated: {customersUpdated}. \n Errors: {string.Join(",", errorList)}");
 
             return Ok(errorList);
         }
