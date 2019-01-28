@@ -104,7 +104,7 @@ namespace EcommerceApi.Controllers
             }
 
             var order = await _context.Order.SingleOrDefaultAsync(m => m.OrderId == id);
-            if (order.Status.Equals(OrderStatus.Paid.ToString(), StringComparison.InvariantCultureIgnoreCase))
+            if (updateOrderStatus.OrderStatus.Equals(OrderStatus.Paid.ToString(), StringComparison.InvariantCultureIgnoreCase))
             {
                 System.Security.Claims.ClaimsPrincipal currentUser = this.User;
                 var userId = _userManager.GetUserId(User);
