@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.Threading.Tasks;
@@ -170,6 +171,65 @@ Order By Year, Label
                                  ";
                 conn.Open();
                 return await conn.QueryAsync<ChartRecordsViewModel>(query);
+            }
+        }
+
+        public async Task<IEnumerable<ProductTypeSalesReportViewModel>> GetProductTypeSalesReport(DateTime fromDate, DateTime toDate)
+        {
+            using (IDbConnection conn = Connection)
+            {
+                string query = $@"
+SELECT ProductTypeName, SUM(ISNULL(VanTotalSales,0)) AS VanTotalSales, SUM(ISNULL(AbbTotalSales,0)) AS AbbTotalSales 
+FROM Product
+INNER JOIN ProductType
+	ON ProductType.ProductTypeId = Product.ProductTypeId
+LEFT JOIN (SELECT SUM(OrderDetail.Total) AS VanTotalSales, ProductId 
+		   FROM [Order]
+		   INNER JOIN OrderDetail
+			 ON OrderDetail.OrderId = [Order].OrderId
+		   WHERE [Order].LocationId = 1
+		   GROUP BY ProductId ) VanSales
+	ON Product.ProductId = VanSales.ProductId
+LEFT JOIN (SELECT SUM(OrderDetail.Total) AS AbbTotalSales, ProductId 
+		   FROM [Order]
+		   INNER JOIN OrderDetail
+			 ON OrderDetail.OrderId = [Order].OrderId
+		   WHERE [Order].LocationId = 2
+		   GROUP BY ProductId ) AbbSales
+ON Product.ProductId = AbbSales.ProductId
+GROUP BY ProductTypeName
+                                 ";
+                conn.Open();
+                return await conn.QueryAsync<ProductTypeSalesReportViewModel>(query);
+            }
+        }
+
+        public async Task<IEnumerable<ProductSalesReportViewModel>> GetProductSalesReport(DateTime fromDate, DateTime toDate)
+        {
+            using (IDbConnection conn = Connection)
+            {
+                string query = $@"
+SELECT ProductName, ProductCode, ProductTypeName, VanTotalSales, AbbTotalSales 
+FROM Product
+INNER JOIN ProductType
+	ON ProductType.ProductTypeId = Product.ProductTypeId
+LEFT JOIN (SELECT SUM(OrderDetail.Total) AS VanTotalSales, ProductId 
+		   FROM [Order]
+		   INNER JOIN OrderDetail
+			 ON OrderDetail.OrderId = [Order].OrderId
+		   WHERE [Order].LocationId = 1
+		   GROUP BY ProductId ) VanSales
+	ON Product.ProductId = VanSales.ProductId
+LEFT JOIN (SELECT SUM(OrderDetail.Total) AS AbbTotalSales, ProductId 
+		   FROM [Order]
+		   INNER JOIN OrderDetail
+			 ON OrderDetail.OrderId = [Order].OrderId
+		   WHERE [Order].LocationId = 2
+		   GROUP BY ProductId ) AbbSales
+ON Product.ProductId = AbbSales.ProductId
+                                 ";
+                conn.Open();
+                return await conn.QueryAsync<ProductSalesReportViewModel>(query);
             }
         }
     }

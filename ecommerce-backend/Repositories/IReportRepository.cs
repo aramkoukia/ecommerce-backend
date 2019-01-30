@@ -1,4 +1,5 @@
 ﻿using EcommerceApi.ViewModel;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -10,6 +11,7 @@ namespace EcommerceApi.Repositories
         Task<IEnumerable<ChartRecordsViewModel>> MonthlySales();
         Task<IEnumerable<ChartRecordsViewModel>> MonthlyPurchases();
         Task<IEnumerable<ChartRecordsViewModel>> DailySales();
-
+        Task<IEnumerable<ProductTypeSalesReportViewModel>> GetProductTypeSalesReport(DateTime fromDate, DateTime toDate);
+        Task<IEnumerable<ProductSalesReportViewModel>> GetProductSalesReport(DateTime fromDate, DateTime toDate);
     }
 }

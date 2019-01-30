@@ -5,6 +5,7 @@ using EcommerceApi.Models;
 using Microsoft.AspNetCore.Authorization;
 using EcommerceApi.ViewModel;
 using EcommerceApi.Repositories;
+using System;
 
 namespace EcommerceApi.Controllers
 {
@@ -50,5 +51,16 @@ namespace EcommerceApi.Controllers
             return await _reportRepository.DailySales();
         }
 
+        [HttpGet("ProductSalesReport")]
+        public async Task<IEnumerable<ProductSalesReportViewModel>> GetProductSalesReport(DateTime fromDate, DateTime toDate)
+        {
+            return await _reportRepository.GetProductSalesReport(fromDate, toDate);
+        }
+
+        [HttpGet("ProductTypeSalesReport")]
+        public async Task<IEnumerable<ProductTypeSalesReportViewModel>> GetProductTypeSalesReport(DateTime fromDate, DateTime toDate)
+        {
+            return await _reportRepository.GetProductTypeSalesReport(fromDate, toDate);
+        }
     }
 }
