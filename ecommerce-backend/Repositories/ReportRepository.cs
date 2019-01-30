@@ -188,6 +188,7 @@ LEFT JOIN (SELECT SUM(OrderDetail.Total) AS VanTotalSales, ProductId
 		   INNER JOIN OrderDetail
 			 ON OrderDetail.OrderId = [Order].OrderId
 		   WHERE [Order].LocationId = 1
+                 AND OrderDate BETWEEN @fromDate AND @toDate
 		   GROUP BY ProductId ) VanSales
 	ON Product.ProductId = VanSales.ProductId
 LEFT JOIN (SELECT SUM(OrderDetail.Total) AS AbbTotalSales, ProductId 
@@ -195,12 +196,13 @@ LEFT JOIN (SELECT SUM(OrderDetail.Total) AS AbbTotalSales, ProductId
 		   INNER JOIN OrderDetail
 			 ON OrderDetail.OrderId = [Order].OrderId
 		   WHERE [Order].LocationId = 2
+                  AND OrderDate BETWEEN @fromDate AND @toDate
 		   GROUP BY ProductId ) AbbSales
 ON Product.ProductId = AbbSales.ProductId
 GROUP BY ProductTypeName
                                  ";
                 conn.Open();
-                return await conn.QueryAsync<ProductTypeSalesReportViewModel>(query);
+                return await conn.QueryAsync<ProductTypeSalesReportViewModel>(query, new { fromDate, toDate });
             }
         }
 
@@ -218,6 +220,7 @@ LEFT JOIN (SELECT SUM(OrderDetail.Total) AS VanTotalSales, ProductId
 		   INNER JOIN OrderDetail
 			 ON OrderDetail.OrderId = [Order].OrderId
 		   WHERE [Order].LocationId = 1
+                 AND OrderDate BETWEEN @fromDate AND @toDate
 		   GROUP BY ProductId ) VanSales
 	ON Product.ProductId = VanSales.ProductId
 LEFT JOIN (SELECT SUM(OrderDetail.Total) AS AbbTotalSales, ProductId 
@@ -225,11 +228,12 @@ LEFT JOIN (SELECT SUM(OrderDetail.Total) AS AbbTotalSales, ProductId
 		   INNER JOIN OrderDetail
 			 ON OrderDetail.OrderId = [Order].OrderId
 		   WHERE [Order].LocationId = 2
+                 AND OrderDate BETWEEN @fromDate AND @toDate
 		   GROUP BY ProductId ) AbbSales
 ON Product.ProductId = AbbSales.ProductId
                                  ";
                 conn.Open();
-                return await conn.QueryAsync<ProductSalesReportViewModel>(query);
+                return await conn.QueryAsync<ProductSalesReportViewModel>(query, new { fromDate, toDate });
             }
         }
     }
