@@ -51,13 +51,13 @@ namespace EcommerceApi.Controllers
             return await _reportRepository.DailySales();
         }
 
-        [HttpGet("ProductSalesReport")]
+        [HttpGet("ProductSales")]
         public async Task<IEnumerable<ProductSalesReportViewModel>> GetProductSalesReport(DateTime fromDate, DateTime toDate)
         {
             return await _reportRepository.GetProductSalesReport(fromDate, toDate);
         }
 
-        [HttpGet("ProductTypeSalesReport")]
+        [HttpGet("ProductTypeSales")]
         public async Task<IEnumerable<ProductTypeSalesReportViewModel>> GetProductTypeSalesReport(DateTime fromDate, DateTime toDate)
         {
             return await _reportRepository.GetProductTypeSalesReport(fromDate, toDate);
