@@ -51,31 +51,51 @@ namespace EcommerceApi.Controllers
         [HttpGet("ProductSales")]
         public async Task<IEnumerable<ProductSalesReportViewModel>> GetProductSalesReport(DateTime fromDate, DateTime toDate)
         {
+            if (fromDate == DateTime.MinValue)
+                fromDate = DateTime.Now;
+            if (toDate == DateTime.MinValue)
+                toDate = DateTime.Now;
             return await _reportRepository.GetProductSalesReport(fromDate, toDate);
         }
 
         [HttpGet("ProductTypeSales")]
         public async Task<IEnumerable<ProductTypeSalesReportViewModel>> GetProductTypeSalesReport(DateTime fromDate, DateTime toDate)
         {
+            if (fromDate == DateTime.MinValue)
+                fromDate = DateTime.Now;
+            if (toDate == DateTime.MinValue)
+                toDate = DateTime.Now;
             return await _reportRepository.GetProductTypeSalesReport(fromDate, toDate);
         }
 
         [HttpGet("Sales")]
-        public async Task<IEnumerable<ProductTypeSalesReportViewModel>> GetSalesReport(DateTime fromDate, DateTime toDate)
+        public async Task<IEnumerable<SalesReportViewModel>> GetSalesReport(DateTime fromDate, DateTime toDate)
         {
-            return await _reportRepository.GetProductTypeSalesReport(fromDate, toDate);
+            if (fromDate == DateTime.MinValue)
+                fromDate = DateTime.Now;
+            if (toDate == DateTime.MinValue)
+                toDate = DateTime.Now;
+            return await _reportRepository.GetSalesReport(fromDate, toDate);
         }
 
         [HttpGet("Payments")]
-        public async Task<IEnumerable<ProductTypeSalesReportViewModel>> GetPaymentsReport(DateTime fromDate, DateTime toDate)
+        public async Task<IEnumerable<PaymentsReportViewModel>> GetPaymentsReport(DateTime fromDate, DateTime toDate)
         {
-            return await _reportRepository.GetProductTypeSalesReport(fromDate, toDate);
+            if (fromDate == DateTime.MinValue)
+                fromDate = DateTime.Now;
+            if (toDate == DateTime.MinValue)
+                toDate = DateTime.Now;
+            return await _reportRepository.GetPaymentsReport(fromDate, toDate);
         }
 
         [HttpGet("Purchases")]
-        public async Task<IEnumerable<ProductTypeSalesReportViewModel>> GetPurchasesReport(DateTime fromDate, DateTime toDate)
+        public async Task<IEnumerable<PurchasesReportViewModel>> GetPurchasesReport(DateTime fromDate, DateTime toDate)
         {
-            return await _reportRepository.GetProductTypeSalesReport(fromDate, toDate);
+            if (fromDate == DateTime.MinValue)
+                fromDate = DateTime.Now;
+            if (toDate == DateTime.MinValue)
+                toDate = DateTime.Now;
+            return await _reportRepository.GetPurchasesReport(fromDate, toDate);
         }
 
         [AllowAnonymous]

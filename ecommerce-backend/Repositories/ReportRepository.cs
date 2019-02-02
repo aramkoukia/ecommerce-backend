@@ -263,9 +263,9 @@ INNER JOIN [Order]
 	ON [Order].OrderId = OrderPayment.OrderId
 LEFT JOIN Users
 	ON Users.Id = OrderPayment.CreatedByUserId
-WHERE OrderDate BETWEEN @fromDate AND @toDate
 LEFT JOIN Customer
 	ON Customer.CustomerId = [Order].CustomerId
+WHERE OrderDate BETWEEN @fromDate AND @toDate
 GROUP BY PaymentTypeName, Users.GivenName, [Order].OrderId, Customer.CompanyName, [Order].Status
                                  ";
                 conn.Open();
