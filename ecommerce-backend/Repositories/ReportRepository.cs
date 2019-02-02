@@ -244,6 +244,55 @@ WHERE ISNULL(VanTotalSales,0) <> 0 OR ISNULL(AbbTotalSales, 0) <> 0
             using (IDbConnection conn = Connection)
             {
                 string query = $@"
+
+SELECT SUM(SubTotal) AS SubTotal,
+       SUM(Total) AS Total,
+	   SUM(TotalDiscount) AS Discount,
+	   Count([Order].OrderId) AS Transactions,
+	   SUM(Pst) AS Pst,
+	   SUM(Gst) AS Gst,
+	   SUM(OtherTax) AS OtherTax,
+	   COALESCE (Status, 'All Orders') AS Status,
+	   COALESCE (Location.LocationName, 'All Locations') AS LocationName
+FROM [Order]
+INNER JOIN Location
+	ON Location.LocationId = [Order].LocationId
+LEFT JOIN (
+	SELECT SUM(TaxAmount) AS GST, LocationId 
+	FROM [Order]
+	INNER JOIN OrderTax
+		ON OrderTax.OrderId = [Order].OrderId
+	INNER JOIN Tax
+		ON Tax.TaxId = OrderTax.TaxId
+	WHERE TaxName = 'GST'
+	GROUP BY [Order].LocationId
+) GST
+	ON [Order].LocationId = GST.LocationId
+LEFT JOIN (
+	SELECT SUM(TaxAmount) AS Pst, LocationId 
+	FROM [Order]
+	INNER JOIN OrderTax
+		ON OrderTax.OrderId = [Order].OrderId
+	INNER JOIN Tax
+		ON Tax.TaxId = OrderTax.TaxId
+	WHERE TaxName = 'PST'
+	GROUP BY [Order].LocationId
+) PST
+	ON [Order].LocationId = PST.LocationId
+LEFT JOIN (
+	SELECT SUM(TaxAmount) AS OtherTax, LocationId 
+	FROM [Order]
+	INNER JOIN OrderTax
+		ON OrderTax.OrderId = [Order].OrderId
+	INNER JOIN Tax
+		ON Tax.TaxId = OrderTax.TaxId
+	WHERE TaxName NOT IN ('PST', 'GST')
+	GROUP BY [Order].LocationId
+) OtherTax
+ON [Order].LocationId = OtherTax.LocationId
+WHERE Status IN ('Return', 'Paid', 'Account')
+	  AND OrderDate BETWEEN @FromDate AND @ToDate
+GROUP BY CUBE (Status, LocationName)
                                  ";
                 conn.Open();
                 return await conn.QueryAsync<SalesReportViewModel>(query, new { fromDate, toDate });
