@@ -236,5 +236,50 @@ ON Product.ProductId = AbbSales.ProductId
                 return await conn.QueryAsync<ProductSalesReportViewModel>(query, new { fromDate, toDate });
             }
         }
+
+        public async Task<IEnumerable<SalesReportViewModel>> GetSalesReport(DateTime fromDate, DateTime toDate)
+        {
+            using (IDbConnection conn = Connection)
+            {
+                string query = $@"
+                                 ";
+                conn.Open();
+                return await conn.QueryAsync<SalesReportViewModel>(query, new { fromDate, toDate });
+            }
+        }
+
+        public async Task<IEnumerable<PaymentsReportViewModel>> GetPaymentsReport(DateTime fromDate, DateTime toDate)
+        {
+            using (IDbConnection conn = Connection)
+            {
+                string query = $@"
+SELECT Users.GivenName, PaymentTypeName, [Order].OrderId, Customer.CompanyName, [Order].Status, SUM(PaymentAmount) AS PaymentAmount
+FROM OrderPayment
+INNER JOIN PaymentType
+	ON PaymentType.PaymentTypeId = OrderPayment.PaymentTypeId 
+INNER JOIN [Order]
+	ON [Order].OrderId = OrderPayment.OrderId
+LEFT JOIN Users
+	ON Users.Id = OrderPayment.CreatedByUserId
+WHERE OrderDate BETWEEN @fromDate AND @toDate
+LEFT JOIN Customer
+	ON Customer.CustomerId = [Order].CustomerId
+GROUP BY PaymentTypeName, Users.GivenName, [Order].OrderId, Customer.CompanyName, [Order].Status
+                                 ";
+                conn.Open();
+                return await conn.QueryAsync<PaymentsReportViewModel>(query, new { fromDate, toDate });
+            }
+        }
+
+        public async Task<IEnumerable<PurchasesReportViewModel>> GetPurchasesReport(DateTime fromDate, DateTime toDate)
+        {
+            using (IDbConnection conn = Connection)
+            {
+                string query = $@"
+                                 ";
+                conn.Open();
+                return await conn.QueryAsync<PurchasesReportViewModel>(query, new { fromDate, toDate });
+            }
+        }
     }
 }

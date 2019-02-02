@@ -62,5 +62,25 @@ namespace EcommerceApi.Controllers
         {
             return await _reportRepository.GetProductTypeSalesReport(fromDate, toDate);
         }
+
+        [HttpGet("Sales")]
+        public async Task<IEnumerable<ProductTypeSalesReportViewModel>> GetSalesReport(DateTime fromDate, DateTime toDate)
+        {
+            return await _reportRepository.GetProductTypeSalesReport(fromDate, toDate);
+        }
+
+        [HttpGet("Payments")]
+        public async Task<IEnumerable<ProductTypeSalesReportViewModel>> GetPaymentsReport(DateTime fromDate, DateTime toDate)
+        {
+            return await _reportRepository.GetProductTypeSalesReport(fromDate, toDate);
+        }
+
+        [HttpGet("Purchases")]
+        public async Task<IEnumerable<ProductTypeSalesReportViewModel>> GetPurchasesReport(DateTime fromDate, DateTime toDate)
+        {
+            return await _reportRepository.GetProductTypeSalesReport(fromDate, toDate);
+        }
+
+
     }
 }
