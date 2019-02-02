@@ -199,6 +199,7 @@ LEFT JOIN (SELECT SUM(OrderDetail.Total) AS AbbTotalSales, ProductId
                   AND OrderDate BETWEEN @fromDate AND @toDate
 		   GROUP BY ProductId ) AbbSales
 ON Product.ProductId = AbbSales.ProductId
+WHERE ISNULL(VanTotalSales,0) <> 0 OR ISNULL(AbbTotalSales, 0) <> 0
 GROUP BY ProductTypeName
                                  ";
                 conn.Open();
@@ -211,7 +212,7 @@ GROUP BY ProductTypeName
             using (IDbConnection conn = Connection)
             {
                 string query = $@"
-SELECT ProductName, ProductCode, ProductTypeName, VanTotalSales, AbbTotalSales 
+SELECT ProductName, ProductCode, ProductTypeName, ISNULL(VanTotalSales,0) AS VanTotalSales, ISNULL(AbbTotalSales, 0) AS AbbTotalSales
 FROM Product
 INNER JOIN ProductType
 	ON ProductType.ProductTypeId = Product.ProductTypeId
@@ -231,6 +232,7 @@ LEFT JOIN (SELECT SUM(OrderDetail.Total) AS AbbTotalSales, ProductId
                  AND OrderDate BETWEEN @fromDate AND @toDate
 		   GROUP BY ProductId ) AbbSales
 ON Product.ProductId = AbbSales.ProductId
+WHERE ISNULL(VanTotalSales,0) <> 0 OR ISNULL(AbbTotalSales, 0) <> 0
                                  ";
                 conn.Open();
                 return await conn.QueryAsync<ProductSalesReportViewModel>(query, new { fromDate, toDate });
