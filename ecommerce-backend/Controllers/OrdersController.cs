@@ -371,7 +371,7 @@ www.lightsandparts.com | essi@lightsandparts.com
         // GET: api/Orders
         [HttpGet("{orderId}/print")]
         [AllowAnonymous]
-        public async Task<IActionResult> PrintOrder([FromRoute] int orderId)
+        public async Task<FileResult> PrintOrder([FromRoute] int orderId)
         {
             var order = await _context.Order.AsNoTracking()
                 .Include(o => o.OrderDetail)
@@ -410,8 +410,12 @@ www.lightsandparts.com | essi@lightsandparts.com
 
             // _converter.Convert(pdf);
             var file = _converter.Convert(pdf);
+            FileContentResult result = new FileContentResult(file, "application/pdf")
+            {
+                FileDownloadName = $"Order-{order.OrderId}.pdf"
+            };
 
-            return File(file, "application/pdf", $"Order-{order.OrderId}.pdf");
+            return result;
         }
 
         // DELETE: api/Orders/5

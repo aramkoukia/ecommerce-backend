@@ -14,6 +14,7 @@ namespace EcommerceApi.Models
         public int? PurchaseId { get; set; }
         public string Supplier { get; set; }
         public string Status { get; set; }
+        public string PoNumber { get; set; }
         public DateTime PurchaseDate { get; set; }
         public DateTime DeliveryDate { get; set; }
 
