@@ -37,10 +37,10 @@ namespace EcommerceApi.Controllers
         [HttpGet]
         public async Task<IEnumerable<ApplicationUser>> Get()
         {
-            var users  = await _userManager.Users.ToListAsync();
+            var users = await _userManager.Users.ToListAsync();
             foreach (var user in users)
             {
-                var locations = _context.UserLocation.AsNoTracking().Include(l => l.Location).Where(u => u.UserId == user.Id).Select(l=> l.Location.LocationName);
+                var locations = _context.UserLocation.AsNoTracking().Include(l => l.Location).Where(u => u.UserId == user.Id).Select(l => l.Location.LocationName);
                 user.Roles = string.Join(", ", await _userManager.GetRolesAsync(user));
                 user.Locations = string.Join(", ", locations);
             }
@@ -48,7 +48,7 @@ namespace EcommerceApi.Controllers
         }
 
         // GET: api/Users/{authCode}
-        [HttpGet]
+        [HttpGet("{authCode}")]
         public async Task<IActionResult> Get(string authCode)
         {
             var user = await _userManager.Users.FirstOrDefaultAsync(u => u.AuthCode.Equals(authCode, StringComparison.InvariantCultureIgnoreCase));

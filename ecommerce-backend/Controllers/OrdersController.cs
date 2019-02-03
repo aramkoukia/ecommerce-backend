@@ -196,9 +196,8 @@ namespace EcommerceApi.Controllers
                 return BadRequest(ModelState);
             }
 
-            System.Security.Claims.ClaimsPrincipal currentUser = this.User;
-            var userId = _userManager.GetUserId(User);
-            order.CreatedByUserId = userId;
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.AuthCode.Equals(order.AuthCode, StringComparison.InvariantCultureIgnoreCase));
+            order.CreatedByUserId = user.Id;
             order.CreatedDate = DateTime.UtcNow;
             order.OrderDate = DateTime.UtcNow;
             order.Customer = null;
@@ -209,7 +208,7 @@ namespace EcommerceApi.Controllers
                 order.OrderPayment.Add(
                     new OrderPayment
                     {
-                        CreatedByUserId = userId,
+                        CreatedByUserId = user.Id,
                         CreatedDate = order.CreatedDate,
                         PaymentAmount = order.Total,
                         PaymentDate = order.CreatedDate,
