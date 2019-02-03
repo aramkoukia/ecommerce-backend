@@ -101,6 +101,10 @@ namespace EcommerceApi.Controllers
                 return BadRequest(ModelState);
             }
 
+            // temp, until we turn of the customer sync, then we can use identity
+            customer.CustomerId = _context.Customer.Max(m => m.CustomerId) + 1;
+            customer.CustomerCode = customer.CustomerId.ToString();
+
             _context.Customer.Add(customer);
             await _context.SaveChangesAsync();
 
