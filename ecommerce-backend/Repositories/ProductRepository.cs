@@ -144,37 +144,45 @@ namespace EcommerceApi.Repositories
             {
                 string query = $@"
 SELECT * FROM (
-SELECT OrderDate AS Date, 'Order' AS TransactionType, (-1 * OrderDetail.Amount) AS Amount, Location.LocationName, CreatedByUserId As UserName FROM [Order]
+SELECT OrderDate AS Date, 'Order' AS TransactionType, (-1 * OrderDetail.Amount) AS Amount, Location.LocationName, Users.GivenName As UserName FROM [Order]
 INNER JOIN OrderDetail
 	On [Order].OrderId = OrderDetail.OrderId
 INNER JOIN Location
 	ON Location.LocationId = [Order].LocationId
+LEFT JOIN Users
+    ON Users.Id = [Order].CreatedByUserId
 WHERE ProductId = @ProductId 
       AND Status IN ('Paid', 'Account')
 
 UNION ALL 
 
-SELECT OrderDate, 'Returned Order' AS TransactionType, OrderDetail.Amount, Location.LocationName, CreatedByUserId As [User] FROM [Order]
+SELECT OrderDate, 'Returned Order' AS TransactionType, OrderDetail.Amount, Location.LocationName, Users.GivenName FROM [Order]
 INNER JOIN OrderDetail
 	On [Order].OrderId = OrderDetail.OrderId
 INNER JOIN Location
 	ON Location.LocationId = [Order].LocationId
+LEFT JOIN Users
+    ON Users.Id = [Order].CreatedByUserId
 WHERE ProductId = @ProductId 
       AND Status IN ('Return') 
 
 UNION ALL 
 
-SELECT PurchaseDate, 'Purchase' AS TransactionType, PurchaseDetail.Amount, '', CreatedByUserId As [User] FROM [Purchase]
+SELECT PurchaseDate, 'Purchase' AS TransactionType, PurchaseDetail.Amount, '', Users.GivenName FROM [Purchase]
 INNER JOIN PurchaseDetail
 	On Purchase.PurchaseId = PurchaseDetail.PurchaseId
+LEFT JOIN Users
+    ON Users.Id = Purchase.CreatedByUserId
 WHERE ProductId = @ProductId
 
 UNION ALL 
 
-SELECT ModifiedDate, 'Inventory Adjustment', Balance, Location.LocationName, CreatedByUserId
+SELECT ModifiedDate, 'Inventory Adjustment', Balance, Location.LocationName, Users.GivenName
 FROM ProductInventoryHistory
 INNER JOIN Location
 	ON Location.LocationId = ProductInventoryHistory.LocationId
+LEFT JOIN Users
+    ON Users.Id = ProductInventoryHistory.CreatedByUserId
 WHERE ProductId = @ProductId
 ) Transactions 
 Order By Date Desc
