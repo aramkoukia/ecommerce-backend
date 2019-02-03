@@ -47,6 +47,19 @@ namespace EcommerceApi.Controllers
             return users;
         }
 
+        // GET: api/Users/{authCode}
+        [HttpGet]
+        public async Task<IActionResult> Get(string authCode)
+        {
+            var user = await _userManager.Users.FirstOrDefaultAsync(u => u.AuthCode.Equals(authCode, StringComparison.InvariantCultureIgnoreCase));
+            if (user == null)
+            {
+                NotFound();
+            }
+
+            return Ok(user);
+        }
+
         // GET: api/Users/id/Roles
         [HttpGet("{email}/Roles")]
         public async Task<IEnumerable<string>> GetUserRoles(string email)
