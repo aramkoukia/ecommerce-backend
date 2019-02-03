@@ -41,13 +41,15 @@ namespace EcommerceApi.Repositories
                                           ,[Notes]
                                           ,[PoNumber]
                                           ,[Status]
-                                          ,[CreatedByUserId]
-	                                      ,ISNULL(OrderPayment.PaidAmount, 0) AS PaidAmount,
-	                                      Location.LocationName,
+                                          ,Users.GivenName
+	                                      ,ISNULL(OrderPayment.PaidAmount, 0) AS PaidAmount
+	                                      ,Location.LocationName,
                                           PaymentTypeName
                                     FROM [Order]
                                     INNER JOIN Location
 	                                    ON Location.LocationId = [Order].LocationId
+                                    Left JOIN Users
+	                                    ON Users.Id = [Order].CreatedByUserId
                                     LEFT JOIN 
 	                                    ( 
                                             SELECT OrderId, SUM(PaymentAmount) AS PaidAmount , PaymentTypeName
@@ -82,13 +84,15 @@ namespace EcommerceApi.Repositories
                                           ,[Notes]
                                           ,[PoNumber]
                                           ,[Status]
-                                          ,[CreatedByUserId]
+                                          ,Users.GivenName
 	                                      ,ISNULL(OrderPayment.PaidAmount, 0) AS PaidAmount,
 	                                      Location.LocationName,
                                           PaymentTypeName
                                     FROM [Order]
                                     INNER JOIN Location
 	                                    ON Location.LocationId = [Order].LocationId
+                                    Left JOIN Users
+	                                    ON Users.Id = [Order].CreatedByUserId
                                     LEFT JOIN 
 	                                    ( 
                                             SELECT OrderId, SUM(PaymentAmount) AS PaidAmount , PaymentTypeName
