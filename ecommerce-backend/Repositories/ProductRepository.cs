@@ -177,7 +177,7 @@ WHERE ProductId = @ProductId
 
 UNION ALL 
 
-SELECT ModifiedDate, 'Inventory Adjustment', Balance, Location.LocationName, Users.GivenName
+SELECT ModifiedDate, TransactionType, Balance, Location.LocationName, Users.GivenName
 FROM ProductInventoryHistory
 INNER JOIN Location
 	ON Location.LocationId = ProductInventoryHistory.LocationId
