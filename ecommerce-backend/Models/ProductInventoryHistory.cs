@@ -12,5 +12,6 @@ namespace EcommerceApi.Models
         public string BinCode { get; set; }
         public string CreatedByUserId { get; set; }
         public DateTime ModifiedDate { get; set; }
+        public string TransactionType { get; set; }
     }
 }

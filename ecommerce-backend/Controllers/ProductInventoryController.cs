@@ -96,6 +96,7 @@ namespace EcommerceApi.Controllers
                 return BadRequest(ModelState);
             }
 
+            decimal currentBalance = 0;
             System.Security.Claims.ClaimsPrincipal currentUser = this.User;
             var userId = _userManager.GetUserId(User);
             productInventoryHistory.CreatedByUserId = userId;
@@ -108,6 +109,7 @@ namespace EcommerceApi.Controllers
 
             if (productInventory != null)
             {
+                currentBalance = productInventory.Balance;
                 productInventory.Balance = productInventoryHistory.Balance;
                 productInventory.BinCode = productInventoryHistory.BinCode;
                 productInventory.ModifiedDate = productInventoryHistory.ModifiedDate;
@@ -124,11 +126,110 @@ namespace EcommerceApi.Controllers
                 _context.ProductInventory.Add(newProductInventory);
             }
 
-            _context.ProductInventoryHistory.Add(productInventoryHistory);
+            // Calculate if the inventory is up or down
+            productInventoryHistory.Balance = productInventoryHistory.Balance - currentBalance;
+            var operationType = "";
+            operationType = productInventoryHistory.Balance > 0 ? "Stock Up - " : "Stock Down - ";
+            productInventoryHistory.TransactionType = productInventoryHistory.Balance > 0 ? "Stock Up" : "Stock Down";
+            productInventoryHistory.Notes = operationType + productInventoryHistory.Notes;
+
+            if (productInventoryHistory.Balance != 0)
+            {
+                _context.ProductInventoryHistory.Add(productInventoryHistory);
+            }
 
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetProductInventoryHistory", new { id = productInventoryHistory.ProductInventoryHistoryId }, productInventoryHistory);
+        }
+
+        [HttpPost("Transfer")]
+        public async Task<IActionResult> PostTransferInventory([FromBody] TransferInventory transferInventory)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            System.Security.Claims.ClaimsPrincipal currentUser = this.User;
+            var userId = _userManager.GetUserId(User);
+
+            var fromProductInventoryHistory = new ProductInventoryHistory
+            {
+                CreatedByUserId = userId,
+                ModifiedDate = DateTime.UtcNow,
+                ProductId = transferInventory.ProductId,
+                Balance = transferInventory.TransferQuantity * -1,
+                LocationId = transferInventory.FromLocationId,
+                BinCode = "",
+                Notes = "Transfer - " + transferInventory.TransferNotes,
+                TransactionType = "Transfer",
+            };
+
+            var toProductInventoryHistory = new ProductInventoryHistory
+            {
+                CreatedByUserId = userId,
+                ModifiedDate = DateTime.UtcNow,
+                ProductId = transferInventory.ProductId,
+                Balance = transferInventory.TransferQuantity,
+                LocationId = transferInventory.ToLocationId,
+                BinCode = "",
+                Notes = "Transfer - " + transferInventory.TransferNotes,
+                TransactionType = "Transfer",
+            };
+
+            // Update Product Inventory
+            var fromProductInventory = await _context.ProductInventory.FirstOrDefaultAsync(m =>
+               m.ProductId == transferInventory.ProductId &&
+               m.LocationId == transferInventory.FromLocationId);
+
+            if (fromProductInventory != null)
+            {
+                fromProductInventory.Balance = fromProductInventory.Balance - transferInventory.TransferQuantity;
+                fromProductInventory.ModifiedDate = fromProductInventoryHistory.ModifiedDate;
+            }
+            else
+            {
+                var newProductInventory = new ProductInventory
+                {
+                    Balance = -transferInventory.TransferQuantity,
+                    BinCode = "",
+                    LocationId = transferInventory.FromLocationId,
+                    ModifiedDate = fromProductInventoryHistory.ModifiedDate,
+                    ProductId = transferInventory.ProductId
+                };
+                _context.ProductInventory.Add(newProductInventory);
+            }
+
+            var toProductInventory = await _context.ProductInventory.FirstOrDefaultAsync(m =>
+               m.ProductId == transferInventory.ProductId &&
+               m.LocationId == transferInventory.ToLocationId);
+
+            if (toProductInventory != null)
+            {
+                toProductInventory.Balance = toProductInventory.Balance + transferInventory.TransferQuantity;
+                toProductInventory.ModifiedDate = toProductInventoryHistory.ModifiedDate;
+            }
+            else
+            {
+                var newProductInventory = new ProductInventory
+                {
+                    Balance = transferInventory.TransferQuantity,
+                    BinCode = "",
+                    LocationId = transferInventory.ToLocationId,
+                    ModifiedDate = toProductInventoryHistory.ModifiedDate,
+                    ProductId = transferInventory.ProductId
+                };
+                _context.ProductInventory.Add(newProductInventory);
+            }
+
+
+            _context.ProductInventoryHistory.Add(fromProductInventoryHistory);
+            _context.ProductInventoryHistory.Add(toProductInventoryHistory);
+
+            await _context.SaveChangesAsync();
+
+            return Ok(transferInventory.ProductId);
         }
 
         // DELETE: api/ProductInventory/5
