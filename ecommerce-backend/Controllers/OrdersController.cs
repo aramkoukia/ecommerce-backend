@@ -120,7 +120,7 @@ namespace EcommerceApi.Controllers
                 );
             }
 
-            // When order is makred as Draft from OnHold we should add them to inventory
+            // When order is marked as Draft from OnHold we should add them to inventory
             if (updateOrderStatus.OrderStatus == OrderStatus.Draft.ToString() &&
                order.Status == OrderStatus.OnHold.ToString())
             {
@@ -427,26 +427,85 @@ www.lightsandparts.com | essi@lightsandparts.com
             return result;
         }
 
-        // DELETE: api/Orders/5
-        //[HttpDelete("{id}")]
-        //public async Task<IActionResult> DeleteOrder([FromRoute] int id)
-        //{
-        //    if (!ModelState.IsValid)
-        //    {
-        //        return BadRequest(ModelState);
-        //    }
+        [HttpGet("customerinvoices")]
+        [AllowAnonymous]
+        public async Task<IActionResult> SendCustomerInvoices()
+        {
+            // get all customers that have pending orders in the previous month
+            // find all orders (paid and unpaid) for these customers
+            // send invoice emails to each customer with summary of paid/unpaid invoices
+            // cc administrators
+            // question: where is due date coming from?
 
-        //    var order = await _context.Order.SingleOrDefaultAsync(m => m.OrderId == id);
-        //    if (order == null)
-        //    {
-        //        return NotFound();
-        //    }
+//            var order = await _context.Order.AsNoTracking()
+//                .Include(o => o.OrderDetail)
+//                    .ThenInclude(o => o.Product)
+//                .Include(t => t.OrderTax)
+//                    .ThenInclude(t => t.Tax)
+//                .Include(o => o.OrderPayment)
+//                .Include(o => o.Customer)
+//                .Include(l => l.Location)
+//                .SingleOrDefaultAsync(m => m.OrderId == 1);
 
-        //    _context.Order.Remove(order);
-        //    await _context.SaveChangesAsync();
+//            var globalSettings = new GlobalSettings
+//            {
+//                ColorMode = ColorMode.Color,
+//                Orientation = Orientation.Portrait,
+//                PaperSize = PaperKind.A4,
+//                Margins = new MarginSettings { Top = 10 },
+//                DocumentTitle = $"Order {order.OrderId}",
+//            };
 
-        //    return Ok(order);
-        //}
+//            var objectSettings = new ObjectSettings
+//            {
+//                PagesCount = true,
+//                HtmlContent = OrderTemplateGenerator.GetHtmlString(order, false),
+//                WebSettings = { DefaultEncoding = "utf-8", UserStyleSheet = Path.Combine(Directory.GetCurrentDirectory(), "assets", "invoice.css") },
+//            };
+
+//            var pdf = new HtmlToPdfDocument()
+//            {
+//                GlobalSettings = globalSettings,
+//                Objects = { objectSettings }
+//            };
+
+//            var file = _converter.Convert(pdf);
+//            var message = @"
+//Dear Customer,
+
+//Thank you for choosing LED Lights and Parts. Your e-statement for the month, January-2019 is attached in the email. For any specific invoice information, get back to us to receive a copy. Please contact us at +1(604) 559-5000 for any other queries. 
+
+//Sincerely,
+
+//Shaney
+
+//3695 East 1st Ave Vancouver, BC V5M 1C2
+
+//Tel: (604) 559-5000
+
+//Cel: (778) 838-8070
+
+//Fax: (604) 559-5008
+
+//www.lightsandparts.com | sina@lightsandparts.com
+//            ";
+//            var attachment = new MemoryStream(file);
+//            var attachmentName = $"Monthly Report - {order.OrderId}.pdf";
+//            var subject = $"Pixel Print Ltd (LED Lights and Parts) Invoice No {order.OrderId}";
+
+//            if (string.IsNullOrEmpty(email))
+//            {
+//                email = order.Customer.Email;
+//            }
+
+//            var orderToUpdateEmail = _context.Order.FirstOrDefault(o => o.OrderId == orderId);
+//            orderToUpdateEmail.Email = email;
+//            await _context.SaveChangesAsync();
+
+//            await _emailSender.SendEmailAsync(email, subject, null, message, attachment, attachmentName, true);
+
+            return Ok();
+        }
 
         private bool OrderExists(int id)
         {

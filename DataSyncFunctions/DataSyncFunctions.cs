@@ -23,5 +23,13 @@ namespace DataSyncFunctions
             log.Info($"Sync Customers: {DateTime.Now}");
             client.GetAsync("https://lightsandpartsapi.azurewebsites.net/api/sync/customers");
         }
+
+        [FunctionName("SendCustomerInvoices")]
+        // 8:00 a.m. every 1st of everymonth
+        public static void RunSendCustomerInvoices([TimerTrigger("0 8 1 * * *")]TimerInfo myTimer, TraceWriter log)
+        {
+            log.Info($"Sending Customer Invoices: {DateTime.Now}");
+            client.GetAsync("https://lightsandpartsapi.azurewebsites.net/api/orders/customerinvoices");
+        }
     }
 }
