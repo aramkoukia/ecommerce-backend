@@ -243,6 +243,18 @@ namespace EcommerceApi.Controllers
             }
 
 
+            var product = await _context.Product.FirstOrDefaultAsync(p => p.ProductId == transferInventory.ProductId);
+            var fromLocation = await _context.Location.FirstOrDefaultAsync(p => p.LocationId == transferInventory.FromLocationId);
+            var toLocation = await _context.Location.FirstOrDefaultAsync(p => p.LocationId == transferInventory.ToLocationId);
+            var subject = $"Inventory Transfer From: {fromLocation.LocationName} To: {toLocation.LocationName}";
+            var message = $"Product: {product.ProductCode} - {product.ProductName}.\n";
+            message += $"Inventory Transfer.\n";
+            message = $"Transfer From: {fromLocation.LocationName} To: {toLocation.LocationName}";
+            message += $"Transfer Amount: {transferInventory.TransferQuantity}.\n";
+            message += $"Date: {toProductInventoryHistory.ModifiedDate}.\n";
+            message += $"User: {userId}.\n";
+            await _emailSender.SendEmailAsync(null, subject, null, message, null, null);
+
             _context.ProductInventoryHistory.Add(fromProductInventoryHistory);
             _context.ProductInventoryHistory.Add(toProductInventoryHistory);
 
