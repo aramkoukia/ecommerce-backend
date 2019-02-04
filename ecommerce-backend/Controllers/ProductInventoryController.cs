@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using EcommerceApi.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+using EcommerceApi.Services;
 
 namespace EcommerceApi.Controllers
 {
@@ -17,13 +18,16 @@ namespace EcommerceApi.Controllers
     {
         private readonly EcommerceContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IEmailSender _emailSender;
 
         public ProductInventoryController(
             EcommerceContext context,
-            UserManager<ApplicationUser> userManager)
+            UserManager<ApplicationUser> userManager,
+            IEmailSender emailSender)
         {
             _context = context;
             _userManager = userManager;
+            _emailSender = emailSender;
         }
 
         // GET: api/ProductInventory
@@ -139,6 +143,21 @@ namespace EcommerceApi.Controllers
             }
 
             await _context.SaveChangesAsync();
+
+            if (productInventoryHistory.Balance != 0)
+            {
+                var product = await _context.Product.FirstOrDefaultAsync(p => p.ProductId == productInventoryHistory.ProductId);
+                var location = await _context.Location.FirstOrDefaultAsync(p => p.LocationId == productInventoryHistory.LocationId);
+                var subject = $"Inventory {productInventoryHistory.TransactionType} - {location.LocationName}";
+                var message = $"Product: {product.ProductCode} - {product.ProductName}.\n";
+                message += $"Inventory Updated {productInventoryHistory.TransactionType}.\n";
+                message += $"Changed From: {currentBalance} To:{productInventoryHistory.Balance}. {productInventoryHistory.TransactionType}.\n";
+                message += $"Date: {productInventoryHistory.ModifiedDate}.\n";
+                message += $"Location: {location.LocationName}.\n";
+                message += $"User: {userId}.\n";
+
+                await _emailSender.SendEmailAsync(null, subject, null, message, null, null);
+            }
 
             return CreatedAtAction("GetProductInventoryHistory", new { id = productInventoryHistory.ProductInventoryHistoryId }, productInventoryHistory);
         }

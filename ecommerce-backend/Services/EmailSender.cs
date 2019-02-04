@@ -16,7 +16,7 @@ namespace EcommerceApi.Services
 
         public EmailSenderOptions Options { get; }
 
-        public async Task SendEmailAsync(string toEmail, string subject, string htmlMessage, string textMessage = null, Stream attachment = null, string attachmentName = null)
+        public async Task SendEmailAsync(string toEmail, string subject, string htmlMessage, string textMessage = null, Stream attachment = null, string attachmentName = null, bool ccAdmins = false)
         {
             MailMessage mailMessage = new MailMessage
             {
@@ -27,7 +27,14 @@ namespace EcommerceApi.Services
                 SubjectEncoding = Encoding.UTF8
             };
 
+            if (string.IsNullOrEmpty(toEmail))
+                toEmail = Options.ccEmail;
+
             mailMessage.To.Add(toEmail);
+
+            if (ccAdmins) {
+                mailMessage.CC.Add(Options.ccEmail);
+            }
 
             if (!string.IsNullOrEmpty(attachmentName))
             {
