@@ -363,7 +363,7 @@ www.lightsandparts.com | essi@lightsandparts.com
             var attachment = new MemoryStream(file);
             var attachmentName = $"Invoice No {order.OrderId}.pdf";
             var subject = $"Pixel Print Ltd (LED Lights and Parts) Invoice No {order.OrderId}";
-            await _emailSender.SendEmailAsync(order.Customer.Email, subject, null, message, attachment, attachmentName);
+            await _emailSender.SendEmailAsync(order.Customer.Email, subject, null, message, attachment, attachmentName, true);
             return Ok();
         }
 

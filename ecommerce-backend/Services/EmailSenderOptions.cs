@@ -30,7 +30,7 @@ namespace EcommerceApi.Services
         public string password { get; protected set; }
         public string host { get; protected set; }
         public int port { get; protected set; }
-        public string ccEmail { get; protected set; }
+        public string ccEmail { get; set; }
 
     }
 }

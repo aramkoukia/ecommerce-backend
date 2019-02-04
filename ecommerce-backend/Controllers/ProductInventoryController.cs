@@ -150,8 +150,8 @@ namespace EcommerceApi.Controllers
                 var location = await _context.Location.FirstOrDefaultAsync(p => p.LocationId == productInventoryHistory.LocationId);
                 var subject = $"Inventory {productInventoryHistory.TransactionType} - {location.LocationName}";
                 var message = $"Product: {product.ProductCode} - {product.ProductName}.\n";
-                message += $"Inventory Updated {productInventoryHistory.TransactionType}.\n";
-                message += $"Changed From: {currentBalance} To:{productInventoryHistory.Balance}. {productInventoryHistory.TransactionType}.\n";
+                message += $"Inventory {productInventoryHistory.TransactionType}: {productInventoryHistory.Balance}.\n";
+                message += $"Changed From: {currentBalance} To:{productInventory.Balance}. {productInventoryHistory.TransactionType}.\n";
                 message += $"Date: {productInventoryHistory.ModifiedDate}.\n";
                 message += $"Location: {location.LocationName}.\n";
                 message += $"User: {userId}.\n";
@@ -249,8 +249,8 @@ namespace EcommerceApi.Controllers
             var subject = $"Inventory Transfer From: {fromLocation.LocationName} To: {toLocation.LocationName}";
             var message = $"Product: {product.ProductCode} - {product.ProductName}.\n";
             message += $"Inventory Transfer.\n";
-            message = $"Transfer From: {fromLocation.LocationName} To: {toLocation.LocationName}";
-            message += $"Transfer Amount: {transferInventory.TransferQuantity}.\n";
+            message += $"From: {fromLocation.LocationName} To: {toLocation.LocationName}.\n";
+            message += $"Amount: {transferInventory.TransferQuantity}.\n";
             message += $"Date: {toProductInventoryHistory.ModifiedDate}.\n";
             message += $"User: {userId}.\n";
             await _emailSender.SendEmailAsync(null, subject, null, message, null, null);
