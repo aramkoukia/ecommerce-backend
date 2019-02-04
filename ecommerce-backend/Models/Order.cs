@@ -42,6 +42,8 @@ namespace EcommerceApi.Models
         [NotMapped]
         public string AuthCode { get; set; }
 
+        public string Email { get; set; }
+
         public ICollection<OrderDetail> OrderDetail { get; set; }
         public ICollection<OrderTax> OrderTax { get; set; }
         public ICollection<OrderPayment> OrderPayment { get; set; }

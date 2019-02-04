@@ -292,7 +292,7 @@ namespace EcommerceApi.Controllers
 
         // GET: api/Orders
         [HttpGet("{orderId}/email")]
-        public async Task<IActionResult> EmailOrder([FromRoute] int orderId)
+        public async Task<IActionResult> EmailOrder([FromRoute] int orderId, [FromQuery] string email)
         {
             var order = await _context.Order.AsNoTracking()
                 .Include(o => o.OrderDetail)
@@ -363,7 +363,20 @@ www.lightsandparts.com | essi@lightsandparts.com
             var attachment = new MemoryStream(file);
             var attachmentName = $"Invoice No {order.OrderId}.pdf";
             var subject = $"Pixel Print Ltd (LED Lights and Parts) Invoice No {order.OrderId}";
-            await _emailSender.SendEmailAsync(order.Customer.Email, subject, null, message, attachment, attachmentName, true);
+
+            if (string.IsNullOrEmpty(email))
+            {
+                email = order.Customer.Email;
+            }
+            else
+            {
+                var orderToUpdateEmail = _context.Order.FirstOrDefault(o => o.OrderId == orderId);
+                orderToUpdateEmail.Email = email;
+                await _context.SaveChangesAsync();
+            }
+
+
+            await _emailSender.SendEmailAsync(email, subject, null, message, attachment, attachmentName, true);
             return Ok();
         }
 

@@ -31,4 +31,14 @@ namespace EcommerceApi.Models
 
         public ICollection<PurchaseDetail> PurchaseDetail { get; set; }
     }
+
+    public enum PurchaseStatus
+    {
+        Plan,
+        Paid,
+        OnDelivery,
+        CustomClearance,
+        Arrived,
+        Canceled
+    }
 }
