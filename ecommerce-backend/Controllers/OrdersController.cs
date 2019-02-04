@@ -368,13 +368,10 @@ www.lightsandparts.com | essi@lightsandparts.com
             {
                 email = order.Customer.Email;
             }
-            else
-            {
-                var orderToUpdateEmail = _context.Order.FirstOrDefault(o => o.OrderId == orderId);
-                orderToUpdateEmail.Email = email;
-                await _context.SaveChangesAsync();
-            }
 
+            var orderToUpdateEmail = _context.Order.FirstOrDefault(o => o.OrderId == orderId);
+            orderToUpdateEmail.Email = email;
+            await _context.SaveChangesAsync();
 
             await _emailSender.SendEmailAsync(email, subject, null, message, attachment, attachmentName, true);
             return Ok();
