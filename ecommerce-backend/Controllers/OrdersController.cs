@@ -392,6 +392,9 @@ www.lightsandparts.com | essi@lightsandparts.com
                 .Include(l => l.Location)
                 .SingleOrDefaultAsync(m => m.OrderId == orderId);
 
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == order.CreatedByUserId);
+            order.CreatedByUserName = user.GivenName;
+
             var globalSettings = new GlobalSettings
             {
                 ColorMode = ColorMode.Color,

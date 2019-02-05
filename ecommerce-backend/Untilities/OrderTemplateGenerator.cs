@@ -54,7 +54,7 @@ namespace EcommerceApi.Untilities
                                 <div class='right spaceafter-10'>Customer: {order.Customer.CompanyName}</div>
                                 <div><b>Invoice #{order.OrderId}</b></div>
                                 <div>Sale Date: {order.OrderDate}</div>
-                                <div>User: {order.CreatedByUserId}</div>
+                                <div>User: {order.CreatedByUserName}</div>
                                 <hr class='spaceafter-30'/>
                                 <h3 class='right'>{order.Status}</h3>    
                                 <hr/>
@@ -68,7 +68,7 @@ namespace EcommerceApi.Untilities
                                 <td style='width:55%'>X {1}</td>
                                 <td style='width:20%' class='right'>${2}</td>
                                 <td style='width:15%' class='right'>${3}</td>
-                                </tr>", item.Amount.ToString("G29"), item.Product.ProductName, item.UnitPrice, item.Total);
+                                </tr>", item.Amount.ToString("G29"), item.Product.ProductCode + " - "+ item.Product.ProductName, item.UnitPrice, item.Total);
         }
             sbCustomer.AppendFormat(@"<tr style='border-top: 1pt solid darkgray;padding-top:10px'>
                         <td style='width:10%'></td>
