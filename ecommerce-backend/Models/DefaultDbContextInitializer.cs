@@ -69,6 +69,22 @@ namespace EcommerceApi.Models
                 await UserManager.AddToRoleAsync(user, "Admin");
             }
 
+            email = "shanaey@gmail.com";
+            username = "shanaey";
+            if (await _userManager.FindByEmailAsync(email) == null)
+            {
+                var user = new ApplicationUser
+                {
+                    UserName = username,
+                    Email = email,
+                    EmailConfirmed = true,
+                    GivenName = "Shanaey"
+                };
+
+                await _userManager.CreateAsync(user, "Shanaey@2019!");
+                await UserManager.AddToRoleAsync(user, "Admin");
+            }
+
             email = "sales@gmail.com";
             username = "sales";
             if (await _userManager.FindByEmailAsync(email) == null)
