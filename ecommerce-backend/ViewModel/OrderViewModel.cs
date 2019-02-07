@@ -6,7 +6,20 @@ namespace EcommerceApi.ViewModel
     {
         public int OrderId { get; set; }
         public int LocationId { get; set; }
-        public DateTime OrderDate { get; set; }
+
+        private DateTime _orderDate;
+        public DateTime OrderDate {
+            set
+            {
+                _orderDate = value;
+            }
+            get
+            {
+                return TimeZoneInfo.ConvertTimeBySystemTimeZoneId(_orderDate, "Pacific Standard Time");
+            }
+        }
+
+
         public decimal Total { get; set; }
         public decimal SubTotal { get; set; }
         public decimal TotalDiscount { get; set; }

@@ -19,7 +19,19 @@ namespace EcommerceApi.Models
         public int OrderId { get; set; }
         public int? CustomerId { get; set; }
         public int LocationId { get; set; }
-        public DateTime OrderDate { get; set; }
+
+        private DateTime _orderDate;
+        public DateTime OrderDate
+        {
+            set
+            {
+                _orderDate = value;
+            }
+            get
+            {
+                return TimeZoneInfo.ConvertTimeBySystemTimeZoneId(_orderDate, "Pacific Standard Time");
+            }
+        }
 
         [Required]
         [Range(1, 10000000, ErrorMessage = "Order total cannot be zero")]
