@@ -1,5 +1,4 @@
 ﻿using EcommerceApi.Models;
-using System;
 using System.Linq;
 using System.Text;
 
@@ -54,7 +53,7 @@ namespace EcommerceApi.Untilities
 
                                 <div class='right spaceafter-10'>Customer: {order.Customer.CompanyName}</div>
                                 <div><b>Invoice #{order.OrderId}</b></div>
-                                <div>Sale Date: {TimeZoneInfo.ConvertTimeBySystemTimeZoneId(order.OrderDate, "Pacific Standard Time")}</div>
+                                <div>Sale Date: {order.OrderDate}</div>
                                 <div>User: {order.CreatedByUserName}</div>
                                 <hr class='spaceafter-30'/>
                                 <h3 class='right'>{order.Status}</h3>    

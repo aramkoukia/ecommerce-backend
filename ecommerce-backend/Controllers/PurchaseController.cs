@@ -67,12 +67,12 @@ namespace EcommerceApi.Controllers
             {
                 return BadRequest(ModelState);
             }
-
+            var date = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateTime.UtcNow, "Pacific Standard Time");
             System.Security.Claims.ClaimsPrincipal currentUser = this.User;
             var userId = _userManager.GetUserId(User);
             Purchase.CreatedByUserId = userId;
-            Purchase.CreatedDate = DateTime.UtcNow;
-            Purchase.PurchaseDate = DateTime.UtcNow;
+            Purchase.CreatedDate = date;
+            Purchase.PurchaseDate = date;
 
             _context.Purchase.Add(Purchase);
             await _context.SaveChangesAsync();

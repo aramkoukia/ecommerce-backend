@@ -104,7 +104,8 @@ namespace EcommerceApi.Controllers
             System.Security.Claims.ClaimsPrincipal currentUser = this.User;
             var userId = _userManager.GetUserId(User);
             productInventoryHistory.CreatedByUserId = userId;
-            productInventoryHistory.ModifiedDate = DateTime.UtcNow;
+            var date = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateTime.UtcNow, "Pacific Standard Time");
+            productInventoryHistory.ModifiedDate = date;
 
             // Update Product Inventory
             var productInventory = await _context.ProductInventory.FirstOrDefaultAsync(m =>
@@ -172,11 +173,11 @@ namespace EcommerceApi.Controllers
 
             System.Security.Claims.ClaimsPrincipal currentUser = this.User;
             var userId = _userManager.GetUserId(User);
-
+            var date = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateTime.UtcNow, "Pacific Standard Time");
             var fromProductInventoryHistory = new ProductInventoryHistory
             {
                 CreatedByUserId = userId,
-                ModifiedDate = DateTime.UtcNow,
+                ModifiedDate = date,
                 ProductId = transferInventory.ProductId,
                 Balance = transferInventory.TransferQuantity * -1,
                 LocationId = transferInventory.FromLocationId,
@@ -184,11 +185,10 @@ namespace EcommerceApi.Controllers
                 Notes = "Transfer - " + transferInventory.TransferNotes,
                 TransactionType = "Transfer",
             };
-
             var toProductInventoryHistory = new ProductInventoryHistory
             {
                 CreatedByUserId = userId,
-                ModifiedDate = DateTime.UtcNow,
+                ModifiedDate = date,
                 ProductId = transferInventory.ProductId,
                 Balance = transferInventory.TransferQuantity,
                 LocationId = transferInventory.ToLocationId,

@@ -102,7 +102,7 @@ namespace EcommerceApi.Controllers
             {
                 return BadRequest();
             }
-
+            var date = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateTime.UtcNow, "Pacific Standard Time");
             var order = await _context.Order.SingleOrDefaultAsync(m => m.OrderId == id);
             if (updateOrderStatus.OrderStatus.Equals(OrderStatus.Paid.ToString(), StringComparison.InvariantCultureIgnoreCase))
             {
@@ -112,9 +112,9 @@ namespace EcommerceApi.Controllers
                     new OrderPayment
                     {
                         CreatedByUserId = userId,
-                        CreatedDate = order.CreatedDate,
+                        CreatedDate = date,
                         PaymentAmount = order.Total,
-                        PaymentDate = order.CreatedDate,
+                        PaymentDate = date,
                         PaymentTypeId = updateOrderStatus.PaymentTypeId
                     }
                 );
@@ -198,8 +198,9 @@ namespace EcommerceApi.Controllers
 
             var user = await _context.Users.FirstOrDefaultAsync(u => u.AuthCode.Equals(order.AuthCode, StringComparison.InvariantCultureIgnoreCase));
             order.CreatedByUserId = user.Id;
-            order.CreatedDate = DateTime.UtcNow;
-            order.OrderDate = DateTime.UtcNow;
+            var date = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateTime.UtcNow, "Pacific Standard Time");
+            order.CreatedDate = date;
+            order.OrderDate = date;
             order.Customer = null;
             order.Location = null;
             if (order.Status.Equals(OrderStatus.Paid.ToString(), StringComparison.InvariantCultureIgnoreCase) ||
@@ -245,7 +246,7 @@ namespace EcommerceApi.Controllers
             {
                 return true;
             }
-
+            var date = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateTime.UtcNow, "Pacific Standard Time");
             // if order is refund we add to inventory
             var addOrUpdate = -1;
             if (order.Status == OrderStatus.Return.ToString())
@@ -262,7 +263,7 @@ namespace EcommerceApi.Controllers
                 if (productInventory != null)
                 {
                     productInventory.Balance = productInventory.Balance + (addOrUpdate * item.Amount);
-                    productInventory.ModifiedDate = order.CreatedDate;
+                    productInventory.ModifiedDate = date;
                 }
             }
             return true;
@@ -274,7 +275,7 @@ namespace EcommerceApi.Controllers
             {
                 return true;
             }
-
+            var date = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateTime.UtcNow, "Pacific Standard Time");
             foreach (var item in order.OrderDetail)
             {
                 var productInventory = await _context.ProductInventory.FirstOrDefaultAsync(m =>
@@ -284,7 +285,7 @@ namespace EcommerceApi.Controllers
                 if (productInventory != null)
                 {
                     productInventory.Balance = productInventory.Balance + item.Amount;
-                    productInventory.ModifiedDate = order.CreatedDate;
+                    productInventory.ModifiedDate = date;
                 }
             }
             return true;
