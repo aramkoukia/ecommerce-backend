@@ -98,6 +98,26 @@ namespace EcommerceApi.Controllers
             return await _reportRepository.GetPurchasesReport(fromDate, toDate);
         }
 
+        [HttpGet("CustomerPaid")]
+        public async Task<IEnumerable<CustomerPaidOrdersViewModel>> GetCustomerPaidReport(DateTime fromDate, DateTime toDate)
+        {
+            if (fromDate == DateTime.MinValue)
+                fromDate = DateTime.Now;
+            if (toDate == DateTime.MinValue)
+                toDate = DateTime.Now;
+            return await _reportRepository.GetCustomerPaidReport(fromDate, toDate);
+        }
+
+        [HttpGet("CustomerUnPaid")]
+        public async Task<IEnumerable<CustomerUnPaidOrdersViewModel>> GetCustomerUnPaidReport(DateTime fromDate, DateTime toDate)
+        {
+            if (fromDate == DateTime.MinValue)
+                fromDate = DateTime.Now;
+            if (toDate == DateTime.MinValue)
+                toDate = DateTime.Now;
+            return await _reportRepository.GetCustomerUnPaidReport(fromDate, toDate);
+        }
+
         [AllowAnonymous]
         [HttpGet("Ping")]
         public string Ping()

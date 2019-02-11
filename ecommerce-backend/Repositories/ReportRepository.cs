@@ -349,5 +349,49 @@ GROUP BY PaymentTypeName, Users.GivenName, [Order].OrderId, Customer.CompanyName
                 return await conn.QueryAsync<PurchasesReportViewModel>(query, new { fromDate, toDate });
             }
         }
+
+        public async Task<IEnumerable<CustomerPaidOrdersViewModel>> GetCustomerPaidReport(DateTime fromDate, DateTime toDate)
+        {
+            using (IDbConnection conn = Connection)
+            {
+                string query = $@"
+SELECT [Order].OrderId, PoNumber, OrderDate, [Order].Total, OrderPayment.PaymentAmount, [Order].[Status], PaymentType.PaymentTypeName, Customer.CompanyName, Customer.CustomerCode, Customer.[Address], Customer.City, Customer.Province, Customer.PostalCode
+FROM [Order]
+INNER JOIN Customer
+	ON Customer.CustomerId = [Order].CustomerId
+INNER JOIN 
+( 
+	SELECT OrderId, PaymentDate, PaymentTypeId, SUM(PaymentAmount) AS PaymentAmount
+	FROM OrderPayment
+	WHERE PaymentDate BETWEEN @FromDate AND @ToDate
+	GROUP BY OrderId, PaymentDate, PaymentTypeId
+) OrderPayment
+	ON [Order].OrderId = OrderPayment.OrderId
+INNER JOIN PaymentType
+	ON PaymentType.PaymentTypeId = OrderPayment.PaymentTypeId
+WHERE [Order].[Status] IN ('Paid', 'Return')
+      AND OrderDate BETWEEN @FromDate AND @ToDate
+                                 ";
+                conn.Open();
+                return await conn.QueryAsync<CustomerPaidOrdersViewModel>(query, new { fromDate, toDate });
+            }
+        }
+
+        public async Task<IEnumerable<CustomerUnPaidOrdersViewModel>> GetCustomerUnPaidReport(DateTime fromDate, DateTime toDate)
+        {
+            using (IDbConnection conn = Connection)
+            {
+                string query = $@"
+SELECT [Order].OrderId, PoNumber, OrderDate, DateAdd(DAY, 30, OrderDate) As DueDate, [Order].Total, CASE [Order].[Status] WHEN 'Account' THEN 'Awaiting Payment' END AS [Status], Customer.CompanyName, Customer.CustomerCode, Customer.[Address], Customer.City, Customer.Province, Customer.PostalCode
+FROM [Order]
+INNER JOIN Customer
+	ON Customer.CustomerId = [Order].CustomerId
+WHERE [Order].[Status] IN ('Account')
+      AND OrderDate <= @ToDate
+                                 ";
+                conn.Open();
+                return await conn.QueryAsync<CustomerUnPaidOrdersViewModel>(query, new { toDate });
+            }
+        }
     }
 }
