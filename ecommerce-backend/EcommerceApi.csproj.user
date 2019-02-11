@@ -12,6 +12,6 @@
     <WebStackScaffolding_DbContextTypeFullName>EcommerceApi.Models.EcommerceContext</WebStackScaffolding_DbContextTypeFullName>
     <WebStackScaffolding_IsAsyncSelected>False</WebStackScaffolding_IsAsyncSelected>
     <ShowAllFiles>true</ShowAllFiles>
-    <NameOfLastUsedPublishProfile>FolderProfile</NameOfLastUsedPublishProfile>
+    <NameOfLastUsedPublishProfile>lightsandpartsapi - Web Deploy</NameOfLastUsedPublishProfile>
   </PropertyGroup>
 </Project>

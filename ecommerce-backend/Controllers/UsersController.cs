@@ -57,7 +57,28 @@ namespace EcommerceApi.Controllers
                 NotFound();
             }
 
-            return Ok(user);
+            var permissions = new List<string>();
+
+            var roles = await _userManager.GetRolesAsync(user);
+            foreach (var roleName in roles)
+            {
+                var role = await _roleManager.FindByNameAsync(roleName);
+                if (role != null)
+                {
+                    var roleClaims = await _roleManager.GetClaimsAsync(role);
+                    if (roleClaims != null && roleClaims.Any())
+                    {
+                        permissions.AddRange(roleClaims.Select(c => c.Value));
+                    }
+                }
+            }
+
+            return Ok(
+                new
+                {
+                    user,
+                    permissions = permissions.Distinct(),
+                });
         }
 
         // GET: api/Users/id/Roles
@@ -121,16 +142,42 @@ namespace EcommerceApi.Controllers
         [HttpPut("resetpassword")]
         public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordViewModel passwordResetInfo)
         {
-            var user = await _userManager.FindByEmailAsync(passwordResetInfo.Email);
+            ApplicationUser user = null;
+            if(!string.IsNullOrEmpty(passwordResetInfo.Email))
+                user = await _userManager.FindByEmailAsync(passwordResetInfo.Email);
+            else 
+                user = await _userManager.FindByNameAsync(passwordResetInfo.UserName);
+
             var token = await _userManager.GeneratePasswordResetTokenAsync(user);
             var result = await _userManager.ResetPasswordAsync(user, token, passwordResetInfo.NewPassword);
             if (result.Succeeded)
             {
                 await _emailSender.SendEmailAsync(
-                    passwordResetInfo.Email,
+                    user.Email,
                     "Password Reset", $"Your password is reset. <br> Your new password is: {passwordResetInfo.NewPassword}");
             }
             return Ok(result);
+        }
+
+        [HttpPut("resetpasscode")]
+        public async Task<IActionResult> ResetPasscode([FromBody] ResetPasscodeViewModel passcodeResetInfo)
+        {
+            ApplicationUser user = await _userManager.FindByNameAsync(passcodeResetInfo.UserName);
+
+            var otherUsersWithSamePasscode = _context.Users.Where(u => !u.UserName.Equals(passcodeResetInfo.UserName, StringComparison.InvariantCultureIgnoreCase) && u.AuthCode.Equals(passcodeResetInfo.NewPasscode, StringComparison.InvariantCultureIgnoreCase ));
+            if (otherUsersWithSamePasscode != null && otherUsersWithSamePasscode.Any())
+            {
+                return BadRequest(new { Errors = new List<string>() { "This pass code is used by other users. please try a new passcode!" } });
+            }
+
+            var dbUser = _context.Users.FirstOrDefault(u => u.UserName.Equals(passcodeResetInfo.UserName, StringComparison.InvariantCultureIgnoreCase));
+            dbUser.AuthCode = passcodeResetInfo.NewPasscode;
+            await _context.SaveChangesAsync();
+
+            await _emailSender.SendEmailAsync(
+                user.Email, "Passcode Reset", $"Your passcode is reset. <br> Your new passcode is: {passcodeResetInfo.NewPasscode}");
+
+            return Ok( new { Succeeded = true });
         }
     }
 }

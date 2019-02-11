@@ -22,11 +22,9 @@ namespace EcommerceApi.Models
         public DateTime OrderDate { get; set; }
 
         [Required]
-        [Range(1, 10000000, ErrorMessage = "Order total cannot be zero")]
         public decimal Total { get; set; }
 
         [Required]
-        [Range(1, 10000000, ErrorMessage = "Order total cannot be zero")]
         public decimal SubTotal { get; set; }
         public decimal TotalDiscount { get; set; }
         public string PstNumber { get; set; }

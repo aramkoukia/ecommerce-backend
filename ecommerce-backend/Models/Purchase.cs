@@ -19,11 +19,9 @@ namespace EcommerceApi.Models
         public DateTime DeliveryDate { get; set; }
 
         [Required]
-        [Range(1, 10000000, ErrorMessage = "Purchase total cannot be zero")]
         public decimal Total { get; set; }
 
         [Required]
-        [Range(1, 10000000, ErrorMessage = "Purchase total cannot be zero")]
         public decimal SubTotal { get; set; }
         public string Notes { get; set; }
         public DateTime CreatedDate { get; set; }
