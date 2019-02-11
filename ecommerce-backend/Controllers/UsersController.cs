@@ -167,7 +167,7 @@ namespace EcommerceApi.Controllers
             var otherUsersWithSamePasscode = _context.Users.Where(u => !u.UserName.Equals(passcodeResetInfo.UserName, StringComparison.InvariantCultureIgnoreCase) && u.AuthCode.Equals(passcodeResetInfo.NewPasscode, StringComparison.InvariantCultureIgnoreCase ));
             if (otherUsersWithSamePasscode != null && otherUsersWithSamePasscode.Any())
             {
-                return BadRequest(new { Errors = new List<string>() { "This pass code is used by other users. please try a new passcode!" } });
+                return Ok(new { Errors = new List<string>() { "This pass code is used by other users. please try a new passcode!" } });
             }
 
             var dbUser = _context.Users.FirstOrDefault(u => u.UserName.Equals(passcodeResetInfo.UserName, StringComparison.InvariantCultureIgnoreCase));

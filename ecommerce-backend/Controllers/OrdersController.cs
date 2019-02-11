@@ -152,6 +152,21 @@ namespace EcommerceApi.Controllers
             return Ok(order);
         }
 
+        [HttpPut("{id}/Info")]
+        public async Task<IActionResult> PutOrderInfo([FromRoute] int id, [FromBody] UpdateOrderInfo updateOrderInfo)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var order = await _context.Order.SingleOrDefaultAsync(m => m.OrderId == id);
+            order.Notes = updateOrderInfo.Notes;
+            order.PoNumber = updateOrderInfo.PoNumber;
+            await _context.SaveChangesAsync();
+            return Ok(order);
+        }
+
         // PUT: api/Orders/5
         [HttpPut("{id}")]
         public async Task<IActionResult> PutOrder([FromRoute] int id, [FromBody] Order order)
