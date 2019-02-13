@@ -316,6 +316,7 @@ namespace EcommerceApi.Controllers
                 .Include(t => t.OrderTax)
                     .ThenInclude(t => t.Tax)
                 .Include(o => o.OrderPayment)
+                    .ThenInclude(t1 => t1.PaymentType)
                 .Include(o => o.Customer)
                 .Include(l => l.Location)
                 .SingleOrDefaultAsync(m => m.OrderId == orderId);
@@ -404,6 +405,7 @@ www.lightsandparts.com | essi@lightsandparts.com
                 .Include(t => t.OrderTax)
                     .ThenInclude(t => t.Tax)
                 .Include(o => o.OrderPayment)
+                    .ThenInclude(t1 => t1.PaymentType)
                 .Include(o => o.Customer)
                 .Include(l => l.Location)
                 .SingleOrDefaultAsync(m => m.OrderId == orderId);

@@ -52,8 +52,13 @@ namespace EcommerceApi.Untilities
                                 </div>
 
                                 <div class='right spaceafter-10'>Customer: {order.Customer.CompanyName}</div>
-                                <div><b>Invoice #{order.OrderId}</b></div>
-                                <div>Sale Date: {order.OrderDate}</div>
+                                <div><b>Invoice #{order.OrderId}</b></div>");
+            if (!string.IsNullOrEmpty(order.PoNumber))
+            {
+                sbCustomer.Append($@"<div>PO Number: {order.PoNumber}</div>");
+            }
+
+            sbCustomer.Append($@" <div>Sale Date: {order.OrderDate}</div>
                                 <div>User: {order.CreatedByUserName}</div>
                                 <hr class='spaceafter-30'/>
                                 <h3 class='right'>{order.Status}</h3>    
@@ -106,6 +111,16 @@ namespace EcommerceApi.Untilities
                         <td style='width:15%' class='right'>${0}</td>
                         </tr>", order.Total - order.OrderPayment.Sum(p => p.PaymentAmount));
 
+            var paymentType = order.OrderPayment.FirstOrDefault()?.PaymentType?.PaymentTypeName;
+            if (paymentType != null)
+            { 
+                sbCustomer.AppendFormat(@"<tr>
+                        <td style='width:10%'></td>
+                        <td style='width:55%'></td>
+                        <td style='width:35%' colspan='2'>Paid by: {0}</td>
+                        </tr>", paymentType);
+            }
+
             sbFinal.Append(sbCustomer);
 
             sbFinal.Append($@"
@@ -116,8 +131,19 @@ namespace EcommerceApi.Untilities
                     <div>{CustomerCopy}</div>
                     <hr class='spaceafter-30'/>   
                     <div class='header'><p><b>Attention:</b>{Note4}</p></div>
-                    <div class='header'><p><b>Store policy:</b>{Note5}</p></div>
+                    <div class='header'><p><b>Store policy:</b>{Note5}</p></div>");
+
+            if (string.IsNullOrEmpty(order.Notes))
+            {
+                sbFinal.Append($@"
                     <div class='header' {pageBreak}><p><b>{Note6}</b></p></div>");
+            }
+            else
+            {
+                sbFinal.Append($@"
+                    <div class='header'><p><b>{Note6}</b></p></div>
+                    <div class='header' {pageBreak}><p><b>Notes: </b>{order.Notes}</p></div>");
+            }
 
             if (includeMerchantCopy)
             {
@@ -136,6 +162,11 @@ namespace EcommerceApi.Untilities
                     <h4>Customer Signature: ___________________</h4>
                     <br />
                     <h4>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Authorized By: ___________________</h4>");
+
+                if (!string.IsNullOrEmpty(order.Notes))
+                {
+                    sbFinal.Append($@"<div class='header'><p><b>Notes: </b>{order.Notes}</p></div>");
+                }
             }
 
             sbFinal.Append("</body></ html>");

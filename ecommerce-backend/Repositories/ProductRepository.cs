@@ -93,8 +93,8 @@ namespace EcommerceApi.Repositories
                                       SELECT * FROM ProductInventory
                                       WHERE LocationId = 2
                                     ) Loc2 
-                                    ON Loc2.ProductId = Product.ProductId
-                                    WHERE SalesPrice > 0";
+                                    ON Loc2.ProductId = Product.ProductId";
+                                    // WHERE SalesPrice > 0";
                 conn.Open();
                 return await conn.QueryAsync<ProductViewModel>(query);
             }
