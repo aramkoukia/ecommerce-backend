@@ -21,5 +21,6 @@ namespace EcommerceApi.ViewModel
         public decimal PaidAmount { get; set; }
         public string LocationName { get; set; }
         public string PaymentTypeName { get; set; }
+        public string CompanyName { get; set; }
     }
 }

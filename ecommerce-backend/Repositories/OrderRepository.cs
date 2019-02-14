@@ -31,25 +31,28 @@ namespace EcommerceApi.Repositories
             {
                 string query = $@"
                                     SELECT [Order].[OrderId]
-                                          ,[CustomerId]
+                                          ,[Order].[CustomerId]
                                           ,[Order].[LocationId]
                                           ,[OrderDate]
                                           ,[Total]
                                           ,[SubTotal]
                                           ,[TotalDiscount]
-                                          ,[PstNumber]
+                                          ,[Order].[PstNumber]
                                           ,[Notes]
                                           ,[PoNumber]
-                                          ,[Status]
+                                          ,[Order].[Status]
                                           ,Users.GivenName
 	                                      ,ISNULL(OrderPayment.PaidAmount, 0) AS PaidAmount
 	                                      ,Location.LocationName,
-                                          PaymentTypeName
+                                          PaymentTypeName,
+                                          Customer.CompanyName
                                     FROM [Order]
                                     INNER JOIN Location
 	                                    ON Location.LocationId = [Order].LocationId
-                                    Left JOIN Users
+                                    LEFT JOIN Users
 	                                    ON Users.Id = [Order].CreatedByUserId
+                                    LEFT JOIN Customer
+                                        ON Customer.CustomerId = [Order].CustomerId
                                     LEFT JOIN 
 	                                    ( 
                                             SELECT OrderId, SUM(PaymentAmount) AS PaidAmount , PaymentTypeName
