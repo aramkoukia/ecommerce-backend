@@ -55,6 +55,9 @@ namespace EcommerceApi.Controllers
                 fromDate = DateTime.Now;
             if (toDate == DateTime.MinValue)
                 toDate = DateTime.Now;
+            else 
+                toDate = toDate.AddDays(1).AddTicks(-1);
+
             return await _reportRepository.GetProductSalesReport(fromDate, toDate);
         }
 
@@ -65,6 +68,9 @@ namespace EcommerceApi.Controllers
                 fromDate = DateTime.Now;
             if (toDate == DateTime.MinValue)
                 toDate = DateTime.Now;
+            else
+                toDate = toDate.AddDays(1).AddTicks(-1);
+
             return await _reportRepository.GetProductTypeSalesReport(fromDate, toDate);
         }
 
@@ -75,7 +81,36 @@ namespace EcommerceApi.Controllers
                 fromDate = DateTime.Now;
             if (toDate == DateTime.MinValue)
                 toDate = DateTime.Now;
+            else
+                toDate = toDate.AddDays(1).AddTicks(-1);
+
             return await _reportRepository.GetSalesReport(fromDate, toDate);
+        }
+
+        [HttpGet("PaymentsByPaymentType")]
+        public async Task<IEnumerable<PaymentsByPaymentTypeViewModel>> GetPaymentsByPaymentTypeReport(DateTime fromDate, DateTime toDate)
+        {
+            if (fromDate == DateTime.MinValue)
+                fromDate = DateTime.Now;
+            if (toDate == DateTime.MinValue)
+                toDate = DateTime.Now;
+            else
+                toDate = toDate.AddDays(1).AddTicks(-1);
+
+            return await _reportRepository.GetPaymentsByPaymentTypeReport(fromDate, toDate);
+        }
+
+        [HttpGet("PaymentsTotal")]
+        public async Task<IEnumerable<PaymentsTotalViewModel>> GetPaymentsTotalReport(DateTime fromDate, DateTime toDate)
+        {
+            if (fromDate == DateTime.MinValue)
+                fromDate = DateTime.Now;
+            if (toDate == DateTime.MinValue)
+                toDate = DateTime.Now;
+            else
+                toDate = toDate.AddDays(1).AddTicks(-1);
+
+            return await _reportRepository.GetPaymentsTotalReport(fromDate, toDate);
         }
 
         [HttpGet("Payments")]
@@ -85,6 +120,9 @@ namespace EcommerceApi.Controllers
                 fromDate = DateTime.Now;
             if (toDate == DateTime.MinValue)
                 toDate = DateTime.Now;
+            else
+                toDate = toDate.AddDays(1).AddTicks(-1);
+
             return await _reportRepository.GetPaymentsReport(fromDate, toDate);
         }
 
@@ -95,6 +133,9 @@ namespace EcommerceApi.Controllers
                 fromDate = DateTime.Now;
             if (toDate == DateTime.MinValue)
                 toDate = DateTime.Now;
+            else
+                toDate = toDate.AddDays(1).AddTicks(-1);
+
             return await _reportRepository.GetPurchasesReport(fromDate, toDate);
         }
 
@@ -105,6 +146,9 @@ namespace EcommerceApi.Controllers
                 fromDate = DateTime.Now;
             if (toDate == DateTime.MinValue)
                 toDate = DateTime.Now;
+            else
+                toDate = toDate.AddDays(1).AddTicks(-1);
+
             return await _reportRepository.GetCustomerPaidReport(fromDate, toDate);
         }
 
@@ -115,6 +159,9 @@ namespace EcommerceApi.Controllers
                 fromDate = DateTime.Now;
             if (toDate == DateTime.MinValue)
                 toDate = DateTime.Now;
+            else
+                toDate = toDate.AddDays(1).AddTicks(-1);
+
             return await _reportRepository.GetCustomerUnPaidReport(fromDate, toDate);
         }
 

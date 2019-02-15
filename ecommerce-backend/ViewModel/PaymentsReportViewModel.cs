@@ -8,5 +8,6 @@
         public decimal PaymentAmount { get; set; }
         public string Status { get; set; }
         public string CompanyName { get; set; }
+        public string LocationName { get; set; }
     }
 }

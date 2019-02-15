@@ -103,7 +103,7 @@ namespace EcommerceApi.Controllers
               issuer: _jwtOptions.issuer,
               audience: _jwtOptions.issuer,
               claims: claims,
-              expires: DateTime.Now.AddMinutes(30),
+              expires: DateTime.Now.AddMinutes(540),
               signingCredentials: creds);
 
             return Ok(

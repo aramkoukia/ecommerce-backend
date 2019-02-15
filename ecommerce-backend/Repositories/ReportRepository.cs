@@ -316,12 +316,12 @@ ON [Order].LocationId = OtherTax.LocationId
             }
         }
 
-        public async Task<IEnumerable<PaymentsReportViewModel>> GetPaymentsReport(DateTime fromDate, DateTime toDate)
+        public async Task<IEnumerable<PaymentsTotalViewModel>> GetPaymentsTotalReport(DateTime fromDate, DateTime toDate)
         {
             using (IDbConnection conn = Connection)
             {
                 string query = $@"
-SELECT Users.GivenName, PaymentTypeName, [Order].OrderId, Customer.CompanyName, [Order].Status, SUM(PaymentAmount) AS PaymentAmount
+SELECT PaymentTypeName, SUM(PaymentAmount) AS PaymentAmount, Location.LocationName
 FROM OrderPayment
 INNER JOIN PaymentType
 	ON PaymentType.PaymentTypeId = OrderPayment.PaymentTypeId 
@@ -331,11 +331,63 @@ LEFT JOIN Users
 	ON Users.Id = OrderPayment.CreatedByUserId
 LEFT JOIN Customer
 	ON Customer.CustomerId = [Order].CustomerId
+INNER JOIN Location
+    ON [Order].LocationId = Location.LocationId
 WHERE OrderDate BETWEEN @fromDate AND @toDate
-GROUP BY PaymentTypeName, Users.GivenName, [Order].OrderId, Customer.CompanyName, [Order].Status
+GROUP BY PaymentTypeName, Location.LocationName
+                                 ";
+                conn.Open();
+                return await conn.QueryAsync<PaymentsTotalViewModel>(query, new { fromDate, toDate });
+            }
+        }
+
+        public async Task<IEnumerable<PaymentsReportViewModel>> GetPaymentsReport(DateTime fromDate, DateTime toDate)
+        {
+            using (IDbConnection conn = Connection)
+            {
+                string query = $@"
+SELECT Users.GivenName, PaymentTypeName, [Order].OrderId, Customer.CompanyName, [Order].Status, SUM(PaymentAmount) AS PaymentAmount, Location.LocationName
+FROM OrderPayment
+INNER JOIN PaymentType
+	ON PaymentType.PaymentTypeId = OrderPayment.PaymentTypeId 
+INNER JOIN [Order]
+	ON [Order].OrderId = OrderPayment.OrderId
+LEFT JOIN Users
+	ON Users.Id = OrderPayment.CreatedByUserId
+LEFT JOIN Customer
+	ON Customer.CustomerId = [Order].CustomerId
+INNER JOIN Location
+    ON [Order].LocationId = Location.LocationId
+WHERE OrderDate BETWEEN @fromDate AND @toDate
+GROUP BY PaymentTypeName, Users.GivenName, [Order].OrderId, Customer.CompanyName, [Order].Status, Location.LocationName
                                  ";
                 conn.Open();
                 return await conn.QueryAsync<PaymentsReportViewModel>(query, new { fromDate, toDate });
+            }
+        }
+
+        public async Task<IEnumerable<PaymentsByPaymentTypeViewModel>> GetPaymentsByPaymentTypeReport(DateTime fromDate, DateTime toDate)
+        {
+            using (IDbConnection conn = Connection)
+            {
+                string query = $@"
+SELECT PaymentTypeName, [Order].Status, SUM(PaymentAmount) AS PaymentAmount, Location.LocationName
+FROM OrderPayment
+INNER JOIN PaymentType
+	ON PaymentType.PaymentTypeId = OrderPayment.PaymentTypeId 
+INNER JOIN [Order]
+	ON [Order].OrderId = OrderPayment.OrderId
+LEFT JOIN Users
+	ON Users.Id = OrderPayment.CreatedByUserId
+LEFT JOIN Customer
+	ON Customer.CustomerId = [Order].CustomerId
+INNER JOIN Location
+    ON [Order].LocationId = Location.LocationId
+WHERE OrderDate BETWEEN @fromDate AND @toDate
+GROUP BY PaymentTypeName, [Order].Status, Location.LocationName
+                                 ";
+                conn.Open();
+                return await conn.QueryAsync<PaymentsByPaymentTypeViewModel>(query, new { fromDate, toDate });
             }
         }
 
