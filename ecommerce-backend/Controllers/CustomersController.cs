@@ -47,8 +47,7 @@ namespace EcommerceApi.Controllers
                 return BadRequest(ModelState);
             }
 
-            var customer = await _context.Customer.AsNoTracking().SingleOrDefaultAsync(m => m.CustomerId == id);
-
+            var customer = await _customerRepository.GetCustomer(id);
             if (customer == null)
             {
                 return NotFound();
