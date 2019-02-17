@@ -14,7 +14,7 @@ namespace EcommerceApi.Untilities
         private static readonly string Note3 = "Mention your invoice number on memo.Thank you.";
         private static readonly string Note4 = "All products must be installed by certified electrician. We will not be responsible for any damage caused by incorrectly connecting or improper use of the material.";
         private static readonly string Note5 = "All returns are subject to a <b>10% restocking fees.</b> We accept return and exchange up to <b>7 Days</b> after the date of purchase in new condition, not energized and original packaging with original Invoice and receipt.";
-        private static readonly string Note6 = "All Customer orders: No returns-No exchange.";
+        private static readonly string Note6 = "All Custom orders: No returns-No exchange.";
         private static readonly string Note7 = "By signing below, you confirm that you have received all the products as per your requirement. Our company does not hold responsibility in case of any wrong order. I also agree with the above store policy.";
         private static readonly string CustomerCopy = "Customer Copy";
         private static readonly string MerchantCopy = "Merchant Copy";
