@@ -212,7 +212,7 @@ GROUP BY ProductTypeName
             using (IDbConnection conn = Connection)
             {
                 string query = $@"
-SELECT ProductName, ProductCode, ProductTypeName, ISNULL(VanTotalSales,0) AS VanTotalSales, ISNULL(AbbTotalSales, 0) AS AbbTotalSales
+SELECT ProductName, ProductCode, ProductTypeName, ISNULL(VanTotalSales,0) AS VanTotalSales, ISNULL(AbbTotalSales, 0) AS AbbTotalSales, ISNULL(VanBalance,0) AS VanBalance, ISNULL(AbbBalance, 0) AS AbbBalance
 FROM Product
 INNER JOIN ProductType
 	ON ProductType.ProductTypeId = Product.ProductTypeId
@@ -231,7 +231,15 @@ LEFT JOIN (SELECT SUM(OrderDetail.Total) AS AbbTotalSales, ProductId
 		   WHERE [Order].LocationId = 2
                  AND OrderDate BETWEEN @fromDate AND @toDate
 		   GROUP BY ProductId ) AbbSales
-ON Product.ProductId = AbbSales.ProductId
+	ON Product.ProductId = AbbSales.ProductId
+LEFT JOIN (SELECT ProductId, Balance AS VanBalance 
+           FROM ProductInventory
+           WHERE LocationId = 1) VanInventoy
+     ON Product.ProductId = VanInventoy.ProductId
+LEFT JOIN (SELECT ProductId, Balance AS AbbBalance 
+           FROM ProductInventory
+           WHERE LocationId = 2) AbbInventoy
+     ON Product.ProductId = AbbInventoy.ProductId
 WHERE ISNULL(VanTotalSales,0) <> 0 OR ISNULL(AbbTotalSales, 0) <> 0
                                  ";
                 conn.Open();

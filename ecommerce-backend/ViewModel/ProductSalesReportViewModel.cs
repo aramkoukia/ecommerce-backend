@@ -7,5 +7,7 @@
         public string ProductTypeName { get; set; }
         public decimal VanTotalSales { get; set; }
         public decimal AbbTotalSales { get; set; }
+        public decimal VanBalance { get; set; }
+        public decimal AbbBalance { get; set; }
     }
 }
