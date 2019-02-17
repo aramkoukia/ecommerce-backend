@@ -415,6 +415,16 @@ www.lightsandparts.com | essi@lightsandparts.com
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == order.CreatedByUserId);
             order.CreatedByUserName = user.UserName;
 
+            var includeMerchantCopy = false;
+            if (order.Status == OrderStatus.Draft.ToString() || order.Status == OrderStatus.OnHold.ToString())
+            {
+                includeMerchantCopy = false;
+            }
+            else
+            {
+                includeMerchantCopy = true;
+            }
+
             var globalSettings = new GlobalSettings
             {
                 ColorMode = ColorMode.Color,
@@ -428,7 +438,7 @@ www.lightsandparts.com | essi@lightsandparts.com
             var objectSettings = new ObjectSettings
             {
                 PagesCount = true,
-                HtmlContent = OrderTemplateGenerator.GetHtmlString(order, true),
+                HtmlContent = OrderTemplateGenerator.GetHtmlString(order, includeMerchantCopy),
                 WebSettings = { DefaultEncoding = "utf-8", UserStyleSheet = Path.Combine(Directory.GetCurrentDirectory(), "assets", "invoice.css") },
                 // HeaderSettings = { FontName = "Arial", FontSize = 9, Right = "Page [page] of [toPage]", Line = true },
                 // FooterSettings = { FontName = "Arial", FontSize = 9, Line = true, Center = "Page [page] of [toPage]" }
