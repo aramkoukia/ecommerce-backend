@@ -67,34 +67,45 @@ namespace EcommerceApi.Repositories
             using (IDbConnection conn = Connection)
             {
                 string query = $@"
-                                    SELECT Product.ProductId, 
-                                           ProductCode, 
-	                                       ProductName, 
-	                                       ChargeTaxes, 
-	                                       AllowOutOfStockPurchase, 
-	                                       SalesPrice, 
-	                                       PurchasePrice, 
-	                                       Product.ModifiedDate, 
-	                                       Product.ProductTypeId, 
-	                                       ProductType.ProductTypeName,
-	                                       ISNULL(Loc1.Balance,0) As VancouverBalance,
-	                                       ISNULL(Loc2.Balance,0) As AbbotsfordBalance,
-                                           ISNULL(Loc1.BinCode,'') AS VancouverBinCode,
-                                           ISNULL(Loc2.BinCode,'') AS AbbotsfordBinCode
-                                    FROM Product
-                                    LEFT JOIN ProductType
-                                    ON Product.ProductTypeId = ProductType.ProductTypeId
-                                    LEFT JOIN (
-                                      SELECT * FROM ProductInventory
-                                      WHERE LocationId = 1
-                                    ) Loc1
-                                    ON Loc1.ProductId = Product.ProductId
-                                    LEFT JOIN (
-                                      SELECT * FROM ProductInventory
-                                      WHERE LocationId = 2
-                                    ) Loc2 
-                                    ON Loc2.ProductId = Product.ProductId";
-                                    // WHERE SalesPrice > 0";
+SELECT Product.ProductId, 
+        ProductCode, 
+	    ProductName, 
+	    ChargeTaxes, 
+	    AllowOutOfStockPurchase, 
+	    SalesPrice, 
+	    PurchasePrice, 
+	    Product.ModifiedDate, 
+	    Product.ProductTypeId, 
+	    ProductType.ProductTypeName,
+	    ISNULL(Loc1.Balance,0) As VancouverBalance,
+	    ISNULL(Loc2.Balance,0) As AbbotsfordBalance,
+        ISNULL(Loc1.BinCode,'') AS VancouverBinCode,
+        ISNULL(Loc2.BinCode,'') AS AbbotsfordBinCode,
+		ISNULL(OnHoldItems.OnHoldAmount, 0) AS OnHoldAmount
+FROM Product
+LEFT JOIN ProductType
+ON Product.ProductTypeId = ProductType.ProductTypeId
+LEFT JOIN (
+    SELECT * FROM ProductInventory
+    WHERE LocationId = 1
+) Loc1
+ON Loc1.ProductId = Product.ProductId
+LEFT JOIN (
+    SELECT * FROM ProductInventory
+    WHERE LocationId = 2
+) Loc2 
+ON Loc2.ProductId = Product.ProductId
+LEFT JOIN (
+  SELECT ProductId, SUM(Amount) As OnHoldAmount
+  FROM [Order]
+  INNER JOIN OrderDetail
+	ON [Order].OrderId = OrderDetail.OrderId
+  WHERE [Order].Status = 'OnHold'
+  GROUP BY ProductId
+) AS OnHoldItems
+ON OnHoldItems.ProductId = Product.ProductId
+";
+// WHERE SalesPrice > 0";
                 conn.Open();
                 return await conn.QueryAsync<ProductViewModel>(query);
             }

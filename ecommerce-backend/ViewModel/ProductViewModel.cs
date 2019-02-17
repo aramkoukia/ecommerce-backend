@@ -18,5 +18,6 @@ namespace EcommerceApi.ViewModel
         public decimal AbbotsfordBalance { get; set; }
         public string VancouverBinCode { get; set; }
         public string AbbotsfordBinCode { get; set; }
+        public decimal OnHoldAmount { get; set; }
     }
 }
