@@ -328,8 +328,10 @@ namespace EcommerceApi.Controllers
                 PaperSize = PaperKind.A4,
                 Margins = new MarginSettings { Top = 10 },
                 DocumentTitle = $"Order {order.OrderId}",
-                // Out = @"C:\PDFCreator\Employee_Report.pdf"
             };
+
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == order.CreatedByUserId);
+            order.CreatedByUserName = user.UserName;
 
             var objectSettings = new ObjectSettings
             {
@@ -411,7 +413,7 @@ www.lightsandparts.com | essi@lightsandparts.com
                 .SingleOrDefaultAsync(m => m.OrderId == orderId);
 
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == order.CreatedByUserId);
-            order.CreatedByUserName = user.GivenName;
+            order.CreatedByUserName = user.UserName;
 
             var globalSettings = new GlobalSettings
             {
