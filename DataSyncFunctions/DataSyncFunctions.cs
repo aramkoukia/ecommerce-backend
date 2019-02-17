@@ -17,12 +17,12 @@ namespace DataSyncFunctions
             client.GetAsync("https://lightsandpartsapi.azurewebsites.net/api/sync/products");
         }
 
-        [FunctionName("SyncCustomers")]
-        public static void RunSyncCustomers([TimerTrigger("0 0 1 * * *")]TimerInfo myTimer, TraceWriter log)
-        {
-            log.Info($"Sync Customers: {DateTime.Now}");
-            client.GetAsync("https://lightsandpartsapi.azurewebsites.net/api/sync/customers");
-        }
+        //[FunctionName("SyncCustomers")]
+        //public static void RunSyncCustomers([TimerTrigger("0 0 1 * * *")]TimerInfo myTimer, TraceWriter log)
+        //{
+        //    log.Info($"Sync Customers: {DateTime.Now}");
+        //    client.GetAsync("https://lightsandpartsapi.azurewebsites.net/api/sync/customers");
+        //}
 
         [FunctionName("SendCustomerInvoices")]
         // 8:00 a.m. every 1st of everymonth

@@ -111,6 +111,7 @@ namespace EcommerceApi.Controllers
                 return BadRequest(ModelState);
             }
 
+            location.LocationId = _context.Location.Max(l => l.LocationId) + 1;
             _context.Location.Add(location);
             try
             {
