@@ -45,7 +45,7 @@ namespace EcommerceApi.Repositories
 	                                      ,ISNULL(OrderPayment.PaidAmount, 0) AS PaidAmount
 	                                      ,Location.LocationName,
                                           PaymentTypeName,
-                                          Customer.CompanyName
+                                          ISNULL(Customer.CompanyName, 'WALK-IN') AS CompanyName
                                     FROM [Order]
                                     INNER JOIN Location
 	                                    ON Location.LocationId = [Order].LocationId

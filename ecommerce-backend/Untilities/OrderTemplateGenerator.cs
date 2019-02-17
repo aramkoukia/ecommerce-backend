@@ -24,7 +24,7 @@ namespace EcommerceApi.Untilities
             var sbCustomer = new StringBuilder();
             var sbFinal = new StringBuilder();
             var pageBreak = includeMerchantCopy ? "style='page-break-after: always;'" : "";
-            
+            var customerName = string.IsNullOrEmpty(order.Customer.CompanyName) ? "WALK-IN" : order.Customer.CompanyName;
             sbCustomer.Append($@"
                         <html>
                             <head>
@@ -51,7 +51,7 @@ namespace EcommerceApi.Untilities
                                      Phone: +1 (604) 744-4474
                                 </div>
 
-                                <div class='right spaceafter-10'>Customer: {order.Customer.CompanyName}</div>
+                                <div class='right spaceafter-10'>Customer: {customerName}</div>
                                 <div><b>Invoice #{order.OrderId}</b></div>");
             if (!string.IsNullOrEmpty(order.PoNumber))
             {
