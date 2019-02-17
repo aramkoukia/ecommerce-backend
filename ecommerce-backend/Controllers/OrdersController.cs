@@ -77,6 +77,7 @@ namespace EcommerceApi.Controllers
                 .Include(t => t.OrderTax)
                     .ThenInclude(t => t.Tax)
                 .Include(o => o.OrderPayment)
+                    .ThenInclude(p => p.PaymentType)
                 .Include(o => o.Customer)
                 .Include(l => l.Location)
                 .SingleOrDefaultAsync(m => m.OrderId == id);
