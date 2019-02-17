@@ -4,5 +4,6 @@
     {
         public string OrderStatus { get; set; }
         public int PaymentTypeId { get; set; }
+        public string ChequeNo { get; set; }
     }
 }

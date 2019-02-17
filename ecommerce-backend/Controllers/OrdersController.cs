@@ -115,7 +115,8 @@ namespace EcommerceApi.Controllers
                         CreatedDate = date,
                         PaymentAmount = order.Total,
                         PaymentDate = date,
-                        PaymentTypeId = updateOrderStatus.PaymentTypeId
+                        PaymentTypeId = updateOrderStatus.PaymentTypeId,
+                        ChequeNo = updateOrderStatus.ChequeNo
                     }
                 );
             }
@@ -228,7 +229,8 @@ namespace EcommerceApi.Controllers
                         CreatedDate = order.CreatedDate,
                         PaymentAmount = order.Total,
                         PaymentDate = order.CreatedDate,
-                        PaymentTypeId = order.PaymentTypeId
+                        PaymentTypeId = order.PaymentTypeId,
+                        ChequeNo = order.ChequeNo
                     }
                 );
             }

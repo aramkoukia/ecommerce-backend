@@ -39,6 +39,9 @@ namespace EcommerceApi.Models
         public int PaymentTypeId { get; set; }
 
         [NotMapped]
+        public string ChequeNo { get; set; }
+
+        [NotMapped]
         public string AuthCode { get; set; }
 
         [NotMapped]
