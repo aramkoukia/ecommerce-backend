@@ -17,6 +17,13 @@ namespace DataSyncFunctions
             client.GetAsync("https://lightsandpartsapi.azurewebsites.net/api/sync/products");
         }
 
+        [FunctionName("MakeOnHoldOrdersAsDraft")]
+        public static void RunMakeOnHoldOrdersAsDraft([TimerTrigger("0 0 1 * * *")]TimerInfo myTimer, TraceWriter log)
+        {
+            log.Info($"MakeOnHoldOrdersAsDraft: {DateTime.Now}");
+            client.GetAsync("https://lightsandpartsapi.azurewebsites.net/api/orders/cancelonholdorders");
+        }
+
         //[FunctionName("SyncCustomers")]
         //public static void RunSyncCustomers([TimerTrigger("0 0 1 * * *")]TimerInfo myTimer, TraceWriter log)
         //{

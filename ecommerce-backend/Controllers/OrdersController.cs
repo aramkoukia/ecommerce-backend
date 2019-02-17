@@ -90,6 +90,29 @@ namespace EcommerceApi.Controllers
             return Ok(order);
         }
 
+        // GET: api/cancelonholdorders
+        [HttpGet("cancelonholdorders")]
+        [AllowAnonymous]
+        public async Task<IActionResult> CancelOnHoldOrders()
+        {
+            var orders = _context.Order
+                .Where(o => o.Status.Equals(OrderStatus.OnHold.ToString(), StringComparison.InvariantCultureIgnoreCase)
+                       && o.OrderDate < DateTime.Now.AddDays(-14));
+            var updateOrderStatus = new UpdateOrderStatus
+            {
+                OrderStatus = OrderStatus.Draft.ToString()
+            };
+
+            foreach (var order in orders)
+            {
+                var done = await AddToInventory(order, updateOrderStatus);
+                order.Status = OrderStatus.Draft.ToString();
+                order.Notes = $"{order.Notes} - Marked as Draft from OnHold after 14 days by system.";
+            }
+            await _context.SaveChangesAsync();
+            return Ok();
+        }
+
         // PUT: api/Orders/5/Status
         [HttpPut("{id}/Status")]
         public async Task<IActionResult> PutOrder([FromRoute] int id, [FromBody] UpdateOrderStatus updateOrderStatus)
