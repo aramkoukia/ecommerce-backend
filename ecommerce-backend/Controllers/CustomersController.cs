@@ -159,11 +159,12 @@ www.lightsandparts.com | sina@lightsandparts.com
             // TODO: temp for testing, also set CcAdmin to true when finished testing 
             customer.Email = "aramkoukia@gmail.com";
 
-            await _emailSender.SendEmailAsync(customer.Email, subject, null, message, attachment, attachmentName, false);
+            await _emailSender.SendEmailAsync(customer.Email, subject, null, message, attachment, attachmentName, true);
             return Ok();
         }
 
         // GET: api/Customers/EmailStatement
+        [AllowAnonymous]
         [HttpGet("{id}/PrintStatement")]
         public async Task<FileResult> PrintCustomerStatement(int id)
         {
