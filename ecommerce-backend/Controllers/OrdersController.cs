@@ -260,7 +260,7 @@ namespace EcommerceApi.Controllers
             }
 
             var done = await UpdateInventory(order);
-
+            order.OrderId = _context.Order.Max(o => o.OrderId) + 1;
             _context.Order.Add(order);
             await _context.SaveChangesAsync();
 

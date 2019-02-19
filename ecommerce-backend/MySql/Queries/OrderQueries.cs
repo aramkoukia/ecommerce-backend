@@ -47,7 +47,7 @@ SELECT p.id,
     (select meta_value from wp_postmeta where post_id = p.id and meta_key = '_wp_old_date' limit 1) as wp_old_date,
     p.post_date
 FROM wp_posts p 
-where p.post_type IN ( '_pos_sale')     
+where p.post_type IN ( '_pos_sale') and p.id < 75746    
 ";
             return await ReadAllOrdersAsync(await cmd.ExecuteReaderAsync());
         }
@@ -71,6 +71,25 @@ FROM wp_posts p
 where p.post_type IN ( '_pos_payment') 
 ";
             return await ReadAllOrderPaymentsAsync(await cmd.ExecuteReaderAsync());
+        }
+
+        public async Task<List<MySqlOrderLineItem>> GetAllOrderDetails()
+        {
+            var cmd = Db.Connection.CreateCommand();
+            cmd.CommandText = @"
+
+SELECT p.order_id,
+    (select meta_value from wp_woocommerce_order_itemmeta where order_item_id = p.order_item_id and meta_key = '_qty' limit 1) as _qty,
+    (select meta_value from wp_woocommerce_order_itemmeta where order_item_id = p.order_item_id and meta_key = '_product_id' limit 1) as _product_id,
+    (select meta_value from wp_woocommerce_order_itemmeta where order_item_id = p.order_item_id and meta_key = '_line_price' limit 1) as _line_price,
+    (select meta_value from wp_woocommerce_order_itemmeta where order_item_id = p.order_item_id and meta_key = '_line_subtotal' limit 1) as _line_subtotal,
+    (select meta_value from wp_woocommerce_order_itemmeta where order_item_id = p.order_item_id and meta_key = '_line_total' limit 1) as _line_total,
+    (select meta_value from wp_woocommerce_order_itemmeta where order_item_id = p.order_item_id and meta_key = '_order_product_id' limit 1) as _order_product_id,
+    (select meta_value from wp_woocommerce_order_itemmeta where order_item_id = p.order_item_id and meta_key = '_pos_payment_amount' limit 1) as _pos_payment_amount
+FROM wp_woocommerce_order_items p
+where p.order_item_type = 'line_item'
+";
+            return await ReadAllOrderLineItemsAsync(await cmd.ExecuteReaderAsync());
         }
 
         private async Task<List<MySqlOrder>> ReadAllOrdersAsync(DbDataReader reader)
@@ -135,6 +154,29 @@ where p.post_type IN ( '_pos_payment')
                         _pos_payment_comment = await reader.IsDBNullAsync(8) ? string.Empty : await reader.GetFieldValueAsync<string>(8),
                         _pos_payment_chequeNo = await reader.IsDBNullAsync(9) ? string.Empty : await reader.GetFieldValueAsync<string>(9),
                         post_author = await reader.GetFieldValueAsync<UInt64>(10),
+                    };
+                    posts.Add(post);
+                }
+            }
+            return posts;
+        }
+
+        private async Task<List<MySqlOrderLineItem>> ReadAllOrderLineItemsAsync(DbDataReader reader)
+        {
+            var posts = new List<MySqlOrderLineItem>();
+            using (reader)
+            {
+                while (await reader.ReadAsync())
+                {
+                    var post = new MySqlOrderLineItem(Db)
+                    {
+                        order_id = await reader.GetFieldValueAsync<UInt64>(0),
+                        _qty = await reader.IsDBNullAsync(1) ? string.Empty : await reader.GetFieldValueAsync<string>(1),
+                        _product_id = await reader.IsDBNullAsync(2) ? string.Empty : await reader.GetFieldValueAsync<string>(2),
+                        _line_price = await reader.IsDBNullAsync(3) ? string.Empty : await reader.GetFieldValueAsync<string>(3),
+                        _line_subtotal = await reader.IsDBNullAsync(4) ? string.Empty : await reader.GetFieldValueAsync<string>(4),
+                        _line_total = await reader.IsDBNullAsync(6) ? string.Empty : await reader.GetFieldValueAsync<string>(6),
+                        _order_product_id = await reader.IsDBNullAsync(7) ? string.Empty : await reader.GetFieldValueAsync<string>(7),
                     };
                     posts.Add(post);
                 }

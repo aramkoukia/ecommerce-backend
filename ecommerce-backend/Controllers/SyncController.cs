@@ -77,7 +77,7 @@ namespace EcommerceApi.Controllers
                         if (typeId > 0)
                         {
                             var existingProductType = await _context.ProductType.FindAsync(typeId);
-                            if (existingProductType == null) { 
+                            if (existingProductType == null) {
                                 newProduct.ProductType = new ProductType
                                 {
                                     ProductTypeId = typeId,
@@ -112,139 +112,139 @@ namespace EcommerceApi.Controllers
             return Ok(errorList);
         }
 
-        [HttpGet("ProductsInventory")]
-        public async Task<IActionResult> SyncProductsInventory()
-        {
-            var errorList = new List<string>();
-            try
-            {
-                if (_db.Connection.State == System.Data.ConnectionState.Closed)
-                {
-                    await _db.Connection.OpenAsync();
-                }
+        //[HttpGet("ProductsInventory")]
+        //public async Task<IActionResult> SyncProductsInventory()
+        //{
+        //    var errorList = new List<string>();
+        //    try
+        //    {
+        //        if (_db.Connection.State == System.Data.ConnectionState.Closed)
+        //        {
+        //            await _db.Connection.OpenAsync();
+        //        }
 
-                var query = new ProductQueries(_db);
-                var products = await query.GetAllProductInventories();
-                foreach (var product in products)
-                {
-                    var found = _context.ProductInventory.FirstOrDefault(p => p.LocationId == int.Parse(product.warehouse_id.ToString()) && p.ProductId == int.Parse(product.product_id.ToString()));
-                    if (found == null)
-                    {
-                        var productExists = await _context.Product.FindAsync(int.Parse(product.product_id.ToString()));
-                        if (productExists != null)
-                        {
-                            var newProduct = new ProductInventory
-                            {
-                                ProductId = int.Parse(product.product_id.ToString()),
-                                Balance = string.IsNullOrEmpty(product.stock) ? 0 : decimal.Parse(product.stock),
-                                BinCode = "",
-                                LocationId = int.Parse(product.warehouse_id.ToString()),
-                                ModifiedDate = DateTime.Now,
-                            };
-                            await _context.ProductInventory.AddAsync(newProduct);
-                            await _context.SaveChangesAsync();
-                        }
-                    }
-                    else
-                    {
-                        found.Balance = string.IsNullOrEmpty(product.stock) ? 0 : decimal.Parse(product.stock);
-                        await _context.SaveChangesAsync();
-                    }
-                }
-                _db.Connection.Close();
-            }
-            catch (Exception ex)
-            {
-                errorList.Add("order taxes:" + ex.ToString());
-            }
+        //        var query = new ProductQueries(_db);
+        //        var products = await query.GetAllProductInventories();
+        //        foreach (var product in products)
+        //        {
+        //            var found = _context.ProductInventory.FirstOrDefault(p => p.LocationId == int.Parse(product.warehouse_id.ToString()) && p.ProductId == int.Parse(product.product_id.ToString()));
+        //            if (found == null)
+        //            {
+        //                var productExists = await _context.Product.FindAsync(int.Parse(product.product_id.ToString()));
+        //                if (productExists != null)
+        //                {
+        //                    var newProduct = new ProductInventory
+        //                    {
+        //                        ProductId = int.Parse(product.product_id.ToString()),
+        //                        Balance = string.IsNullOrEmpty(product.stock) ? 0 : decimal.Parse(product.stock),
+        //                        BinCode = "",
+        //                        LocationId = int.Parse(product.warehouse_id.ToString()),
+        //                        ModifiedDate = DateTime.Now,
+        //                    };
+        //                    await _context.ProductInventory.AddAsync(newProduct);
+        //                    await _context.SaveChangesAsync();
+        //                }
+        //            }
+        //            else
+        //            {
+        //                found.Balance = string.IsNullOrEmpty(product.stock) ? 0 : decimal.Parse(product.stock);
+        //                await _context.SaveChangesAsync();
+        //            }
+        //        }
+        //        _db.Connection.Close();
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        errorList.Add("order taxes:" + ex.ToString());
+        //    }
 
-            await _emailSender.SendEmailAsync("aramkoukia@gmail.com", "Sync Finished: Products Inventory", $"Sync Finished: Products Inventory. {string.Join(",", errorList)}");
-            return Ok(errorList);
-        }
+        //    await _emailSender.SendEmailAsync("aramkoukia@gmail.com", "Sync Finished: Products Inventory", $"Sync Finished: Products Inventory. {string.Join(",", errorList)}");
+        //    return Ok(errorList);
+        //}
 
-        [HttpGet("Customers")]
-        public async Task<IActionResult> SyncCustomers()
-        {
-            var errorList = new List<string>();
-            var customersCreated = 0;
-            var customersUpdated = 0;
-            try
-            {
-                if (_db.Connection.State == System.Data.ConnectionState.Closed)
-                {
-                    await _db.Connection.OpenAsync();
-                }
+        //[HttpGet("Customers")]
+        //public async Task<IActionResult> SyncCustomers()
+        //{
+        //    var errorList = new List<string>();
+        //    var customersCreated = 0;
+        //    var customersUpdated = 0;
+        //    try
+        //    {
+        //        if (_db.Connection.State == System.Data.ConnectionState.Closed)
+        //        {
+        //            await _db.Connection.OpenAsync();
+        //        }
 
-                var query = new CustomerQueries(_db);
-                var customers = await query.GetAllCustomers();
-                foreach (var customer in customers)
-                {
-                    var limit = 0;
-                    int.TryParse(customer._pos_customer_accountlimit, out limit);
+        //        var query = new CustomerQueries(_db);
+        //        var customers = await query.GetAllCustomers();
+        //        foreach (var customer in customers)
+        //        {
+        //            var limit = 0;
+        //            int.TryParse(customer._pos_customer_accountlimit, out limit);
 
-                    var found = await _context.Customer.FindAsync(int.Parse(customer.id.ToString()));
-                    if (found == null)
-                    {
-                        customersCreated++;
-                        var newCustomer = new Customer
-                        {
-                            Address = customer._pos_customer_address,
-                            City = customer._pos_customer_city,
-                            CompanyName = customer._pos_customer_company_name,
-                            Country = customer._pos_customer_country,
-                            CreditLimit = limit,
-                            CustomerCode = customer.id.ToString(),
-                            CustomerId = int.Parse(customer.id.ToString()),
-                            Email = customer._pos_customer_email,
-                            FirstName = customer._pos_customer_first_name,
-                            LastName = customer._pos_customer_last_name,
-                            Mobile = customer._pos_customer_mobile,
-                            PhoneNumber = customer._pos_customer_phone,
-                            PostalCode = customer._pos_customer_postal_code,
-                            Province = customer._pos_customer_province,
-                            PstNumber = customer._pos_customer_pst_number,
-                            Status = "",
-                            UserName = customer._pos_customer_email,
-                            Website = customer._pos_customer_contractorlink
-                        };
-                        await _context.Customer.AddAsync(newCustomer);
-                        await _context.SaveChangesAsync();
-                    }
-                    else
-                    {
-                        customersUpdated++;
-                        found.Address = customer._pos_customer_address;
-                        found.City = customer._pos_customer_city;
-                        found.CompanyName = customer._pos_customer_company_name;
-                        found.Country = customer._pos_customer_country;
-                        found.CreditLimit = limit;
-                        found.CustomerCode = customer.id.ToString();
-                        // found.CustomerId = int.Parse(customer.id.ToString());
-                        found.Email = customer._pos_customer_email;
-                        found.FirstName = customer._pos_customer_first_name;
-                        found.LastName = customer._pos_customer_last_name;
-                        found.Mobile = customer._pos_customer_mobile;
-                        found.PhoneNumber = customer._pos_customer_phone;
-                        found.PostalCode = customer._pos_customer_postal_code;
-                        found.Province = customer._pos_customer_province;
-                        found.PstNumber = customer._pos_customer_pst_number;
-                        found.Status = "";
-                        found.UserName = customer._pos_customer_email;
-                        found.Website = customer._pos_customer_contractorlink;
-                        await _context.SaveChangesAsync();
-                    }
-                }
-                _db.Connection.Close();
-            }
-            catch (Exception ex)
-            {
-                errorList.Add("order taxes:" + ex.ToString());
-            }
+        //            var found = await _context.Customer.FindAsync(int.Parse(customer.id.ToString()));
+        //            if (found == null)
+        //            {
+        //                customersCreated++;
+        //                var newCustomer = new Customer
+        //                {
+        //                    Address = customer._pos_customer_address,
+        //                    City = customer._pos_customer_city,
+        //                    CompanyName = customer._pos_customer_company_name,
+        //                    Country = customer._pos_customer_country,
+        //                    CreditLimit = limit,
+        //                    CustomerCode = customer.id.ToString(),
+        //                    CustomerId = int.Parse(customer.id.ToString()),
+        //                    Email = customer._pos_customer_email,
+        //                    FirstName = customer._pos_customer_first_name,
+        //                    LastName = customer._pos_customer_last_name,
+        //                    Mobile = customer._pos_customer_mobile,
+        //                    PhoneNumber = customer._pos_customer_phone,
+        //                    PostalCode = customer._pos_customer_postal_code,
+        //                    Province = customer._pos_customer_province,
+        //                    PstNumber = customer._pos_customer_pst_number,
+        //                    Status = "",
+        //                    UserName = customer._pos_customer_email,
+        //                    Website = customer._pos_customer_contractorlink
+        //                };
+        //                await _context.Customer.AddAsync(newCustomer);
+        //                await _context.SaveChangesAsync();
+        //            }
+        //            else
+        //            {
+        //                customersUpdated++;
+        //                found.Address = customer._pos_customer_address;
+        //                found.City = customer._pos_customer_city;
+        //                found.CompanyName = customer._pos_customer_company_name;
+        //                found.Country = customer._pos_customer_country;
+        //                found.CreditLimit = limit;
+        //                found.CustomerCode = customer.id.ToString();
+        //                // found.CustomerId = int.Parse(customer.id.ToString());
+        //                found.Email = customer._pos_customer_email;
+        //                found.FirstName = customer._pos_customer_first_name;
+        //                found.LastName = customer._pos_customer_last_name;
+        //                found.Mobile = customer._pos_customer_mobile;
+        //                found.PhoneNumber = customer._pos_customer_phone;
+        //                found.PostalCode = customer._pos_customer_postal_code;
+        //                found.Province = customer._pos_customer_province;
+        //                found.PstNumber = customer._pos_customer_pst_number;
+        //                found.Status = "";
+        //                found.UserName = customer._pos_customer_email;
+        //                found.Website = customer._pos_customer_contractorlink;
+        //                await _context.SaveChangesAsync();
+        //            }
+        //        }
+        //        _db.Connection.Close();
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        errorList.Add("order taxes:" + ex.ToString());
+        //    }
 
-            await _emailSender.SendEmailAsync("aramkoukia@gmail.com", "Sync Finished: Customers", $"Sync Finished: Customers.  \n Customers Created: {customersCreated}. \n Customers Updated: {customersUpdated}. \n Errors: {string.Join(",", errorList)}");
+        //    await _emailSender.SendEmailAsync("aramkoukia@gmail.com", "Sync Finished: Customers", $"Sync Finished: Customers.  \n Customers Created: {customersCreated}. \n Customers Updated: {customersUpdated}. \n Errors: {string.Join(",", errorList)}");
 
-            return Ok(errorList);
-        }
+        //    return Ok(errorList);
+        //}
 
         [HttpGet("Orders")]
         public async Task<IActionResult> SyncOrders()
@@ -452,33 +452,36 @@ namespace EcommerceApi.Controllers
                 {
                     try
                     {
-                        var found = _context.OrderPayment.FirstOrDefault(o => o.OrderId == int.Parse(order._pos_payment_order_id.ToString())
-                                                                  && o.PaymentAmount == decimal.Parse(order._pos_payment_amount.ToString())
-                                                                  && o.AuthCode == order._pos_payment_AuthCode.ToString());
-                        if (found == null)
+                        //var found = _context.OrderPayment.FirstOrDefault(o => o.OrderId == int.Parse(order._pos_payment_order_id.ToString())
+                        //                                          && o.PaymentAmount == decimal.Parse(order._pos_payment_amount.ToString())
+                        //                                          && o.AuthCode == order._pos_payment_AuthCode.ToString());
+                        //if (found == null)
+                        //{
+                        if (int.Parse(order._pos_payment_order_id.ToString()) >= 75746)
                         {
-
-                            var newOrder = new OrderPayment
-                            {
-                                CreatedByUserId = order.post_author.ToString(),
-                                CreatedDate = order.post_date,
-                                CreditCard = order._pos_payment_lastFour,
-                                OrderId = int.Parse(order._pos_payment_order_id.ToString()),
-                                PaymentAmount = decimal.Parse(order._pos_payment_amount),
-                                PaymentDate = order.post_date,
-                                PaymentTypeId = int.Parse(order._pos_payment_paymentType_id.ToString()),
-                                AuthCode = order._pos_payment_AuthCode,
-                                Notes = order._pos_payment_comment,
-                                ChequeNo = order._pos_payment_chequeNo
-                            };
-                            newOrder.PaymentType = null;
-                            await _context.OrderPayment.AddAsync(newOrder);
-                            await _context.SaveChangesAsync();
+                            continue;
                         }
-                        else
+                        var newOrder = new OrderPayment
                         {
-                            // await _context.SaveChangesAsync();
-                        }
+                            CreatedByUserId = order.post_author.ToString(),
+                            CreatedDate = order.post_date,
+                            CreditCard = order._pos_payment_lastFour,
+                            OrderId = int.Parse(order._pos_payment_order_id.ToString()),
+                            PaymentAmount = decimal.Parse(order._pos_payment_amount),
+                            PaymentDate = order.post_date,
+                            PaymentTypeId = int.Parse(order._pos_payment_paymentType_id.ToString()),
+                            AuthCode = order._pos_payment_AuthCode,
+                            Notes = order._pos_payment_comment,
+                            ChequeNo = order._pos_payment_chequeNo
+                        };
+                        newOrder.PaymentType = null;
+                        await _context.OrderPayment.AddAsync(newOrder);
+                        await _context.SaveChangesAsync();
+                        //}
+                        //else
+                        //{
+                        //    // await _context.SaveChangesAsync();
+                        //}
                     }
                     catch (Exception ex)
                     {
@@ -490,6 +493,62 @@ namespace EcommerceApi.Controllers
             catch (Exception ex)
             {
                 errorList.Add("order taxes:" + ex.ToString());
+            }
+
+            return Ok(errorList);
+        }
+
+        [HttpGet("OrderDetails")]
+        public async Task<IActionResult> SyncOrderLineItems()
+        {
+            var errorList = new List<string>();
+            try
+            {
+                if (_db.Connection.State == System.Data.ConnectionState.Closed)
+                {
+                    await _db.Connection.OpenAsync();
+                }
+
+                var query = new OrderQueries(_db);
+                var orders = await query.GetAllOrderDetails();
+                foreach (var order in orders)
+                {
+                    try
+                    {
+                        var orderId = int.Parse(order.order_id.ToString());
+                        var productId = int.Parse(order._product_id);
+                        if (orderId >= 75746
+                            || !_context.Product.Where(o => o.ProductId == productId).Any()
+                            || !_context.Order.Where(o=>o.OrderId == orderId).Any())
+                        {
+                            continue;
+                        }
+
+                        var newOrder = new OrderDetail
+                        {
+                            Amount = decimal.Parse(order._qty),
+                            ProductId = productId,
+                            SubTotal = string.IsNullOrEmpty(order._line_subtotal) ? 0 : decimal.Parse(order._line_subtotal),
+                            Total = string.IsNullOrEmpty(order._line_total) ? 0 : decimal.Parse(order._line_total),
+                            UnitPrice = string.IsNullOrEmpty(order._line_price) ? 0 : decimal.Parse(order._line_price),
+                            OrderId = orderId
+                        };
+                        newOrder.Product = null;
+                        newOrder.DiscountAmount = 0;
+                        newOrder.TotalDiscount = 0;
+                        await _context.OrderDetail.AddAsync(newOrder);
+                        await _context.SaveChangesAsync();
+                    }
+                    catch (Exception ex)
+                    {
+                        errorList.Add("order line items:" + ex.ToString());
+                    }
+                }
+                _db.Connection.Close();
+            }
+            catch (Exception ex)
+            {
+                errorList.Add("order line items:" + ex.ToString());
             }
 
             return Ok(errorList);

@@ -43,7 +43,7 @@ namespace EcommerceApi.Repositories
 		                                ) OrderPayment
 		                                ON [Order].OrderId = OrderPayment.OrderId
 		                                WHERE CustomerId IS NOT NULL 
-			                                    AND Status Like '%Paid%' 
+			                                    AND Status = 'Account' 
 		                                GROUP BY [Order].OrderId, [Order].CustomerId) AS UnPaidOrders
 	                                GROUP BY CustomerId
                                 ) CustomerAccount
@@ -85,7 +85,7 @@ namespace EcommerceApi.Repositories
 		                                ) OrderPayment
 		                                ON [Order].OrderId = OrderPayment.OrderId
 		                                WHERE CustomerId IS NOT NULL 
-			                                    AND Status Like '%Paid%' 
+			                                    AND Status = 'Account' 
 		                                GROUP BY [Order].OrderId, [Order].CustomerId) AS UnPaidOrders
 	                                GROUP BY CustomerId
                                 ) CustomerAccount
