@@ -384,46 +384,60 @@ namespace EcommerceApi.Controllers
                 var orders = await query.GetAllOrders();
                 foreach (var order in orders)
                 {
-                    decimal taxGst = 0;
-                    if (!string.IsNullOrEmpty(order._pos_sale_tax_GST))
+                    try
                     {
-                        decimal.TryParse(order._pos_sale_tax_GST, out taxGst);
+                        var orderId = int.Parse(order.id.ToString());
+                        if (orderId >= 75746)
+                        {
+                            continue;
+                        }
+
+                        decimal taxGst = 0;
+                        if (!string.IsNullOrEmpty(order._pos_sale_tax_GST))
+                        {
+                            decimal.TryParse(order._pos_sale_tax_GST, out taxGst);
+                        }
+                        decimal taxPst = 0;
+                        if (!string.IsNullOrEmpty(order._pos_sale_tax_PST))
+                        {
+                            decimal.TryParse(order._pos_sale_tax_PST, out taxPst);
+                        }
+
+                        var found = await _context.OrderTax.FindAsync(int.Parse(order.id.ToString()));
+                        if (found == null)
+                        {
+                            if (taxPst > 0)
+                            {
+                                var orderTaxGst = new OrderTax
+                                {
+                                    OrderId = int.Parse(order.id.ToString()),
+                                    TaxAmount = taxGst,
+                                    TaxId = 1
+                                };
+                                await _context.OrderTax.AddAsync(orderTaxGst);
+                            }
+                            if (taxPst > 0)
+                            {
+                                var orderTaxPst = new OrderTax
+                                {
+                                    OrderId = int.Parse(order.id.ToString()),
+                                    TaxAmount = taxPst,
+                                    TaxId = 2
+                                };
+                                await _context.OrderTax.AddAsync(orderTaxPst);
+                            }
+                            await _context.SaveChangesAsync();
+                        }
+                        else
+                        {
+                            // await _context.SaveChangesAsync();
+                        }
                     }
-                    decimal taxPst = 0;
-                    if (!string.IsNullOrEmpty(order._pos_sale_tax_PST))
+                    catch (Exception e)
                     {
-                        decimal.TryParse(order._pos_sale_tax_PST, out taxPst);
+                        errorList.Add("order taxes:" + e.ToString());
                     }
 
-                    var found = await _context.OrderTax.FindAsync(int.Parse(order.id.ToString()));
-                    if (found == null)
-                    {
-                        if (taxPst > 0)
-                        {
-                            var orderTaxGst = new OrderTax
-                            {
-                                OrderId = int.Parse(order.id.ToString()),
-                                TaxAmount = taxGst,
-                                TaxId = 1
-                            };
-                            await _context.OrderTax.AddAsync(orderTaxGst);
-                        }
-                        if (taxPst > 0)
-                        {
-                            var orderTaxPst = new OrderTax
-                            {
-                                OrderId = int.Parse(order.id.ToString()),
-                                TaxAmount = taxPst,
-                                TaxId = 2
-                            };
-                            await _context.OrderTax.AddAsync(orderTaxPst);
-                        }
-                        await _context.SaveChangesAsync();
-                    }
-                    else
-                    {
-                        // await _context.SaveChangesAsync();
-                    }
                 }
                 _db.Connection.Close();
             }
@@ -452,21 +466,23 @@ namespace EcommerceApi.Controllers
                 {
                     try
                     {
+                        var orderId = int.Parse(order._pos_payment_order_id.ToString());
+                        if (orderId >= 75746)
+                        {
+                            continue;
+                        }
+
                         //var found = _context.OrderPayment.FirstOrDefault(o => o.OrderId == int.Parse(order._pos_payment_order_id.ToString())
                         //                                          && o.PaymentAmount == decimal.Parse(order._pos_payment_amount.ToString())
                         //                                          && o.AuthCode == order._pos_payment_AuthCode.ToString());
                         //if (found == null)
                         //{
-                        if (int.Parse(order._pos_payment_order_id.ToString()) >= 75746)
-                        {
-                            continue;
-                        }
                         var newOrder = new OrderPayment
                         {
                             CreatedByUserId = order.post_author.ToString(),
                             CreatedDate = order.post_date,
                             CreditCard = order._pos_payment_lastFour,
-                            OrderId = int.Parse(order._pos_payment_order_id.ToString()),
+                            OrderId = orderId,
                             PaymentAmount = decimal.Parse(order._pos_payment_amount),
                             PaymentDate = order.post_date,
                             PaymentTypeId = int.Parse(order._pos_payment_paymentType_id.ToString()),
