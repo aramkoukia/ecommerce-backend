@@ -157,6 +157,9 @@ namespace EcommerceApi.Controllers
             }
 
             order.Status = updateOrderStatus.OrderStatus;
+            if (updateOrderStatus.OrderStatus == OrderStatus.Paid.ToString()) {
+                order.OrderDate = date;
+            }
 
             try
             {

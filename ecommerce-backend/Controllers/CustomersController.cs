@@ -85,7 +85,7 @@ namespace EcommerceApi.Controllers
             {
                 return BadRequest();
             }
-
+            customer.CustomerCode = id.ToString();
             _context.Entry(customer).State = EntityState.Modified;
 
             try
