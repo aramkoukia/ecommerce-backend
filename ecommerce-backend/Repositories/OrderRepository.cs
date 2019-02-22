@@ -62,7 +62,7 @@ namespace EcommerceApi.Repositories
                                             GROUP BY OrderId, PaymentTypeName
                                         ) AS OrderPayment
 	                                    ON OrderPayment.OrderId = [Order].OrderId
-                                    WHERE (@showAll != 0 OR OrderDate >= Dateadd(month, -6, GetDate()))
+                                    WHERE (@showAll != 0 OR OrderDate >= Dateadd(month, -3, GetDate()))
 										  AND ([Order].LocationId = @locationId OR @locationId = 0)
                                     ORDER BY [Order].[OrderId] DESC
                                  ";
