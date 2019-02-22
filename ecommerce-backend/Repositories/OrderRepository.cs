@@ -63,7 +63,7 @@ namespace EcommerceApi.Repositories
                                         ) AS OrderPayment
 	                                    ON OrderPayment.OrderId = [Order].OrderId
                                     WHERE (@ShowAll != 0 OR OrderDate >= Dateadd(month, -6, GetDate()))
-										  AND ([Order].LocationId = @LocationId OR @LocationId IS NULL)
+										  AND ([Order].LocationId = @LocationId OR @LocationId = 0)
                                     ORDER BY [Order].[OrderId] DESC
                                  ";
                 conn.Open();
