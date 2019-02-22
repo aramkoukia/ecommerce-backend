@@ -45,7 +45,7 @@ namespace EcommerceApi.Controllers
         [HttpGet]
         public async Task<IEnumerable<OrderViewModel>> GetOrder(bool showAllOrders)
         {
-            return await _orderRepository.GetOrders(showAllOrders, null);
+            return await _orderRepository.GetOrders(showAllOrders, 0);
         }
 
         // GET: api/Orders/Location/{locationId}
