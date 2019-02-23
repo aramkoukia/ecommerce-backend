@@ -143,7 +143,7 @@ ON OnHoldItems.ProductId = Product.ProductId
                                       WHERE LocationId = 2
                                     ) Loc2 
                                     ON Loc2.ProductId = Product.ProductId
-                                    AND Product.ProductId = @ProductId";
+                                    WHERE Product.ProductId = @ProductId";
                 conn.Open();
                 return await conn.QueryFirstAsync<ProductViewModel>(query, new { ProductId = productId });
             }
