@@ -329,7 +329,7 @@ ON [Order].LocationId = OtherTax.LocationId
             using (IDbConnection conn = Connection)
             {
                 string query = $@"
-SELECT PaymentTypeName, SUM(PaymentAmount) AS PaymentAmount, Location.LocationName
+SELECT ISNULL(PaymentTypeName, 'Total') AS PaymentTypeName, SUM(PaymentAmount) AS PaymentAmount, ISNULL(Location.LocationName, 'All Locations') AS LocationName
 FROM OrderPayment
 INNER JOIN PaymentType
 	ON PaymentType.PaymentTypeId = OrderPayment.PaymentTypeId 
@@ -343,7 +343,7 @@ INNER JOIN Location
     ON [Order].LocationId = Location.LocationId
 WHERE OrderDate BETWEEN @fromDate AND @toDate
 GROUP BY PaymentTypeName, Location.LocationName
-                                 ";
+WITH ROLLUP                                 ";
                 conn.Open();
                 return await conn.QueryAsync<PaymentsTotalViewModel>(query, new { fromDate, toDate });
             }
