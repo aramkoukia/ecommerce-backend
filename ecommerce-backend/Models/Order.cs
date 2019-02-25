@@ -36,12 +36,6 @@ namespace EcommerceApi.Models
         public int? OriginalOrderId { get; set; }
 
         [NotMapped]
-        public int PaymentTypeId { get; set; }
-
-        [NotMapped]
-        public string ChequeNo { get; set; }
-
-        [NotMapped]
         public string AuthCode { get; set; }
 
         [NotMapped]
@@ -55,7 +49,6 @@ namespace EcommerceApi.Models
 
         public Customer Customer { get; set; }
         public Location Location { get; set; }
-
     }
 
     public enum OrderStatus {

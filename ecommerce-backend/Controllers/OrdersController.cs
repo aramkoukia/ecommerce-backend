@@ -132,24 +132,28 @@ namespace EcommerceApi.Controllers
             {
                 System.Security.Claims.ClaimsPrincipal currentUser = this.User;
                 var userId = _userManager.GetUserId(User);
-                order.OrderPayment.Add(
-                    new OrderPayment
+                if (updateOrderStatus.OrderPayment != null && updateOrderStatus.OrderPayment.Any())
+                {
+                    foreach (var payment in updateOrderStatus.OrderPayment)
                     {
-                        CreatedByUserId = userId,
-                        CreatedDate = date,
-                        PaymentAmount = order.Total,
-                        PaymentDate = date,
-                        PaymentTypeId = updateOrderStatus.PaymentTypeId,
-                        ChequeNo = updateOrderStatus.ChequeNo
+                        order.OrderPayment.Add(new OrderPayment
+                        {
+                            CreatedByUserId = userId,
+                            CreatedDate = date,
+                            PaymentAmount = payment.PaymentAmount,
+                            PaymentDate = date,
+                            PaymentTypeId = payment.PaymentTypeId,
+                            ChequeNo = payment.ChequeNo
+                        });
                     }
-                );
+                }
             }
 
             // When order is marked as Draft from OnHold we should add them to inventory
             if (updateOrderStatus.OrderStatus == OrderStatus.Draft.ToString() &&
                order.Status == OrderStatus.OnHold.ToString())
             {
-              var done = await AddToInventory(order, updateOrderStatus);
+                var done = await AddToInventory(order, updateOrderStatus);
             }
             else
             {
@@ -157,7 +161,8 @@ namespace EcommerceApi.Controllers
             }
 
             order.Status = updateOrderStatus.OrderStatus;
-            if (updateOrderStatus.OrderStatus == OrderStatus.Paid.ToString()) {
+            if (updateOrderStatus.OrderStatus == OrderStatus.Paid.ToString())
+            {
                 order.OrderDate = date;
             }
 
@@ -244,24 +249,18 @@ namespace EcommerceApi.Controllers
             var date = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateTime.UtcNow, "Pacific Standard Time");
             order.CreatedDate = date;
             order.OrderDate = date;
-            order.Customer = null;
-            order.Location = null;
-            if (order.Status.Equals(OrderStatus.Paid.ToString(), StringComparison.InvariantCultureIgnoreCase) ||
-               (order.Status.Equals(OrderStatus.Return.ToString(), StringComparison.InvariantCultureIgnoreCase) && await OriginalOrderWasPaid(order.OriginalOrderId)))
+            if (order.OrderPayment != null && order.OrderPayment.Any())
             {
-                order.OrderPayment.Add(
-                    new OrderPayment
-                    {
-                        CreatedByUserId = user.Id,
-                        CreatedDate = order.CreatedDate,
-                        PaymentAmount = order.Total,
-                        PaymentDate = order.CreatedDate,
-                        PaymentTypeId = order.PaymentTypeId,
-                        ChequeNo = order.ChequeNo
-                    }
-                );
+                foreach (var payment in order.OrderPayment)
+                {
+                    payment.CreatedByUserId = user.Id;
+                    payment.CreatedDate = order.CreatedDate;
+                    payment.PaymentDate = order.CreatedDate;
+                }
             }
 
+            order.Customer = null;
+            order.Location = null;
             var done = await UpdateInventory(order);
             order.OrderId = _context.Order.Max(o => o.OrderId) + 1;
             _context.Order.Add(order);
