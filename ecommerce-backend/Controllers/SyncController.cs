@@ -43,69 +43,79 @@ namespace EcommerceApi.Controllers
                 var products = await query.GetAllProducts();
                 foreach (var product in products)
                 {
-                    decimal price = 0;
-                    if (!string.IsNullOrEmpty(product._price))
+                    try
                     {
-                        decimal.TryParse(product._price, out price);
-                    }
-                    int typeId = 0;
-                    if (!string.IsNullOrEmpty(product._cat_id))
-                    {
-                        int.TryParse(product._cat_id, out typeId);
-                    }
-
-                    var found = await _context.Product.FindAsync(int.Parse(product.id.ToString()));
-                    if (found == null)
-                    {
-                        productsCreated++;
-                        var newProduct = new Product
+                        decimal price = 0;
+                        if (!string.IsNullOrEmpty(product._price))
                         {
-                            AllowOutOfStockPurchase = true,
-                            Barcode = product._sku,
-                            ChargeTaxes = true,
-                            ModifiedDate = DateTime.Now,
-                            ProductCode = product._sku,
-                            ProductDescription = "",
-                            ProductId = int.Parse(product.id.ToString()),
-                            ProductName = product.post_title,
-                            ProductTypeId = typeId,
-                            PurchasePrice = 0,
-                            Sku = product._sku,
-                            SalesPrice = price
-                        };
-
-                        if (typeId > 0)
+                            decimal.TryParse(product._price, out price);
+                        }
+                        int typeId = 0;
+                        if (!string.IsNullOrEmpty(product._cat_id))
                         {
-                            var existingProductType = await _context.ProductType.FindAsync(typeId);
-                            if (existingProductType == null) {
-                                newProduct.ProductType = new ProductType
+                            int.TryParse(product._cat_id, out typeId);
+                        }
+
+                        var found = await _context.Product.FindAsync(int.Parse(product.id.ToString()));
+                        if (found == null)
+                        {
+                            productsCreated++;
+                            var newProduct = new Product
+                            {
+                                AllowOutOfStockPurchase = true,
+                                Barcode = product._sku,
+                                ChargeTaxes = true,
+                                ModifiedDate = DateTime.Now,
+                                ProductCode = product._sku,
+                                ProductDescription = "",
+                                ProductId = int.Parse(product.id.ToString()),
+                                ProductName = product.post_title,
+                                ProductTypeId = typeId,
+                                PurchasePrice = 0,
+                                Sku = product._sku,
+                                SalesPrice = price
+                            };
+
+                            if (typeId > 0)
+                            {
+                                var existingProductType = await _context.ProductType.FindAsync(typeId);
+                                if (existingProductType == null)
                                 {
-                                    ProductTypeId = typeId,
-                                    ModifiedDate = DateTime.Now,
-                                    ProductTypeName = product._category
-                                };
+                                    newProduct.ProductType = new ProductType
+                                    {
+                                        ProductTypeId = typeId,
+                                        ModifiedDate = DateTime.Now,
+                                        ProductTypeName = product._category
+                                    };
+                                }
                             }
+                            else
+                            {
+                                newProduct.ProductType = null;
+                            }
+                            await _context.Product.AddAsync(newProduct);
+                            await _context.SaveChangesAsync();
                         }
                         else
                         {
-                            newProduct.ProductType = null;
+                            productsUpdated++;
+                            found.ModifiedDate = DateTime.Now;
+                            found.ProductTypeId = typeId;
+                            found.SalesPrice = price;
+                            await _context.SaveChangesAsync();
                         }
-                        await _context.Product.AddAsync(newProduct);
-                        await _context.SaveChangesAsync();
+
                     }
-                    else
+                    catch (Exception e)
                     {
-                        productsUpdated++;
-                        found.ModifiedDate = DateTime.Now;
-                        found.SalesPrice = price;
-                        await _context.SaveChangesAsync();
+                        errorList.Add("products error:" + e.ToString());
                     }
                 }
                 _db.Connection.Close();
             }
             catch (Exception ex)
             {
-                errorList.Add("order taxes:" + ex.ToString());
+                errorList.Add("products error:" + ex.ToString());
             }
 
             await _emailSender.SendEmailAsync("aramkoukia@gmail.com", "Sync Finished: Products", $"Sync Finished: Products. \n Products Created: {productsCreated}. \n Products Updated: {productsUpdated}. \n Errors: {string.Join(",", errorList)}");
