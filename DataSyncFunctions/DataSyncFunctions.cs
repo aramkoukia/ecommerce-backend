@@ -11,7 +11,7 @@ namespace DataSyncFunctions
         static HttpClient client = new HttpClient();
 
         [FunctionName("SyncProducts")]
-        public static void RunSyncProducts([TimerTrigger("0 0 1 * * *")]TimerInfo myTimer, TraceWriter log)
+        public static void RunSyncProducts([TimerTrigger("0 0 1,23,21,19,17 * * *")]TimerInfo myTimer, TraceWriter log)
         {
             log.Info($"SyncProducts: {DateTime.Now}");
             client.GetAsync("https://lightsandpartsapi.azurewebsites.net/api/sync/products");
