@@ -55,11 +55,11 @@ namespace EcommerceApi.Repositories
                                         ON Customer.CustomerId = [Order].CustomerId
                                     LEFT JOIN 
 	                                    ( 
-                                            SELECT OrderId, SUM(PaymentAmount) AS PaidAmount , PaymentTypeName
+                                            SELECT OrderId, SUM(PaymentAmount) AS PaidAmount , STRING_AGG(PaymentTypeName, ', ') AS PaymentTypeName  
                                             FROM OrderPayment
                                             INNER JOIN PaymentType
 	                                            ON PaymentType.PaymentTypeId = OrderPayment.PaymentTypeId 
-                                            GROUP BY OrderId, PaymentTypeName
+                                            GROUP BY OrderId
                                         ) AS OrderPayment
 	                                    ON OrderPayment.OrderId = [Order].OrderId
                                     WHERE (@showAll != 0 OR OrderDate >= Dateadd(month, -3, GetDate()))
@@ -98,11 +98,11 @@ namespace EcommerceApi.Repositories
 	                                    ON Users.Id = [Order].CreatedByUserId
                                     LEFT JOIN 
 	                                    ( 
-                                            SELECT OrderId, SUM(PaymentAmount) AS PaidAmount , PaymentTypeName
+                                            SELECT OrderId, SUM(PaymentAmount) AS PaidAmount , STRING_AGG(PaymentTypeName, ', ') AS PaymentTypeName  
                                             FROM OrderPayment
                                             INNER JOIN PaymentType
 	                                            ON PaymentType.PaymentTypeId = OrderPayment.PaymentTypeId 
-                                            GROUP BY OrderId, PaymentTypeName
+                                            GROUP BY OrderId
                                         ) AS OrderPayment
 	                                    ON OrderPayment.OrderId = [Order].OrderId
                                     WHERE [Order].CustomerId = @CustomerId
