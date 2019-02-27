@@ -43,7 +43,8 @@ namespace EcommerceApi.Repositories
 	                                       ISNULL(Loc1.Balance,0) As VancouverBalance,
 	                                       ISNULL(Loc2.Balance,0) As AbbotsfordBalance,
                                            ISNULL(Loc1.BinCode,'') AS VancouverBinCode,
-                                           ISNULL(Loc2.BinCode,'') AS AbbotsfordBinCode
+                                           ISNULL(Loc2.BinCode,'') AS AbbotsfordBinCode,
+                                           Product.Disabled
                                     FROM Product
                                     LEFT JOIN ProductType
                                     ON Product.ProductTypeId = ProductType.ProductTypeId
@@ -104,6 +105,7 @@ LEFT JOIN (
   GROUP BY ProductId
 ) AS OnHoldItems
 ON OnHoldItems.ProductId = Product.ProductId
+WHERE Disabled = 0
 ";
 // WHERE SalesPrice > 0";
                 conn.Open();
@@ -129,7 +131,8 @@ ON OnHoldItems.ProductId = Product.ProductId
 	                                       ISNULL(Loc1.Balance,0) As VancouverBalance,
 	                                       ISNULL(Loc2.Balance,0) As AbbotsfordBalance,
                                            ISNULL(Loc1.BinCode,'') AS VancouverBinCode,
-                                           ISNULL(Loc2.BinCode,'') AS AbbotsfordBinCode
+                                           ISNULL(Loc2.BinCode,'') AS AbbotsfordBinCode,
+                                           Product.Disabled
                                     FROM Product
                                     INNER JOIN ProductType
                                     ON Product.ProductTypeId = ProductType.ProductTypeId

@@ -19,5 +19,6 @@ namespace EcommerceApi.ViewModel
         public string VancouverBinCode { get; set; }
         public string AbbotsfordBinCode { get; set; }
         public decimal OnHoldAmount { get; set; }
+        public string Disabled { get; set; }
     }
 }
