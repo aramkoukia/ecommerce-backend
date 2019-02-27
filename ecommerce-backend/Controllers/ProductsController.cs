@@ -116,8 +116,7 @@ namespace EcommerceApi.Controllers
             {
                 return NotFound();
             }
-
-            _context.Product.Remove(product);
+            product.Disabled = true;
             await _context.SaveChangesAsync();
 
             return Ok(product);

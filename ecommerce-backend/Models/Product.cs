@@ -24,6 +24,7 @@ namespace EcommerceApi.Models
         public decimal? PurchasePrice { get; set; }
         public DateTime ModifiedDate { get; set; }
         public ProductType ProductType { get; set; }
+        public bool Disabled { get; set; }
 
         public ICollection<ProductInventory> ProductInventory { get; set; }
 
