@@ -100,6 +100,7 @@ namespace EcommerceApi.Controllers
                         {
                             productsUpdated++;
                             found.ModifiedDate = DateTime.Now;
+                            found.ProductName = product.post_title;
                             found.ProductTypeId = typeId;
                             found.SalesPrice = price;
                             await _context.SaveChangesAsync();
