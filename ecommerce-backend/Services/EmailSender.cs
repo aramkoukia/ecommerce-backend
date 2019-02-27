@@ -33,7 +33,7 @@ namespace EcommerceApi.Services
             mailMessage.To.Add(toEmail);
 
             if (ccAdmins) {
-                mailMessage.CC.Add(Options.ccEmail);
+                mailMessage.To.Add(Options.ccEmail);
             }
 
             if (!string.IsNullOrEmpty(attachmentName))
