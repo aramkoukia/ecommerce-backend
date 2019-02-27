@@ -60,10 +60,15 @@ namespace EcommerceApi.Untilities
 
             sbCustomer.Append($@" <div>Sale Date: {order.OrderDate}</div>
                                 <div>User: {order.CreatedByUserName}</div>
-                                <hr class='spaceafter-30'/>
-                                <h3 class='right'>{order.Status}</h3>    
-                                <hr/>
+                                <hr class='spaceafter-30'/>");
+
+            if (order.Status.Equals(OrderStatus.Account.ToString(), System.StringComparison.InvariantCultureIgnoreCase)) {
+                sbCustomer.Append($@"<p><b>Please Note: Payment is due on {order.OrderDate.AddDays(40).Date.ToString("dd-MMM-yyyy")}. Additional charges of 2% per month are applicable after due date.</b></p>");
+            }
                                 
+
+                sbCustomer.Append($@"<h3 class='right'>{order.Status}</h3>    
+                                <hr/>
                                 <table>");
 
         foreach (var item in order.OrderDetail)
