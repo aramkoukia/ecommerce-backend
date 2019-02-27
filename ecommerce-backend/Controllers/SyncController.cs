@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Linq;
 using Microsoft.AspNetCore.Identity;
 using EcommerceApi.Services;
+using System.Diagnostics;
 
 namespace EcommerceApi.Controllers
 {
@@ -29,6 +30,9 @@ namespace EcommerceApi.Controllers
         [HttpGet("Products")]
         public async Task<IActionResult> SyncProducts()
         {
+            var timeElapped = 0;
+            var stopWatch = new Stopwatch();
+            stopWatch.Start();
             var errorList = new List<string>();
             var productsCreated = 0;
             var productsUpdated = 0;
@@ -118,9 +122,12 @@ namespace EcommerceApi.Controllers
             {
                 errorList.Add("products error:" + ex.ToString());
             }
-
-            await _emailSender.SendEmailAsync("aramkoukia@gmail.com", "Sync Finished: Products", $"Sync Finished: Products. \n Products Created: {productsCreated}. \n Products Updated: {productsUpdated}. \n Errors: {string.Join(",", errorList)}");
-            return Ok(errorList);
+            stopWatch.Stop();
+            var timeTook = $"Products Sync Took: {TimeSpan.FromMilliseconds(stopWatch.ElapsedMilliseconds).Minutes} minutes.";
+            var message = $"Products Sync Finished. \n Products Created: {productsCreated}. \n Products Updated: {productsUpdated}. {timeTook}\n Errors: {string.Join(",", errorList)}";
+            await _emailSender.SendEmailAsync("aramkoukia@gmail.com", "Sync Finished: Products", message, null, null, null, true);
+            
+            return Ok(message);
         }
 
         //[HttpGet("ProductsInventory")]
