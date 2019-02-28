@@ -252,6 +252,9 @@ WHERE ISNULL(VanTotalSales,0) <> 0 OR ISNULL(AbbTotalSales, 0) <> 0
             using (IDbConnection conn = Connection)
             {
                 string query = $@"
+IF OBJECT_ID('tempdb..#Results') IS NOT NULL
+    DROP TABLE #Results
+
 SELECT LocationName,
 	   [Order].[Status],
 	   SubTotal,
@@ -261,7 +264,7 @@ SELECT LocationName,
 	   Pst,
 	   Gst,
 	   OtherTax
-FROM (
+INTO #Results FROM (
 	SELECT 
 	   SUM(SubTotal) AS SubTotal, 
        SUM(Total) AS Total,
@@ -318,7 +321,18 @@ LEFT JOIN (
 	GROUP BY [Order].LocationId, Status
 ) OtherTax
 ON [Order].LocationId = OtherTax.LocationId
-   AND [Order].Status = OtherTax.Status";
+   AND [Order].Status = OtherTax.Status
+
+SELECT * FROM #Results
+UNION 
+SELECT ' Total Account',  '', SUM(SubTotal), SUM(Total), SUM(Discount), SUM(Transactions), SUM(Pst), SUM(Gst), SUM(OtherTax)
+FROM #Results
+WHERE [Status] = 'Account'
+UNION 
+SELECT ' Total Without Account',  '', SUM(SubTotal), SUM(Total), SUM(Discount), SUM(Transactions), SUM(Pst), SUM(Gst), SUM(OtherTax)
+FROM #Results
+WHERE [Status] <> 'Account'
+";
                 conn.Open();
                 return await conn.QueryAsync<SalesReportViewModel>(query, new { fromDate, toDate });
             }

@@ -107,6 +107,8 @@ namespace EcommerceApi.Controllers
                             found.ProductName = product.post_title;
                             found.ProductTypeId = typeId;
                             found.SalesPrice = price;
+                            found.Barcode = product._sku;
+                            found.ProductCode = product._sku;
                             await _context.SaveChangesAsync();
                         }
 
