@@ -105,7 +105,7 @@ namespace EcommerceApi.Untilities
             sbCustomer.AppendFormat(@"<tr>
                         <td style='width:10%'></td>
                         <td style='width:55%'></td>
-                        <td style='width:20%'>Credit Card / Debit:</td>
+                        <td style='width:20%'>Paid Amount:</td>
                         <td style='width:15%' class='right'>${0}</td>
                         </tr>", order.OrderPayment.Sum(p=>p.PaymentAmount));
 
