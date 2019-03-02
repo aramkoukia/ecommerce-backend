@@ -49,6 +49,8 @@ namespace EcommerceApi.Models
 
         public Customer Customer { get; set; }
         public Location Location { get; set; }
+        public decimal RestockingFeePercent { get; set; }
+        public decimal RestockingFeeAmount { get; set; }
     }
 
     public enum OrderStatus {
