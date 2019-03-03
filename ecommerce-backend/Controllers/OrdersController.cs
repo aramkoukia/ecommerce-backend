@@ -488,6 +488,66 @@ www.lightsandparts.com | essi@lightsandparts.com
             return result;
         }
 
+        // GET: api/Orders
+        [HttpGet("{orderId}/packingslip")]
+        [AllowAnonymous]
+        public async Task<FileResult> PackingSlipOrder([FromRoute] int orderId)
+        {
+            var order = await _context.Order.AsNoTracking()
+                .Include(o => o.OrderDetail)
+                    .ThenInclude(o => o.Product)
+                .Include(t => t.OrderTax)
+                    .ThenInclude(t => t.Tax)
+                .Include(o => o.OrderPayment)
+                    .ThenInclude(t1 => t1.PaymentType)
+                .Include(o => o.Customer)
+                .Include(l => l.Location)
+                .SingleOrDefaultAsync(m => m.OrderId == orderId);
+
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == order.CreatedByUserId);
+            order.CreatedByUserName = user.UserName;
+
+            var includeMerchantCopy = false;
+            if (order.Status == OrderStatus.Draft.ToString() || order.Status == OrderStatus.OnHold.ToString())
+            {
+                includeMerchantCopy = false;
+            }
+            else
+            {
+                includeMerchantCopy = true;
+            }
+
+            var globalSettings = new GlobalSettings
+            {
+                ColorMode = ColorMode.Color,
+                Orientation = Orientation.Portrait,
+                PaperSize = PaperKind.A4,
+                Margins = new MarginSettings { Top = 10 },
+                DocumentTitle = $"Packing Slip - Order {order.OrderId}",
+            };
+
+            var objectSettings = new ObjectSettings
+            {
+                PagesCount = true,
+                HtmlContent = ShipmentSlipTemplateGenerator.GetHtmlString(order),
+                WebSettings = { DefaultEncoding = "utf-8", UserStyleSheet = Path.Combine(Directory.GetCurrentDirectory(), "assets", "invoice.css") },
+            };
+
+            var pdf = new HtmlToPdfDocument()
+            {
+                GlobalSettings = globalSettings,
+                Objects = { objectSettings }
+            };
+
+            var file = _converter.Convert(pdf);
+            FileContentResult result = new FileContentResult(file, "application/pdf")
+            {
+                FileDownloadName = $"Order-{order.OrderId}.pdf"
+            };
+
+            return result;
+        }
+
         [HttpGet("customerinvoices")]
         [AllowAnonymous]
         public async Task<IActionResult> SendCustomerInvoices()
