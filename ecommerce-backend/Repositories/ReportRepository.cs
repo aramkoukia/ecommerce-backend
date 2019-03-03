@@ -212,11 +212,11 @@ GROUP BY ProductTypeName
             using (IDbConnection conn = Connection)
             {
                 string query = $@"
-SELECT ProductName, ProductCode, ProductTypeName, ISNULL(VanTotalSales,0) AS VanTotalSales, ISNULL(AbbTotalSales, 0) AS AbbTotalSales, ISNULL(VanBalance,0) AS VanBalance, ISNULL(AbbBalance, 0) AS AbbBalance
+SELECT ProductName, ProductCode, ProductTypeName, ISNULL(VanTotalSales,0) AS VanTotalSales, ISNULL(AbbTotalSales, 0) AS AbbTotalSales, ISNULL(VanBalance,0) AS VanBalance, ISNULL(AbbBalance, 0) AS AbbBalance, ISNULL(VanAmount, 0) AS VanAmount, ISNULL(AbbAmount, 0) AS AbbAmount
 FROM Product
 INNER JOIN ProductType
 	ON ProductType.ProductTypeId = Product.ProductTypeId
-LEFT JOIN (SELECT SUM(OrderDetail.Total) AS VanTotalSales, ProductId 
+LEFT JOIN (SELECT SUM(OrderDetail.Total) AS VanTotalSales, SUM(OrderDetail.Amount) AS VanAmount, ProductId 
 		   FROM [Order]
 		   INNER JOIN OrderDetail
 			 ON OrderDetail.OrderId = [Order].OrderId
@@ -224,7 +224,7 @@ LEFT JOIN (SELECT SUM(OrderDetail.Total) AS VanTotalSales, ProductId
                  AND OrderDate BETWEEN @fromDate AND @toDate
 		   GROUP BY ProductId ) VanSales
 	ON Product.ProductId = VanSales.ProductId
-LEFT JOIN (SELECT SUM(OrderDetail.Total) AS AbbTotalSales, ProductId 
+LEFT JOIN (SELECT SUM(OrderDetail.Total) AS AbbTotalSales,  SUM(OrderDetail.Amount) AS AbbAmount, ProductId 
 		   FROM [Order]
 		   INNER JOIN OrderDetail
 			 ON OrderDetail.OrderId = [Order].OrderId
@@ -244,6 +244,32 @@ WHERE ISNULL(VanTotalSales,0) <> 0 OR ISNULL(AbbTotalSales, 0) <> 0
                                  ";
                 conn.Open();
                 return await conn.QueryAsync<ProductSalesReportViewModel>(query, new { fromDate, toDate });
+            }
+        }
+
+        public async Task<IEnumerable<ProductSalesDetailReportViewModel>> GetProductSalesDetailReport(DateTime fromDate, DateTime toDate)
+        {
+            using (IDbConnection conn = Connection)
+            {
+                string query = $@"
+SELECT LocationName, ISNULL(Customer.CompanyName, 'WALK-IN') AS CompanyName, ISNULL(Customer.CustomerCode, '') AS CustomerCode, ProductName, ProductCode, OrderId, ProductTypeName, ISNULL(TotalSales,0) AS TotalSales, ISNULL(Amount, 0) AS Amount
+FROM Product
+INNER JOIN ProductType
+	ON ProductType.ProductTypeId = Product.ProductTypeId
+LEFT JOIN (SELECT ProductId, [Order].CustomerId, OrderDetail.OrderId, LocationId, SUM(OrderDetail.Total) AS TotalSales, SUM(OrderDetail.Amount) AS Amount
+		   FROM [Order]
+		   INNER JOIN OrderDetail
+			 ON OrderDetail.OrderId = [Order].OrderId
+		   WHERE OrderDate BETWEEN @fromDate AND @toDate
+		   GROUP BY ProductId, OrderDetail.OrderId, LocationId, [Order].CustomerId) Sales
+	ON Product.ProductId = Sales.ProductId
+INNER JOIN [Location]
+	ON Sales.LocationId = [Location].LocationId
+LEFT JOIN Customer
+	ON Customer.CustomerId = Sales.CustomerId
+WHERE ISNULL(TotalSales,0) <> 0 ";
+                conn.Open();
+                return await conn.QueryAsync<ProductSalesDetailReportViewModel>(query, new { fromDate, toDate });
             }
         }
 

@@ -61,6 +61,19 @@ namespace EcommerceApi.Controllers
             return await _reportRepository.GetProductSalesReport(fromDate, toDate);
         }
 
+        [HttpGet("ProductSalesDetail")]
+        public async Task<IEnumerable<ProductSalesDetailReportViewModel>> GetProductSalesDetailReport(DateTime fromDate, DateTime toDate)
+        {
+            if (fromDate == DateTime.MinValue)
+                fromDate = DateTime.Now;
+            if (toDate == DateTime.MinValue)
+                toDate = DateTime.Now;
+            else
+                toDate = toDate.AddDays(1).AddTicks(-1);
+
+            return await _reportRepository.GetProductSalesDetailReport(fromDate, toDate);
+        }
+
         [HttpGet("ProductTypeSales")]
         public async Task<IEnumerable<ProductTypeSalesReportViewModel>> GetProductTypeSalesReport(DateTime fromDate, DateTime toDate)
         {

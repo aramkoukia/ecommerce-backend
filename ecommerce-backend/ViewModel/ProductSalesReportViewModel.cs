@@ -9,5 +9,7 @@
         public decimal AbbTotalSales { get; set; }
         public decimal VanBalance { get; set; }
         public decimal AbbBalance { get; set; }
+        public decimal VanAmount { get; set; }
+        public decimal AbbAmount { get; set; }
     }
 }
