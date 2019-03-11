@@ -58,5 +58,29 @@ namespace EcommerceApi.Services
                 await client.SendMailAsync(mailMessage);
             }
         }
+
+        public async Task SendAdminReportAsync(string subject, string textMessage)
+        {
+            MailMessage mailMessage = new MailMessage
+            {
+                From = new MailAddress(this.Options.emailFromAddress, this.Options.emailFromName),
+                Body = textMessage,
+                BodyEncoding = Encoding.UTF8,
+                Subject = subject,
+                SubjectEncoding = Encoding.UTF8
+            };
+
+            mailMessage.To.Add(Options.ccEmail);
+
+            using (SmtpClient client = new SmtpClient(this.Options.host, this.Options.port))
+            {
+                client.UseDefaultCredentials = false;
+                client.DeliveryMethod = SmtpDeliveryMethod.Network;
+                client.Credentials = new NetworkCredential(this.Options.username, this.Options.password);
+                client.EnableSsl = this.Options.enableSSL;
+                await client.SendMailAsync(mailMessage);
+            }
+        }
+
     }
 }
