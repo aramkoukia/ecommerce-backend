@@ -108,6 +108,7 @@ namespace EcommerceApi.Controllers
                 var done = await AddToInventory(order, updateOrderStatus);
                 order.Status = OrderStatus.Draft.ToString();
                 order.Notes = $"{order.Notes} - Marked as Draft from OnHold after 14 days by system.";
+                await _emailSender.SendAdminReportAsync("OnHold Order Cancelled", $"OnHold Order Cancelled. \n Order Id: {order.OrderId}");
             }
             await _context.SaveChangesAsync();
             return Ok();
@@ -128,6 +129,7 @@ namespace EcommerceApi.Controllers
             }
             var date = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateTime.UtcNow, "Pacific Standard Time");
             var order = await _context.Order.SingleOrDefaultAsync(m => m.OrderId == id);
+            var originalOrderStatus = order.Status;
             if (updateOrderStatus.OrderStatus.Equals(OrderStatus.Paid.ToString(), StringComparison.InvariantCultureIgnoreCase))
             {
                 System.Security.Claims.ClaimsPrincipal currentUser = this.User;
@@ -166,6 +168,8 @@ namespace EcommerceApi.Controllers
                 order.OrderDate = date;
             }
 
+            await _emailSender.SendAdminReportAsync("Order Status Changed", $"Order Status changed. \n Order Id: {id}. \n From: {originalOrderStatus} To: {updateOrderStatus.OrderStatus.ToString()}");
+
             try
             {
                 await _context.SaveChangesAsync();
@@ -196,6 +200,21 @@ namespace EcommerceApi.Controllers
             var order = await _context.Order.SingleOrDefaultAsync(m => m.OrderId == id);
             order.Notes = updateOrderInfo.Notes;
             order.PoNumber = updateOrderInfo.PoNumber;
+            await _context.SaveChangesAsync();
+            return Ok(order);
+        }
+
+
+        [HttpPut("{id}/Customer")]
+        public async Task<IActionResult> PutOrderCustomer([FromRoute] int id, [FromBody] UpdateOrderCustomer updateOrderCustomer)
+        {
+            var order = await _context.Order.SingleOrDefaultAsync(m => m.OrderId == id);
+            if (!ModelState.IsValid || !order.Status.Equals(OrderStatus.Draft.ToString(), StringComparison.InvariantCultureIgnoreCase))
+            {
+                return BadRequest(ModelState);
+            }
+
+            order.CustomerId = updateOrderCustomer.CustomerId;
             await _context.SaveChangesAsync();
             return Ok(order);
         }
@@ -264,6 +283,8 @@ namespace EcommerceApi.Controllers
             var done = await UpdateInventory(order);
             order.OrderId = _context.Order.Max(o => o.OrderId) + 1;
             _context.Order.Add(order);
+            await _emailSender.SendAdminReportAsync("New Order", $"New Order Created. \n Order Id: {order.OrderId}. \n Status: {order.Status} \n Total: ${order.Total} \n User: {user.GivenName}");
+
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetOrder", new { id = order.OrderId }, order);
