@@ -7,6 +7,7 @@ using EcommerceApi.Models;
 using Microsoft.AspNetCore.Authorization;
 using EcommerceApi.ViewModel;
 using EcommerceApi.Repositories;
+using System;
 
 namespace EcommerceApi.Controllers
 {
@@ -47,9 +48,16 @@ namespace EcommerceApi.Controllers
 
         // GET: api/Products/5/Transactions
         [HttpGet("{id}/Transactions")]
-        public async Task<IEnumerable<ProductTransactionViewModel>> GetProductTransactions([FromRoute] int id)
+        public async Task<IEnumerable<ProductTransactionViewModel>> GetProductTransactions([FromRoute] int id, DateTime fromDate, DateTime toDate)
         {
-            return await _productRepository.GetProductTransactions(id);
+            if (fromDate == DateTime.MinValue)
+                fromDate = DateTime.Now;
+            if (toDate == DateTime.MinValue)
+                toDate = DateTime.Now;
+            else
+                toDate = toDate.AddDays(1).AddTicks(-1);
+
+            return await _productRepository.GetProductTransactions(id, fromDate, toDate);
         }
 
         // PUT: api/Products/5

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.Threading.Tasks;
@@ -152,13 +153,18 @@ WHERE Disabled = 0
             }
         }
 
-        public async Task<IEnumerable<ProductTransactionViewModel>> GetProductTransactions(int productId)
+        public async Task<IEnumerable<ProductTransactionViewModel>> GetProductTransactions(int productId, DateTime fromDate, DateTime toDate)
         {
             using (IDbConnection conn = Connection)
             {
                 string query = $@"
+declare @productid int = 7549
+declare @fromDate datetime = dateadd(day, -7, getdate())
+declare @toDate datetime = getdate()
+
 SELECT * FROM (
-SELECT OrderDate AS Date, 'Order' AS TransactionType, (-1 * OrderDetail.Amount) AS Amount, Location.LocationName, Users.GivenName As UserName FROM [Order]
+SELECT OrderDate AS Date, 'Order' AS TransactionType, (-1 * OrderDetail.Amount) AS Amount, Location.LocationName, Users.GivenName As UserName, 'Id: ' + CAST([Order].OrderId AS NVARCHAR(100)) AS Notes
+FROM [Order]
 INNER JOIN OrderDetail
 	On [Order].OrderId = OrderDetail.OrderId
 INNER JOIN Location
@@ -166,11 +172,13 @@ INNER JOIN Location
 LEFT JOIN Users
     ON Users.Id = [Order].CreatedByUserId
 WHERE ProductId = @ProductId 
-      AND Status IN ('Paid', 'Account')
+      AND OrderDate BETWEEN @fromDate AND @toDate
+	  AND Status IN ('Paid', 'Account')
 
 UNION ALL 
 
-SELECT OrderDate, 'Returned Order' AS TransactionType, OrderDetail.Amount, Location.LocationName, Users.GivenName FROM [Order]
+SELECT OrderDate, 'Returned Order' AS TransactionType, OrderDetail.Amount, Location.LocationName, Users.GivenName, 'Id: ' + CAST([Order].OrderId AS NVARCHAR(100)) AS Notes
+FROM [Order]
 INNER JOIN OrderDetail
 	On [Order].OrderId = OrderDetail.OrderId
 INNER JOIN Location
@@ -178,31 +186,35 @@ INNER JOIN Location
 LEFT JOIN Users
     ON Users.Id = [Order].CreatedByUserId
 WHERE ProductId = @ProductId 
+      AND OrderDate BETWEEN @fromDate AND @toDate
       AND Status IN ('Return') 
 
 UNION ALL 
 
-SELECT PurchaseDate, 'Purchase' AS TransactionType, PurchaseDetail.Amount, '', Users.GivenName FROM [Purchase]
+SELECT PurchaseDate, 'Purchase' AS TransactionType, PurchaseDetail.Amount, '', Users.GivenName, 'Id: ' + CAST([Purchase].PurchaseId AS NVARCHAR(100)) AS Notes
+FROM [Purchase]
 INNER JOIN PurchaseDetail
 	On Purchase.PurchaseId = PurchaseDetail.PurchaseId
 LEFT JOIN Users
     ON Users.Id = Purchase.CreatedByUserId
 WHERE ProductId = @ProductId
+      AND PurchaseDate BETWEEN @fromDate AND @toDate
 
 UNION ALL 
 
-SELECT ModifiedDate, TransactionType, Balance, Location.LocationName, Users.GivenName
+SELECT ModifiedDate, TransactionType, Balance, Location.LocationName, Users.GivenName, ProductInventoryHistory.Notes
 FROM ProductInventoryHistory
 INNER JOIN Location
 	ON Location.LocationId = ProductInventoryHistory.LocationId
 LEFT JOIN Users
-    ON Users.Id = ProductInventoryHistory.CreatedByUserId
-WHERE ProductId = @ProductId
+    ON Users.Email = ProductInventoryHistory.CreatedByUserId
+WHERE ProductId = @productId
+      AND ModifiedDate BETWEEN @fromDate AND @toDate
 ) Transactions 
-Order By Date Desc
+Order By [Date] Desc
 ";
                 conn.Open();
-                return await conn.QueryAsync<ProductTransactionViewModel>(query, new { ProductId = productId });
+                return await conn.QueryAsync<ProductTransactionViewModel>(query, new { productId, fromDate, toDate });
             }
         }
     }
