@@ -8,5 +8,6 @@ namespace EcommerceApi.Repositories
     {
         Task<IEnumerable<OrderViewModel>> GetOrders(bool showAll, int locationId);
         Task<IEnumerable<OrderViewModel>> GetOrdersByCustomer(int customerId);
+        Task<InventoryViewModel> GetProductInventoryForValidation(int productId, int locationId);
     }
 }

@@ -112,5 +112,16 @@ namespace EcommerceApi.Repositories
                 return await conn.QueryAsync<OrderViewModel>(query, new { CustomerId = customerId });
             }
         }
+
+        public async Task<InventoryViewModel> GetProductInventoryForValidation(int productId, int locationId)
+        {
+            using (IDbConnection conn = Connection)
+            {
+                string query = $@"
+                                 ";
+                conn.Open();
+                return await conn.QueryFirstAsync<InventoryViewModel>(query, new { productId , locationId });
+            }
+        }
     }
 }

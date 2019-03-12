@@ -30,7 +30,6 @@ namespace EcommerceApi.Controllers
         [HttpGet("Products")]
         public async Task<IActionResult> SyncProducts()
         {
-            var timeElapped = 0;
             var stopWatch = new Stopwatch();
             stopWatch.Start();
             var errorList = new List<string>();
