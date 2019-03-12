@@ -493,8 +493,8 @@ www.lightsandparts.com | essi@lightsandparts.com
             return result;
         }
 
-        [HttpGet("validateinventory")]
-        public async Task<IActionResult> ValidateInventory(InventoryValidationRequest inventoryValidationRequest)
+        [HttpPost("validateinventory")]
+        public async Task<IActionResult> ValidateInventory([FromBody] InventoryValidationRequest inventoryValidationRequest)
         {
             var result = new List<InventoryValidationResponse>();
             if (inventoryValidationRequest == null
