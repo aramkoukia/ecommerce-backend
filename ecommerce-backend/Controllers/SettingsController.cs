@@ -16,17 +16,11 @@ namespace EcommerceApi.Controllers
     public class SettingsController : Controller
     {
         private readonly EcommerceContext _context;
-        private readonly IEmailSender _emailSender;
-
+        
         public SettingsController(
-            EcommerceContext context,
-            ICustomerRepository customerRepository,
-            IReportRepository reportRepository,
-            IConverter converter,
-            IEmailSender emailSender)
+            EcommerceContext context)
         {
             _context = context;
-            _emailSender = emailSender;
         }
 
         // GET: api/Settings
@@ -36,7 +30,7 @@ namespace EcommerceApi.Controllers
             return await _context.Settings.FirstOrDefaultAsync();
         }
 
-        // POST: api/Customers
+        // POST: api/Settings
         [HttpPost]
         public async Task<IActionResult> PostSettings([FromBody] Settings settings)
         {
@@ -55,6 +49,8 @@ namespace EcommerceApi.Controllers
                 currentSetting.SmtpHost = settings.SmtpHost;
                 currentSetting.SmtpPort = settings.SmtpPort;
                 currentSetting.SmtpUseSsl = settings.SmtpUseSsl;
+                currentSetting.BlockInSufficientStockOnOrder = settings.BlockInSufficientStockOnOrder;
+                currentSetting.WarnInSufficientStockOnOrder = settings.WarnInSufficientStockOnOrder;
             }
             else
             {

@@ -493,7 +493,7 @@ www.lightsandparts.com | essi@lightsandparts.com
             return result;
         }
 
-        [HttpPost("validateinventory")]
+        [HttpPut("validateinventory")]
         public async Task<IActionResult> ValidateInventory([FromBody] InventoryValidationRequest inventoryValidationRequest)
         {
             var result = new List<InventoryValidationResponse>();
@@ -512,9 +512,9 @@ www.lightsandparts.com | essi@lightsandparts.com
                     result.Add(new InventoryValidationResponse
                     {
                         ProductCode = inventory.ProductCode,
-                        Amount = item.Amount,
+                        Amount = inventory.Balance,
                         AmountRequested = item.Amount,
-                        AmountShort = inventory.Balance - item.Amount,
+                        AmountShort = item.Amount - inventory.Balance,
                         LocationName = inventory.LocationName,
                         OnHold = inventory.OnHold,
                         ProductId = item.ProductId,
