@@ -64,7 +64,6 @@ namespace EcommerceApi
             services.AddTransient(_ => new AppDb(Configuration.GetConnectionString("mysqlConnection")));
 
             services.AddTransient<IEmailSender, EmailSender>();
-            services.Configure<EmailSenderOptions>(Configuration.GetSection("email"));
 
             // Configure Entity Framework Identity for Auth
             services.AddIdentity<ApplicationUser, IdentityRole>()

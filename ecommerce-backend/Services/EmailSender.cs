@@ -1,5 +1,7 @@
-﻿using Microsoft.Extensions.Options;
+﻿using EcommerceApi.Models;
+using Microsoft.Extensions.Options;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Net.Mail;
 using System.Text;
@@ -9,18 +11,19 @@ namespace EcommerceApi.Services
 {
     public class EmailSender  : IEmailSender
     {
-        public EmailSender(IOptions<EmailSenderOptions> optionsAccessor)
-        {
-            Options = optionsAccessor.Value;
-        }
+        private readonly EcommerceContext _context;
 
-        public EmailSenderOptions Options { get; }
+        public EmailSender(EcommerceContext context)
+        {
+            _context = context;
+        }
 
         public async Task SendEmailAsync(string toEmail, string subject, string htmlMessage, string textMessage = null, Stream attachment = null, string attachmentName = null, bool ccAdmins = false)
         {
+            var settings = _context.Settings.FirstOrDefault();
             MailMessage mailMessage = new MailMessage
             {
-                From = new MailAddress(this.Options.emailFromAddress, this.Options.emailFromName),
+                From = new MailAddress(settings.FromEmail, settings.FromEmail),
                 Body = textMessage,
                 BodyEncoding = Encoding.UTF8,
                 Subject = subject,
@@ -28,12 +31,12 @@ namespace EcommerceApi.Services
             };
 
             if (string.IsNullOrEmpty(toEmail))
-                toEmail = Options.ccEmail;
+                toEmail = settings.ReportEmail;
 
             mailMessage.To.Add(toEmail);
 
             if (ccAdmins) {
-                mailMessage.To.Add(Options.ccEmail);
+                mailMessage.To.Add(settings.ReportEmail);
             }
 
             if (!string.IsNullOrEmpty(attachmentName))
@@ -49,38 +52,38 @@ namespace EcommerceApi.Services
                 mailMessage.AlternateViews.Add(htmlView);
             }
 
-            using (SmtpClient client = new SmtpClient(this.Options.host, this.Options.port))
+            using (SmtpClient client = new SmtpClient(settings.SmtpHost, settings.SmtpPort))
             {
                 client.UseDefaultCredentials = false;
                 client.DeliveryMethod = SmtpDeliveryMethod.Network;
-                client.Credentials = new NetworkCredential(this.Options.username, this.Options.password);
-                client.EnableSsl = this.Options.enableSSL;
+                client.Credentials = new NetworkCredential(settings.FromEmail, settings.FromEmailPassword);
+                client.EnableSsl = settings.SmtpUseSsl;
                 await client.SendMailAsync(mailMessage);
             }
         }
 
         public async Task SendAdminReportAsync(string subject, string textMessage)
         {
+            var settings = _context.Settings.FirstOrDefault();
             MailMessage mailMessage = new MailMessage
             {
-                From = new MailAddress(this.Options.emailFromAddress, this.Options.emailFromName),
+                From = new MailAddress(settings.FromEmail, settings.FromEmail),
                 Body = textMessage,
                 BodyEncoding = Encoding.UTF8,
                 Subject = subject,
                 SubjectEncoding = Encoding.UTF8
             };
 
-            mailMessage.To.Add(Options.ccEmail);
+            mailMessage.To.Add(settings.ReportEmail);
 
-            using (SmtpClient client = new SmtpClient(this.Options.host, this.Options.port))
+            using (SmtpClient client = new SmtpClient(settings.SmtpHost, settings.SmtpPort))
             {
                 client.UseDefaultCredentials = false;
                 client.DeliveryMethod = SmtpDeliveryMethod.Network;
-                client.Credentials = new NetworkCredential(this.Options.username, this.Options.password);
-                client.EnableSsl = this.Options.enableSSL;
+                client.Credentials = new NetworkCredential(settings.FromEmail, settings.FromEmailPassword);
+                client.EnableSsl = settings.SmtpUseSsl;
                 await client.SendMailAsync(mailMessage);
             }
         }
-
     }
 }
