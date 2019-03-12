@@ -118,6 +118,29 @@ namespace EcommerceApi.Repositories
             using (IDbConnection conn = Connection)
             {
                 string query = $@"
+SELECT Product.ProductId, ISNULL(Balance, 0) AS Balance, Product.ProductCode, Product.ProductName, [Location].LocationName, ISNULL(OnHold, 0) AS OnHold 
+FROM Product
+LEFT JOIN 
+( SELECT ProductId, Balance, @locationId as LocationId
+  FROM ProductInventory
+  WHERE ProductInventory.ProductId = @productId
+         AND ProductInventory.LocationId = @locationId) ProductInventory
+	ON Product.ProductId = ProductInventory.ProductId
+LEFT JOIN [Location]
+	ON [Location].LocationId = ProductInventory.LocationId
+LEFT JOIN (
+	SELECT ProductId, LocationId, SUM(Amount) AS OnHold 
+	FROM [Order]
+	INNER JOIN OrderDetail
+		ON [Order].OrderId = OrderDetail.OrderId
+	WHERE LocationId = @locationId
+		AND OrderDetail.ProductId = @productId
+		AND [Status] = 'OnHold'
+	GROUP BY ProductId, LocationId
+) OnHoldOrders
+ON OnHoldOrders.ProductId = ProductInventory.ProductId
+AND OnHoldOrders.LocationId = ProductInventory.LocationId 
+WHERE Product.ProductId = @productId
                                  ";
                 conn.Open();
                 return await conn.QueryFirstAsync<InventoryViewModel>(query, new { productId , locationId });
