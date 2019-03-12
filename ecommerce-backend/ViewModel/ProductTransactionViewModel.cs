@@ -9,6 +9,6 @@ namespace EcommerceApi.ViewModel
         public decimal Amount { get; set; }
         public string LocationName { get; set; }
         public string UserName { get; set; }
-        public string CustomerName { get; set; }
+        public string Notes { get; set; }
     }
 }

@@ -158,10 +158,6 @@ WHERE Disabled = 0
             using (IDbConnection conn = Connection)
             {
                 string query = $@"
-declare @productid int = 7549
-declare @fromDate datetime = dateadd(day, -7, getdate())
-declare @toDate datetime = getdate()
-
 SELECT * FROM (
 SELECT OrderDate AS Date, 'Order' AS TransactionType, (-1 * OrderDetail.Amount) AS Amount, Location.LocationName, Users.GivenName As UserName, 'Id: ' + CAST([Order].OrderId AS NVARCHAR(100)) AS Notes
 FROM [Order]
