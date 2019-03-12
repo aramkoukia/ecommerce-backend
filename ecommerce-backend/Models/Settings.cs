@@ -10,5 +10,7 @@
         public int SmtpPort { get; set; }
         public string SmtpHost { get; set; }
         public bool SmtpUseSsl { get; set; }
+        public bool WarnInSufficientStockOnOrder { get; set; }
+        public bool BlockInSufficientStockOnOrder { get; set; }
     }
 }
