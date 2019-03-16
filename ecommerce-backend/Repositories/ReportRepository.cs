@@ -222,6 +222,7 @@ LEFT JOIN (SELECT SUM(OrderDetail.Total) AS VanTotalSales, SUM(OrderDetail.Amoun
 			 ON OrderDetail.OrderId = [Order].OrderId
 		   WHERE [Order].LocationId = 1
                  AND OrderDate BETWEEN @fromDate AND @toDate
+                 AND [Order].Status IN ('Return', 'Paid', 'Account')
 		   GROUP BY ProductId ) VanSales
 	ON Product.ProductId = VanSales.ProductId
 LEFT JOIN (SELECT SUM(OrderDetail.Total) AS AbbTotalSales,  SUM(OrderDetail.Amount) AS AbbAmount, ProductId 
@@ -230,6 +231,7 @@ LEFT JOIN (SELECT SUM(OrderDetail.Total) AS AbbTotalSales,  SUM(OrderDetail.Amou
 			 ON OrderDetail.OrderId = [Order].OrderId
 		   WHERE [Order].LocationId = 2
                  AND OrderDate BETWEEN @fromDate AND @toDate
+                 AND [Order].Status IN ('Return', 'Paid', 'Account')
 		   GROUP BY ProductId ) AbbSales
 	ON Product.ProductId = AbbSales.ProductId
 LEFT JOIN (SELECT ProductId, Balance AS VanBalance 
@@ -261,6 +263,7 @@ LEFT JOIN (SELECT ProductId, [Order].CustomerId, OrderDetail.OrderId, LocationId
 		   INNER JOIN OrderDetail
 			 ON OrderDetail.OrderId = [Order].OrderId
 		   WHERE OrderDate BETWEEN @fromDate AND @toDate
+                 AND [Order].Status IN ('Return', 'Paid', 'Account')
 		   GROUP BY ProductId, OrderDetail.OrderId, LocationId, [Order].CustomerId) Sales
 	ON Product.ProductId = Sales.ProductId
 INNER JOIN [Location]
