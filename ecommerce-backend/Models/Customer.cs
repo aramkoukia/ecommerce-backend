@@ -21,5 +21,6 @@
         public string Website { get; set; }
         public string Status { get; set; }
         public string Segment { get; set; }
+        public decimal StoreCredit { get; set; }
     }
 }
