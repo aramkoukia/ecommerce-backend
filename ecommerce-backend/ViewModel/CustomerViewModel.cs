@@ -19,6 +19,7 @@
         public string UserName { get; set; }
         public string Email { get; set; }
         public string Status { get; set; }
+        public decimal AccountBalance { get; set; }
         public decimal StoreCredit { get; set; }
     }
 }
