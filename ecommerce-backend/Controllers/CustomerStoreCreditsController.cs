@@ -6,10 +6,11 @@ using EcommerceApi.Models;
 using Microsoft.AspNetCore.Authorization;
 using System;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 namespace EcommerceApi.Controllers
 {
-    [Authorize]
+    //[Authorize]
     [Produces("application/json")]
     [Route("api/CustomerStoreCredits")]
     public class CustomerStoreCreditsController : Controller
@@ -29,8 +30,8 @@ namespace EcommerceApi.Controllers
         [HttpGet("{id}")]
         public IEnumerable<CustomerStoreCredit> GetCustomerStoreCredits([FromRoute] int id)
         {
-            return _context.CustomerStoreCredit 
-                .Where(c => c.CustomerId == id);
+            return _context.CustomerStoreCredit.AsNoTracking()
+                .Where(c => c.CustomerId == id).ToList();
         }
 
         // POST: api/CustomerStoreCredits
@@ -41,12 +42,17 @@ namespace EcommerceApi.Controllers
             {
                 return BadRequest(ModelState);
             }
+
             System.Security.Claims.ClaimsPrincipal currentUser = this.User;
             var userId = _userManager.GetUserId(User);
             customerStoreCredit.CreatedByUserId = userId;
             var date = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateTime.UtcNow, "Pacific Standard Time");
             customerStoreCredit.CreatedDate = date;
             _context.CustomerStoreCredit.Add(customerStoreCredit);
+
+            var customer = await _context.Customer.FirstOrDefaultAsync(c => c.CustomerId == customerStoreCredit.CustomerId);
+            customer.StoreCredit += customerStoreCredit.Amount;
+
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetCustomerStoreCredits", new { id = customerStoreCredit.CustomerId }, customerStoreCredit);
