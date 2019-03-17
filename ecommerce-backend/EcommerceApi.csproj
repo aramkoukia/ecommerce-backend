@@ -3,6 +3,8 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
     <UserSecretsId>cb856a2c-3470-476a-baa2-7707690f1ef3</UserSecretsId>
+    <ApplicationInsightsResourceId>/subscriptions/9057c309-3427-4108-b5da-b4ed0faa2873/resourcegroups/ecommerce/providers/microsoft.insights/components/lightsandparts</ApplicationInsightsResourceId>
+    <ApplicationInsightsAnnotationResourceId>/subscriptions/9057c309-3427-4108-b5da-b4ed0faa2873/resourcegroups/ecommerce/providers/microsoft.insights/components/lightsandparts</ApplicationInsightsAnnotationResourceId>
   </PropertyGroup>
 
   <ItemGroup>
@@ -37,6 +39,7 @@
   <ItemGroup>
     <PackageReference Include="Dapper" Version="1.50.5" />
     <PackageReference Include="DinkToPdf" Version="1.0.8" />
+    <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.1.1" />
     <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.9" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.0.9" />
     <PackageReference Include="MySqlConnector" Version="0.48.2" />
@@ -44,6 +47,10 @@
 
   <ItemGroup>
     <DotNetCliToolReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Tools" Version="2.0.4" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <WCFMetadata Include="Connected Services" />
   </ItemGroup>
 
 </Project>

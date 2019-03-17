@@ -34,6 +34,7 @@ namespace EcommerceApi
 
         public static IWebHost BuildHost(string serverBindingUrl, string[] args) =>
             WebHost.CreateDefaultBuilder(args)
+                .UseApplicationInsights()
             .UseContentRoot(Directory.GetCurrentDirectory())
             .UseUrls(serverBindingUrl)
                 .UseStartup<Startup>()
