@@ -132,6 +132,7 @@ namespace EcommerceApi.Controllers
             }
 
             // Calculate if the inventory is up or down
+            productInventoryHistory.ChangedBalance = productInventoryHistory.Balance; // Storing the Balance after operation
             productInventoryHistory.Balance = productInventoryHistory.Balance - currentBalance;
             var operationType = "";
             operationType = productInventoryHistory.Balance > 0 ? "Stock Up - " : "Stock Down - ";

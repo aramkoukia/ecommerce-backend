@@ -20,11 +20,11 @@ namespace EcommerceApi.Controllers
         }
 
         // GET: api/CustomerStoreCredits
-        [HttpGet]
-        public IEnumerable<CustomerStoreCredit> GetCustomerStoreCredits(int customerId)
+        [HttpGet("{id}")]
+        public IEnumerable<CustomerStoreCredit> GetCustomerStoreCredits([FromRoute] int id)
         {
             return _context.CustomerStoreCredit 
-                .Where(c => c.CustomerId == customerId);
+                .Where(c => c.CustomerId == id);
         }
 
         // POST: api/CustomerStoreCredits
