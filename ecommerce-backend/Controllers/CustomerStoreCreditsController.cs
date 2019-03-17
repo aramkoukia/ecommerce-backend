@@ -4,6 +4,8 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using EcommerceApi.Models;
 using Microsoft.AspNetCore.Authorization;
+using System;
+using Microsoft.AspNetCore.Identity;
 
 namespace EcommerceApi.Controllers
 {
@@ -13,10 +15,14 @@ namespace EcommerceApi.Controllers
     public class CustomerStoreCreditsController : Controller
     {
         private readonly EcommerceContext _context;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        public CustomerStoreCreditsController(EcommerceContext context)
+        public CustomerStoreCreditsController(
+            EcommerceContext context,
+            UserManager<ApplicationUser> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
 
         // GET: api/CustomerStoreCredits
@@ -35,7 +41,11 @@ namespace EcommerceApi.Controllers
             {
                 return BadRequest(ModelState);
             }
-
+            System.Security.Claims.ClaimsPrincipal currentUser = this.User;
+            var userId = _userManager.GetUserId(User);
+            customerStoreCredit.CreatedByUserId = userId;
+            var date = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateTime.UtcNow, "Pacific Standard Time");
+            customerStoreCredit.CreatedDate = date;
             _context.CustomerStoreCredit.Add(customerStoreCredit);
             await _context.SaveChangesAsync();
 
