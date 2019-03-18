@@ -267,10 +267,28 @@ namespace EcommerceApi.Controllers
             var date = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateTime.UtcNow, "Pacific Standard Time");
             order.CreatedDate = date;
             order.OrderDate = date;
+            order.OrderId = _context.Order.Max(o => o.OrderId) + 1;
             if (order.OrderPayment != null && order.OrderPayment.Any())
             {
                 foreach (var payment in order.OrderPayment)
                 {
+                    // Paid by Store Credit. Upating customer store credit and add to hostory
+                    if (payment.PaymentTypeId == 26 && order.CustomerId != null) {
+                        var customer = await _context.Customer.FirstOrDefaultAsync(c => c.CustomerId == order.CustomerId);
+                        if (customer != null)
+                        {
+                            customer.StoreCredit -= payment.PaymentAmount;
+                            _context.CustomerStoreCredit.Add(
+                                new CustomerStoreCredit {
+                                    Amount = -1 * payment.PaymentAmount,
+                                    CreatedByUserId = user.Id,
+                                    CreatedDate = date,
+                                    CustomerId = customer.CustomerId,
+                                    Notes = $"Used to pay Order: {order.OrderId}"
+                                }
+                            );
+                        }
+                    }
                     payment.CreatedByUserId = user.Id;
                     payment.CreatedDate = order.CreatedDate;
                     payment.PaymentDate = order.CreatedDate;
@@ -280,7 +298,6 @@ namespace EcommerceApi.Controllers
             order.Customer = null;
             order.Location = null;
             var done = await UpdateInventory(order);
-            order.OrderId = _context.Order.Max(o => o.OrderId) + 1;
             _context.Order.Add(order);
             await _emailSender.SendAdminReportAsync("New Order", $"New Order Created. \n Order Id: {order.OrderId}. \n Status: {order.Status} \n Total: ${order.Total} \n User: {user.GivenName}");
 
