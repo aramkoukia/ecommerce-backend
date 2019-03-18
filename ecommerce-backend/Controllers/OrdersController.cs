@@ -147,6 +147,32 @@ namespace EcommerceApi.Controllers
                             PaymentTypeId = payment.PaymentTypeId,
                             ChequeNo = payment.ChequeNo
                         });
+
+                        // Paid by Store Credit. Upating customer store credit and add to history
+                        if (payment.PaymentTypeId == 26 && order.CustomerId != null)
+                        {
+                            var customer = await _context.Customer.FirstOrDefaultAsync(c => c.CustomerId == order.CustomerId);
+                            if (customer != null)
+                            {
+                                var storeCreditNote = $"Used to pay Order: {order.OrderId}";
+                                if (order.Status == OrderStatus.Return.ToString())
+                                {
+                                    storeCreditNote = $"Store Credit added for Refund of Order: {order.OrderId}";
+                                }
+
+                                customer.StoreCredit = customer.StoreCredit + decimal.Multiply(payment.PaymentAmount, decimal.MinusOne);
+                                _context.CustomerStoreCredit.Add(
+                                    new CustomerStoreCredit
+                                    {
+                                        Amount = decimal.Multiply(payment.PaymentAmount, decimal.MinusOne),
+                                        CreatedByUserId = userId,
+                                        CreatedDate = date,
+                                        CustomerId = customer.CustomerId,
+                                        Notes = storeCreditNote
+                                    }
+                                );
+                            }
+                        }
                     }
                 }
             }
@@ -267,24 +293,36 @@ namespace EcommerceApi.Controllers
             var date = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateTime.UtcNow, "Pacific Standard Time");
             order.CreatedDate = date;
             order.OrderDate = date;
+            if (order.Status != OrderStatus.Return.ToString() && order.Total < 0)
+            {
+                order.Status = OrderStatus.Return.ToString();
+            }
+
             order.OrderId = _context.Order.Max(o => o.OrderId) + 1;
             if (order.OrderPayment != null && order.OrderPayment.Any())
             {
                 foreach (var payment in order.OrderPayment)
                 {
-                    // Paid by Store Credit. Upating customer store credit and add to hostory
-                    if (payment.PaymentTypeId == 26 && order.CustomerId != null) {
+                    // Paid by Store Credit. Upating customer store credit and add to history
+                    if (payment.PaymentTypeId == 26 && order.CustomerId != null)
+                    {
                         var customer = await _context.Customer.FirstOrDefaultAsync(c => c.CustomerId == order.CustomerId);
                         if (customer != null)
                         {
-                            customer.StoreCredit -= payment.PaymentAmount;
+                            var storeCreditNote = $"Used to pay Order: {order.OrderId}";
+                            if (order.Status == OrderStatus.Return.ToString())
+                            {
+                                storeCreditNote = $"Store Credit added for Refund of Order: {order.OrderId}";
+                            }
+
+                            customer.StoreCredit = customer.StoreCredit + decimal.Multiply(payment.PaymentAmount, decimal.MinusOne);
                             _context.CustomerStoreCredit.Add(
                                 new CustomerStoreCredit {
-                                    Amount = -1 * payment.PaymentAmount,
-                                    CreatedByUserId = user.Id,
+                                    Amount = decimal.Multiply(payment.PaymentAmount, decimal.MinusOne),
+                                    CreatedByUserId = user.Email,
                                     CreatedDate = date,
                                     CustomerId = customer.CustomerId,
-                                    Notes = $"Used to pay Order: {order.OrderId}"
+                                    Notes = storeCreditNote
                                 }
                             );
                         }
@@ -542,6 +580,7 @@ www.lightsandparts.com | essi@lightsandparts.com
 
             return Ok(result);
         }
+
         private async Task<bool> OriginalOrderWasPaid(int? originalOrderId)
         {
             if (!originalOrderId.HasValue)
