@@ -51,7 +51,7 @@ namespace EcommerceApi.Controllers
         [HttpGet("{authCode}")]
         public async Task<IActionResult> Get(string authCode)
         {
-            var user = await _userManager.Users.FirstOrDefaultAsync(u => u.AuthCode.Equals(authCode, StringComparison.InvariantCultureIgnoreCase));
+            var user = await _userManager.Users.FirstOrDefaultAsync(u => u.AuthCode != null && u.AuthCode.Equals(authCode, StringComparison.InvariantCultureIgnoreCase));
             if (user == null)
             {
                 NotFound();
