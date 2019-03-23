@@ -136,7 +136,7 @@ namespace EcommerceApi.Controllers
                 var userId = _userManager.GetUserId(User);
                 if (updateOrderStatus.OrderPayment != null && updateOrderStatus.OrderPayment.Any())
                 {
-                    var orderPayments = updateOrderStatus.OrderPayment.Select(m=> new { m.PaymentTypeId, m.PaymentAmount, m.ChequeNo }).Distinct();
+                    var orderPayments = updateOrderStatus.OrderPayment.Select(m=> new { m.PaymentTypeId, m.PaymentAmount, m.ChequeNo }).Distinct().ToList();
                     foreach (var payment in orderPayments)
                     {
                         order.OrderPayment.Add(new OrderPayment
@@ -302,7 +302,7 @@ namespace EcommerceApi.Controllers
             order.OrderId = _context.Order.Max(o => o.OrderId) + 1;
             if (order.OrderPayment != null && order.OrderPayment.Any())
             {
-                var orderPayments = order.OrderPayment.Select(m => new { m.PaymentTypeId, m.PaymentAmount, m.ChequeNo }).Distinct();
+                var orderPayments = order.OrderPayment.Select(m => new { m.PaymentTypeId, m.PaymentAmount, m.ChequeNo }).Distinct().ToList();
                 order.OrderPayment.Clear();
                 foreach (var payment in orderPayments)
                 {
