@@ -403,15 +403,17 @@ Dear Customer,
 
 Attached is your current invoice from LED Lights and Parts (Pixel Print Ltd). 
 
-If you have a credit account this invoice will be marked Awaiting payment. 
+If you have a credit account, the invoice will be marked as ACCOUNT.
 
-If you already paid this invoice will be marked PAID. and no further action is required. 
+If you requested to hold on products, the invoice will be marked as HOLD.
 
-If you requested the quote, the invoice will be marked HOLD. 
+If you already paid, the invoice will be marked as PAID and no further action is required. 
+
+If you requested the quote, the invoice will be marked as DRAFT. 
 
 If you returned or exchanged the invoice will be marked as Return/Exchange or Credit. 
 
-Thank you for working with LED Lights and Parts! We\'re happy to work with you to solve any of your lighting challenges. 
+Thank you for working with LED Lights and Parts! We are happy to work with you to solve any of your lighting challenges. 
 
 Sincerely,
 
