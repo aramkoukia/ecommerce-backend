@@ -136,7 +136,8 @@ namespace EcommerceApi.Controllers
                 var userId = _userManager.GetUserId(User);
                 if (updateOrderStatus.OrderPayment != null && updateOrderStatus.OrderPayment.Any())
                 {
-                    foreach (var payment in updateOrderStatus.OrderPayment)
+                    var orderPayments = updateOrderStatus.OrderPayment.Select(m=> new { m.PaymentTypeId, m.PaymentAmount, m.ChequeNo }).Distinct();
+                    foreach (var payment in orderPayments)
                     {
                         order.OrderPayment.Add(new OrderPayment
                         {
@@ -301,8 +302,20 @@ namespace EcommerceApi.Controllers
             order.OrderId = _context.Order.Max(o => o.OrderId) + 1;
             if (order.OrderPayment != null && order.OrderPayment.Any())
             {
-                foreach (var payment in order.OrderPayment)
+                var orderPayments = order.OrderPayment.Select(m => new { m.PaymentTypeId, m.PaymentAmount, m.ChequeNo }).Distinct();
+                order.OrderPayment.Clear();
+                foreach (var payment in orderPayments)
                 {
+                    order.OrderPayment.Add(new OrderPayment
+                    {
+                        CreatedByUserId = user.Id,
+                        CreatedDate = date,
+                        PaymentAmount = payment.PaymentAmount,
+                        PaymentDate = date,
+                        PaymentTypeId = payment.PaymentTypeId,
+                        ChequeNo = payment.ChequeNo
+                    });
+
                     // Paid by Store Credit. Upating customer store credit and add to history
                     if (payment.PaymentTypeId == 26 && order.CustomerId != null)
                     {
@@ -327,9 +340,6 @@ namespace EcommerceApi.Controllers
                             );
                         }
                     }
-                    payment.CreatedByUserId = user.Id;
-                    payment.CreatedDate = order.CreatedDate;
-                    payment.PaymentDate = order.CreatedDate;
                 }
             }
 
