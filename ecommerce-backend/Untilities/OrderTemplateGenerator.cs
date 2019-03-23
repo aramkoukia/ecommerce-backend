@@ -126,6 +126,15 @@ namespace EcommerceApi.Untilities
                         </tr>", paymentType);
             }
 
+            if (order.RestockingFeeAmount != 0)
+            {
+                sbCustomer.AppendFormat(@"<tr>
+                        <td style='width:10%'></td>
+                        <td style='width:55%'></td>
+                        <td style='width:35%' colspan='2'>Re-Stocking Fee : ${0}</td>
+                        </tr>", order.RestockingFeeAmount);
+            }
+
             sbFinal.Append(sbCustomer);
 
             sbFinal.Append($@"
