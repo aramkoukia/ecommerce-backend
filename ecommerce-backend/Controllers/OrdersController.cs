@@ -289,7 +289,7 @@ namespace EcommerceApi.Controllers
                 return BadRequest(ModelState);
             }
 
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.AuthCode.Equals(order.AuthCode, StringComparison.InvariantCultureIgnoreCase));
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.AuthCode != null && u.AuthCode.Equals(order.AuthCode, StringComparison.InvariantCultureIgnoreCase));
             order.CreatedByUserId = user.Id;
             var date = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateTime.UtcNow, "Pacific Standard Time");
             order.CreatedDate = date;
@@ -356,7 +356,7 @@ namespace EcommerceApi.Controllers
 
         // GET: api/Orders
         [HttpGet("{orderId}/email")]
-        public async Task<IActionResult> EmailOrder([FromRoute] int orderId, [FromQuery] string email)
+        public async Task<IActionResult> EmailOrder([FromRoute] int orderId, [FromQuery] string email, string authCode)
         {
             var order = await _context.Order.AsNoTracking()
                 .Include(o => o.OrderDetail)
@@ -386,8 +386,6 @@ namespace EcommerceApi.Controllers
                 PagesCount = true,
                 HtmlContent = OrderTemplateGenerator.GetHtmlString(order, false),
                 WebSettings = { DefaultEncoding = "utf-8", UserStyleSheet = Path.Combine(Directory.GetCurrentDirectory(), "assets", "invoice.css") },
-                // HeaderSettings = { FontName = "Arial", FontSize = 9, Right = "Page [page] of [toPage]", Line = true },
-                // FooterSettings = { FontName = "Arial", FontSize = 9, Line = true, Center = "Report Footer" }
             };
 
             var pdf = new HtmlToPdfDocument()
@@ -397,7 +395,7 @@ namespace EcommerceApi.Controllers
             };
 
             var file = _converter.Convert(pdf);
-            var message = @"
+            var message = $@"
 Dear Customer,
 
 
@@ -417,7 +415,7 @@ Thank you for working with LED Lights and Parts! We are happy to work with you t
 
 Sincerely,
 
-Shaney
+{user.UserName}
 
 3695 East 1st Ave Vancouver, BC V5M 1C2
 
@@ -427,7 +425,7 @@ Cel: (778) 839-3352
 
 Fax: (604) 559-5008
 
-www.lightsandparts.com | essi@lightsandparts.com
+www.lightsandparts.com | {user.Email}
             ";
             var attachment = new MemoryStream(file);
             var attachmentName = $"Invoice No {order.OrderId}.pdf";

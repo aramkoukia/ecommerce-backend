@@ -180,7 +180,7 @@ namespace EcommerceApi.Controllers
         {
             ApplicationUser user = await _userManager.FindByNameAsync(passcodeResetInfo.UserName);
 
-            var otherUsersWithSamePasscode = _context.Users.Where(u => !u.UserName.Equals(passcodeResetInfo.UserName, StringComparison.InvariantCultureIgnoreCase) && u.AuthCode.Equals(passcodeResetInfo.NewPasscode, StringComparison.InvariantCultureIgnoreCase ));
+            var otherUsersWithSamePasscode = _context.Users.Where(u => !u.UserName.Equals(passcodeResetInfo.UserName, StringComparison.InvariantCultureIgnoreCase) && u.AuthCode != null && u.AuthCode.Equals(passcodeResetInfo.NewPasscode, StringComparison.InvariantCultureIgnoreCase ));
             if (otherUsersWithSamePasscode != null && otherUsersWithSamePasscode.Any())
             {
                 return Ok(new { Errors = new List<string>() { "This pass code is used by other users. please try a new passcode!" } });
