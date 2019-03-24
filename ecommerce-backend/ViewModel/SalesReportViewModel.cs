@@ -4,12 +4,12 @@
     {
         public string LocationName { get; set; }
         public string Status { get; set; }
-        public decimal SubTotal { get; set; }
-        public decimal Total { get; set; }
-        public decimal Discount { get; set; }
+        public string SubTotal { get; set; }
+        public string Total { get; set; }
+        public string Discount { get; set; }
         public int Transactions { get; set; }
-        public decimal Pst { get; set; }
-        public decimal Gst { get; set; }
-        public decimal OtherTax { get; set; }
+        public string Pst { get; set; }
+        public string Gst { get; set; }
+        public string OtherTax { get; set; }
     }
 }

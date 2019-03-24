@@ -7,8 +7,8 @@ namespace EcommerceApi.ViewModel
         public int OrderId { get; set; }
         public string PoNumber { get; set; }
         public DateTime OrderDate { get; set; }
-        public decimal PaymentAmount { get; set; }
-        public decimal Total { get; set; }
+        public string PaymentAmount { get; set; }
+        public string Total { get; set; }
         public string Status { get; set; }
         public string PaymentTypeName { get; set; }
         public string CompanyName { get; set; }

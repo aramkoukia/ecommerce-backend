@@ -9,7 +9,7 @@
         public string LocationName { get; set; }
         public int OrderId { get; set; }
         public string ProductTypeName { get; set; }
-        public decimal TotalSales { get; set; }
+        public string TotalSales { get; set; }
         public decimal Amount { get; set; }
     }
 }
