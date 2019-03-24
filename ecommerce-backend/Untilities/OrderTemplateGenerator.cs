@@ -95,6 +95,17 @@ namespace EcommerceApi.Untilities
                                 <td style='width:15%' class='right'>${1}</td>
                                 </tr>", tax.Tax.TaxName, tax.TaxAmount);
         }
+
+            if (order.RestockingFeeAmount != 0)
+            {
+                sbCustomer.AppendFormat(@"<tr>
+                        <td style='width:10%'></td>
+                        <td style='width:55%'></td>
+                        <td style='width:20%'>Re-Stocking Fee:</td>
+                        <td style='width:15%' class='right'>${0}</td>
+                        </tr>", order.RestockingFeeAmount);
+            }
+
             sbCustomer.AppendFormat(@"<tr>
                         <td style='width:10%'></td>
                         <td style='width:55%'></td>
@@ -124,15 +135,6 @@ namespace EcommerceApi.Untilities
                         <td style='width:55%'></td>
                         <td style='width:35%' colspan='2'>Paid by: {0}</td>
                         </tr>", paymentType);
-            }
-
-            if (order.RestockingFeeAmount != 0)
-            {
-                sbCustomer.AppendFormat(@"<tr>
-                        <td style='width:10%'></td>
-                        <td style='width:55%'></td>
-                        <td style='width:35%' colspan='2'>Re-Stocking Fee : ${0}</td>
-                        </tr>", order.RestockingFeeAmount);
             }
 
             sbFinal.Append(sbCustomer);
