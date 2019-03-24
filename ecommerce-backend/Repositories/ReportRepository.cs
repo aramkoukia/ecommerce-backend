@@ -179,7 +179,7 @@ Order By Year, Label
             using (IDbConnection conn = Connection)
             {
                 string query = $@"
-SELECT ProductTypeName, SUM(ISNULL(VanTotalSales,0)) AS VanTotalSales, SUM(ISNULL(AbbTotalSales,0)) AS AbbTotalSales 
+SELECT ProductTypeName, FORMAT(SUM(ISNULL(VanTotalSales,0)), 'N2') AS VanTotalSales, FORMAT(SUM(ISNULL(AbbTotalSales,0)), 'N2') AS AbbTotalSales 
 FROM Product
 INNER JOIN ProductType
 	ON ProductType.ProductTypeId = Product.ProductTypeId
@@ -212,7 +212,7 @@ GROUP BY ProductTypeName
             using (IDbConnection conn = Connection)
             {
                 string query = $@"
-SELECT ProductName, ProductCode, ProductTypeName, ISNULL(VanTotalSales,0) AS VanTotalSales, ISNULL(AbbTotalSales, 0) AS AbbTotalSales, ISNULL(VanBalance,0) AS VanBalance, ISNULL(AbbBalance, 0) AS AbbBalance, ISNULL(VanAmount, 0) AS VanAmount, ISNULL(AbbAmount, 0) AS AbbAmount
+SELECT ProductName, ProductCode, ProductTypeName, FORMAT(ISNULL(VanTotalSales,0), 'N2') AS VanTotalSales, FORMAT(ISNULL(AbbTotalSales, 0), 'N2') AS AbbTotalSales, ISNULL(VanBalance,0) AS VanBalance, ISNULL(AbbBalance, 0) AS AbbBalance, ISNULL(VanAmount, 0) AS VanAmount, ISNULL(AbbAmount, 0) AS AbbAmount
 FROM Product
 INNER JOIN ProductType
 	ON ProductType.ProductTypeId = Product.ProductTypeId
@@ -254,7 +254,7 @@ WHERE ISNULL(VanTotalSales,0) <> 0 OR ISNULL(AbbTotalSales, 0) <> 0
             using (IDbConnection conn = Connection)
             {
                 string query = $@"
-SELECT LocationName, ISNULL(Customer.CompanyName, 'WALK-IN') AS CompanyName, ISNULL(Customer.CustomerCode, '') AS CustomerCode, ProductName, ProductCode, OrderId, ProductTypeName, ISNULL(TotalSales,0) AS TotalSales, ISNULL(Amount, 0) AS Amount
+SELECT LocationName, ISNULL(Customer.CompanyName, 'WALK-IN') AS CompanyName, ISNULL(Customer.CustomerCode, '') AS CustomerCode, ProductName, ProductCode, OrderId, ProductTypeName, FORMAT(ISNULL(TotalSales,0), 'N2') AS TotalSales, ISNULL(Amount, 0) AS Amount
 FROM Product
 INNER JOIN ProductType
 	ON ProductType.ProductTypeId = Product.ProductTypeId
@@ -352,13 +352,13 @@ LEFT JOIN (
 ON [Order].LocationId = OtherTax.LocationId
    AND [Order].Status = OtherTax.Status
 
-SELECT * FROM #Results
+SELECT LocationName, [Status], FORMAT(SubTotal, 'N2') AS SubTotal, FORMAT(Total, 'N2') AS Total, FORMAT(Discount, 'N2') AS Discount, Transactions, FORMAT(Pst, 'N2') AS Pst, FORMAT(Gst, 'N2') AS Gst, FORMAT(OtherTax, 'N2') AS OtherTax FROM #Results
 UNION 
-SELECT ' Total Account',  '', SUM(SubTotal), SUM(Total), SUM(Discount), SUM(Transactions), SUM(Pst), SUM(Gst), SUM(OtherTax)
+SELECT ' Total Account',  '', FORMAT(SUM(SubTotal), 'N2'), FORMAT(SUM(Total), 'N2'), FORMAT(SUM(Discount), 'N2'), SUM(Transactions), FORMAT(SUM(Pst), 'N2'), FORMAT(SUM(Gst), 'N2'), FORMAT(SUM(OtherTax), 'N2')
 FROM #Results
 WHERE [Status] = 'Account'
 UNION 
-SELECT ' Total Without Account',  '', SUM(SubTotal), SUM(Total), SUM(Discount), SUM(Transactions), SUM(Pst), SUM(Gst), SUM(OtherTax)
+SELECT ' Total Without Account',  '', FORMAT(SUM(SubTotal), 'N2'), FORMAT(SUM(Total), 'N2'), FORMAT(SUM(Discount), 'N2'), SUM(Transactions), FORMAT(SUM(Pst), 'N2'), FORMAT(SUM(Gst), 'N2'), FORMAT(SUM(OtherTax), 'N2')
 FROM #Results
 WHERE [Status] <> 'Account'
 ";
@@ -372,7 +372,7 @@ WHERE [Status] <> 'Account'
             using (IDbConnection conn = Connection)
             {
                 string query = $@"
-SELECT ISNULL(PaymentTypeName, 'Total') AS PaymentTypeName, SUM(PaymentAmount) AS PaymentAmount, ISNULL(Location.LocationName, 'All Locations') AS LocationName
+SELECT ISNULL(PaymentTypeName, 'Total') AS PaymentTypeName, FORMAT(SUM(PaymentAmount), 'N2') AS PaymentAmount, ISNULL(Location.LocationName, 'All Locations') AS LocationName
 FROM OrderPayment
 INNER JOIN PaymentType
 	ON PaymentType.PaymentTypeId = OrderPayment.PaymentTypeId 
@@ -397,7 +397,7 @@ WITH ROLLUP                                 ";
             using (IDbConnection conn = Connection)
             {
                 string query = $@"
-SELECT Users.GivenName, PaymentTypeName, [Order].OrderId, Customer.CompanyName, [Order].Status, SUM(PaymentAmount) AS PaymentAmount, Location.LocationName
+SELECT Users.GivenName, PaymentTypeName, [Order].OrderId, Customer.CompanyName, [Order].Status, FORMAT(SUM(PaymentAmount), 'N2') AS PaymentAmount, Location.LocationName
 FROM OrderPayment
 INNER JOIN PaymentType
 	ON PaymentType.PaymentTypeId = OrderPayment.PaymentTypeId 
@@ -422,7 +422,7 @@ GROUP BY PaymentTypeName, Users.GivenName, [Order].OrderId, Customer.CompanyName
             using (IDbConnection conn = Connection)
             {
                 string query = $@"
-SELECT PaymentTypeName, [Order].Status, SUM(PaymentAmount) AS PaymentAmount, Location.LocationName
+SELECT PaymentTypeName, [Order].Status, FORMAT(SUM(PaymentAmount), 'N2') AS PaymentAmount, Location.LocationName
 FROM OrderPayment
 INNER JOIN PaymentType
 	ON PaymentType.PaymentTypeId = OrderPayment.PaymentTypeId 
@@ -458,7 +458,7 @@ GROUP BY PaymentTypeName, [Order].Status, Location.LocationName
             using (IDbConnection conn = Connection)
             {
                 string query = $@"
-SELECT [Order].OrderId, PoNumber, OrderDate, [Order].Total, OrderPayment.PaymentAmount, [Order].[Status], PaymentType.PaymentTypeName, Customer.CompanyName, Customer.CustomerCode, Customer.[Address], Customer.City, Customer.Province, Customer.PostalCode
+SELECT [Order].OrderId, PoNumber, OrderDate, FORMAT([Order].Total, 'N2') AS Total, FORMAT(OrderPayment.PaymentAmount, 'N2') AS PaymentAmount, [Order].[Status], PaymentType.PaymentTypeName, Customer.CompanyName, Customer.CustomerCode, Customer.[Address], Customer.City, Customer.Province, Customer.PostalCode
 FROM [Order]
 INNER JOIN Customer
 	ON Customer.CustomerId = [Order].CustomerId
