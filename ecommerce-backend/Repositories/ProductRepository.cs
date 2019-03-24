@@ -159,7 +159,7 @@ WHERE Disabled = 0
             {
                 string query = $@"
 SELECT * FROM (
-SELECT OrderDate AS Date, 'Order' AS TransactionType, (-1 * OrderDetail.Amount) AS Amount, Location.LocationName, Users.GivenName As UserName, 'Id: ' + CAST([Order].OrderId AS NVARCHAR(100)) AS Notes
+SELECT OrderDate AS Date, 'Order' AS TransactionType, (-1 * OrderDetail.Amount) AS Amount, Location.LocationName, Users.GivenName As UserName, 'Id: ' + CAST([Order].OrderId AS NVARCHAR(100)) AS Notes, NULL AS Balance
 FROM [Order]
 INNER JOIN OrderDetail
 	On [Order].OrderId = OrderDetail.OrderId
@@ -173,7 +173,7 @@ WHERE ProductId = @ProductId
 
 UNION ALL 
 
-SELECT OrderDate, 'Returned Order' AS TransactionType, OrderDetail.Amount, Location.LocationName, Users.GivenName, 'Id: ' + CAST([Order].OrderId AS NVARCHAR(100)) AS Notes
+SELECT OrderDate, 'Returned Order' AS TransactionType, OrderDetail.Amount, Location.LocationName, Users.GivenName, 'Id: ' + CAST([Order].OrderId AS NVARCHAR(100)) AS Notes, NULL
 FROM [Order]
 INNER JOIN OrderDetail
 	On [Order].OrderId = OrderDetail.OrderId
@@ -187,7 +187,7 @@ WHERE ProductId = @ProductId
 
 UNION ALL 
 
-SELECT PurchaseDate, 'Purchase' AS TransactionType, PurchaseDetail.Amount, '', Users.GivenName, 'Id: ' + CAST([Purchase].PurchaseId AS NVARCHAR(100)) AS Notes
+SELECT PurchaseDate, 'Purchase' AS TransactionType, PurchaseDetail.Amount, '', Users.GivenName, 'Id: ' + CAST([Purchase].PurchaseId AS NVARCHAR(100)) AS Notes, NULL
 FROM [Purchase]
 INNER JOIN PurchaseDetail
 	On Purchase.PurchaseId = PurchaseDetail.PurchaseId
@@ -198,7 +198,7 @@ WHERE ProductId = @ProductId
 
 UNION ALL 
 
-SELECT ModifiedDate, TransactionType, Balance, Location.LocationName, Users.GivenName, ProductInventoryHistory.Notes
+SELECT ModifiedDate, TransactionType, Balance AS BalanceChanged, Location.LocationName, Users.GivenName, ProductInventoryHistory.Notes, ChangedBalance as Balance
 FROM ProductInventoryHistory
 INNER JOIN Location
 	ON Location.LocationId = ProductInventoryHistory.LocationId

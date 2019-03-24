@@ -207,6 +207,7 @@ namespace EcommerceApi.Controllers
             {
                 fromProductInventory.Balance = fromProductInventory.Balance - transferInventory.TransferQuantity;
                 fromProductInventory.ModifiedDate = fromProductInventoryHistory.ModifiedDate;
+                fromProductInventoryHistory.ChangedBalance = fromProductInventory.Balance;
             }
             else
             {
@@ -218,6 +219,7 @@ namespace EcommerceApi.Controllers
                     ModifiedDate = fromProductInventoryHistory.ModifiedDate,
                     ProductId = transferInventory.ProductId
                 };
+                fromProductInventoryHistory.ChangedBalance = newProductInventory.Balance;
                 _context.ProductInventory.Add(newProductInventory);
             }
 
@@ -229,6 +231,7 @@ namespace EcommerceApi.Controllers
             {
                 toProductInventory.Balance = toProductInventory.Balance + transferInventory.TransferQuantity;
                 toProductInventory.ModifiedDate = toProductInventoryHistory.ModifiedDate;
+                toProductInventoryHistory.ChangedBalance = toProductInventory.Balance;
             }
             else
             {
@@ -240,8 +243,10 @@ namespace EcommerceApi.Controllers
                     ModifiedDate = toProductInventoryHistory.ModifiedDate,
                     ProductId = transferInventory.ProductId
                 };
+                toProductInventoryHistory.ChangedBalance = newProductInventory.Balance;
                 _context.ProductInventory.Add(newProductInventory);
             }
+            
 
 
             var product = await _context.Product.FirstOrDefaultAsync(p => p.ProductId == transferInventory.ProductId);

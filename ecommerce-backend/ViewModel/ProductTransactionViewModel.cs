@@ -10,5 +10,6 @@ namespace EcommerceApi.ViewModel
         public string LocationName { get; set; }
         public string UserName { get; set; }
         public string Notes { get; set; }
+        public decimal Balance { get; set; }
     }
 }
