@@ -261,9 +261,18 @@ namespace EcommerceApi.Controllers
             var orderPayments = updateOrderPayment.OrderPayment.Select(m => new { m.PaymentTypeId, m.PaymentAmount, m.ChequeNo }).Distinct().ToList();
             var originalPaymentTypes = string.Join(",", order.OrderPayment.Select(m => m.PaymentType.PaymentTypeName).ToArray());
             var originalPaymentAmount = string.Join(",", order.OrderPayment.Select(m => m.PaymentAmount).ToArray());
+            var originalAmountTotal = order.OrderPayment.Sum(m => m.PaymentAmount);
+            var newAmountTotal = updateOrderPayment.OrderPayment.Sum(m => m.PaymentAmount);
+            if (newAmountTotal != originalAmountTotal)
+            {
+                return BadRequest("Original Amount is not the same as New Amount");
+            }
+
             var paymentTypeIds = updateOrderPayment.OrderPayment.Select(o => o.PaymentTypeId);
             var newPaymentTypes = string.Join(",", _context.PaymentType.Where(p =>  paymentTypeIds.Contains(p.PaymentTypeId)).Select(m => m.PaymentTypeName).ToArray());
             var newPaymentAmount = string.Join(",", updateOrderPayment.OrderPayment.Select(m => m.PaymentAmount).ToArray());
+
+
             
             foreach (var payment in order.OrderPayment)
             { 
