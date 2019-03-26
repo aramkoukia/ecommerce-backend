@@ -128,7 +128,11 @@ namespace EcommerceApi.Controllers
                 return BadRequest();
             }
             var date = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateTime.UtcNow, "Pacific Standard Time");
-            var order = await _context.Order.SingleOrDefaultAsync(m => m.OrderId == id);
+
+            var order = await _context.Order
+                .Include(o => o.OrderDetail)
+                .SingleOrDefaultAsync(m => m.OrderId == id);
+
             var originalOrderStatus = order.Status;
             if (updateOrderStatus.OrderStatus.Equals(OrderStatus.Paid.ToString(), StringComparison.InvariantCultureIgnoreCase))
             {
@@ -186,7 +190,7 @@ namespace EcommerceApi.Controllers
             }
             else
             {
-                var done = await UpdateInventory(order);
+                var done = await ExistingOrderUpdateInventory(order, updateOrderStatus);
             }
 
             order.Status = updateOrderStatus.OrderStatus;
@@ -345,7 +349,7 @@ namespace EcommerceApi.Controllers
 
             order.Customer = null;
             order.Location = null;
-            var done = await UpdateInventory(order);
+            var done = await NewOrderUpdateInventory(order);
             _context.Order.Add(order);
             await _emailSender.SendAdminReportAsync("New Order", $"New Order Created. \n Order Id: {order.OrderId}. \n Status: {order.Status} \n Total: ${order.Total} \n User: {user.GivenName}");
 
@@ -606,19 +610,13 @@ www.lightsandparts.com | {user.Email}
             return false;
         }
 
-        private async Task<bool> UpdateInventory(Order order)
+        private async Task<bool> NewOrderUpdateInventory(Order order)
         {
             if (order.Status == OrderStatus.Draft.ToString())
             {
                 return true;
             }
             var date = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateTime.UtcNow, "Pacific Standard Time");
-            // if order is refund we add to inventory
-            var addOrUpdate = -1;
-            if (order.Status == OrderStatus.Return.ToString())
-            {
-                addOrUpdate = 1;
-            }
 
             foreach (var item in order.OrderDetail)
             {
@@ -626,11 +624,75 @@ www.lightsandparts.com | {user.Email}
                     m.ProductId == item.ProductId &&
                     m.LocationId == order.LocationId);
 
+                // if order is refund we add to inventory
+                var addOrUpdate = -1;
+                var amount = Math.Abs(item.Amount);
+                if (order.Status == OrderStatus.Return.ToString() || item.Amount < 0)
+                {
+                    addOrUpdate = 1;
+                }
+
+                if (productInventory != null)
+                {
+                    productInventory.Balance = productInventory.Balance + (addOrUpdate * amount);
+                    productInventory.ModifiedDate = date;
+                }
+                else
+                {
+                    _context.ProductInventory.Add(
+                        new ProductInventory
+                        {
+                            Balance = addOrUpdate * amount,
+                            BinCode = "",
+                            LocationId = order.LocationId,
+                            ModifiedDate = date,
+                            ProductId = item.ProductId
+                        });
+                }
+            }
+            return true;
+        }
+
+        private async Task<bool> ExistingOrderUpdateInventory(Order order, UpdateOrderStatus updateOrderStatus)
+        {
+            if (updateOrderStatus.OrderStatus == OrderStatus.Draft.ToString())
+            {
+                return true;
+            }
+            var date = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateTime.UtcNow, "Pacific Standard Time");
+
+            foreach (var item in order.OrderDetail)
+            {
+                var productInventory = await _context.ProductInventory.FirstOrDefaultAsync(m =>
+                    m.ProductId == item.ProductId &&
+                    m.LocationId == order.LocationId);
+
+                // if order is refund we add to inventory
+                var addOrUpdate = -1;
+                var amount = Math.Abs(item.Amount);
+                if (order.Status == OrderStatus.Return.ToString() || item.Amount < 0)
+                {
+                    addOrUpdate = 1;
+                }
+
                 if (productInventory != null)
                 {
                     productInventory.Balance = productInventory.Balance + (addOrUpdate * item.Amount);
                     productInventory.ModifiedDate = date;
                 }
+                else
+                {
+                    _context.ProductInventory.Add(
+                        new ProductInventory
+                        {
+                            Balance = addOrUpdate * item.Amount,
+                            BinCode = "",
+                            LocationId = order.LocationId,
+                            ModifiedDate = date,
+                            ProductId = item.ProductId
+                        });
+                }
+
             }
             return true;
         }
@@ -652,6 +714,18 @@ www.lightsandparts.com | {user.Email}
                 {
                     productInventory.Balance = productInventory.Balance + item.Amount;
                     productInventory.ModifiedDate = date;
+                }
+                else
+                {
+                    _context.ProductInventory.Add(
+                        new ProductInventory
+                        {
+                             Balance = productInventory.Balance + item.Amount,
+                             BinCode = "",
+                             LocationId = order.LocationId,
+                             ModifiedDate = date,
+                             ProductId = item.ProductId                                 
+                        });
                 }
             }
             return true;
