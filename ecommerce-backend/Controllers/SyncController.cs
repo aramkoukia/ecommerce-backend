@@ -97,6 +97,30 @@ namespace EcommerceApi.Controllers
                                 newProduct.ProductType = null;
                             }
                             await _context.Product.AddAsync(newProduct);
+                            await _context.ProductInventory.AddAsync(new ProductInventory {
+                                Balance = 0,
+                                BinCode = "",
+                                LocationId = 1,
+                                ModifiedDate = newProduct.ModifiedDate,
+                                ProductId = newProduct.ProductId,
+                            });
+                            await _context.ProductInventory.AddAsync(new ProductInventory
+                            {
+                                Balance = 0,
+                                BinCode = "",
+                                LocationId = 2,
+                                ModifiedDate = newProduct.ModifiedDate,
+                                ProductId = newProduct.ProductId,
+                            });
+                            await _context.ProductInventory.AddAsync(new ProductInventory
+                            {
+                                Balance = 0,
+                                BinCode = "",
+                                LocationId = 3,
+                                ModifiedDate = newProduct.ModifiedDate,
+                                ProductId = newProduct.ProductId,
+                            });
+
                             await _context.SaveChangesAsync();
                         }
                         else
