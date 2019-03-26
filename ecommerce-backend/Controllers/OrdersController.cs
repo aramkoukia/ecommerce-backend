@@ -627,7 +627,7 @@ www.lightsandparts.com | {user.Email}
                 // if order is refund we add to inventory
                 var addOrUpdate = -1;
                 var amount = Math.Abs(item.Amount);
-                if (updateOrderStatus.Status == OrderStatus.Return.ToString() || item.Amount < 0)
+                if (order.Status == OrderStatus.Return.ToString() || item.Amount < 0)
                 {
                     addOrUpdate = 1;
                 }
@@ -670,7 +670,7 @@ www.lightsandparts.com | {user.Email}
                 // if order is refund we add to inventory
                 var addOrUpdate = -1;
                 var amount = Math.Abs(item.Amount);
-                if (order.Status == OrderStatus.Return.ToString() || item.Amount < 0)
+                if (updateOrderStatus.OrderStatus == OrderStatus.Return.ToString() || item.Amount < 0)
                 {
                     addOrUpdate = 1;
                 }
