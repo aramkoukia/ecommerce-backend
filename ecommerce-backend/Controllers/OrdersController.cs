@@ -220,6 +220,55 @@ namespace EcommerceApi.Controllers
             return Ok(order);
         }
 
+        [HttpPut("{id}/Move/{locationId}")]
+        public async Task<IActionResult> PutOrderLocation([FromRoute] int id, [FromRoute] int locationId)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var date = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateTime.UtcNow, "Pacific Standard Time");
+
+            var order = await _context.Order
+                .Include(o => o.OrderDetail)
+                .Include(o => o.Location)
+                .SingleOrDefaultAsync(m => m.OrderId == id);
+
+            if (order.LocationId == locationId)
+            {
+                return BadRequest("You need to change a different location for transfer");
+            }
+
+            var originalLocation = order.Location.LocationName;
+            var newLocation = _context.Location.FirstOrDefault(l => l.LocationId == locationId).LocationName;
+
+            System.Security.Claims.ClaimsPrincipal currentUser = this.User;
+            var userId = _userManager.GetUserId(User);
+ 
+            var done = await TransferOrderInventory(order, locationId);
+ 
+            await _emailSender.SendAdminReportAsync("Order Location Changed", $"Order Location changed. \n Order Id: {id}. \n From: {originalLocation} To: {newLocation}");
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!OrderExists(id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+
+            return Ok(order);
+        }
+
         [HttpPut("{id}/Info")]
         public async Task<IActionResult> PutOrderInfo([FromRoute] int id, [FromBody] UpdateOrderInfo updateOrderInfo)
         {
@@ -234,7 +283,6 @@ namespace EcommerceApi.Controllers
             await _context.SaveChangesAsync();
             return Ok(order);
         }
-
 
         [HttpPut("{id}/Payment")]
         public async Task<IActionResult> PutOrderPayment([FromRoute] int id, [FromBody] UpdateOrderPayment updateOrderPayment)
@@ -783,7 +831,7 @@ www.lightsandparts.com | {user.Email}
 
                 if (productInventory != null)
                 {
-                    productInventory.Balance = productInventory.Balance + (addOrUpdate * item.Amount);
+                    productInventory.Balance = productInventory.Balance + (addOrUpdate * amount);
                     productInventory.ModifiedDate = date;
                 }
                 else
@@ -791,7 +839,7 @@ www.lightsandparts.com | {user.Email}
                     _context.ProductInventory.Add(
                         new ProductInventory
                         {
-                            Balance = addOrUpdate * item.Amount,
+                            Balance = addOrUpdate * amount,
                             BinCode = "",
                             LocationId = order.LocationId,
                             ModifiedDate = date,
@@ -799,6 +847,82 @@ www.lightsandparts.com | {user.Email}
                         });
                 }
 
+            }
+            return true;
+        }
+
+        private async Task<bool> TransferOrderInventory(Order order, int locationId)
+        {
+            if (order.Status == OrderStatus.Draft.ToString())
+            {
+                return true;
+            }
+
+            var date = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateTime.UtcNow, "Pacific Standard Time");
+
+            foreach (var item in order.OrderDetail)
+            {
+                // Updating Source Location Inventory
+                var sourceLocationProductInventory = await _context.ProductInventory.FirstOrDefaultAsync(m =>
+                    m.ProductId == item.ProductId &&
+                    m.LocationId == order.LocationId);
+
+                // if order is refund we add to inventory
+                var addOrUpdate = 1;
+                var amount = Math.Abs(item.Amount);
+                if (order.Status == OrderStatus.Return.ToString() || item.Amount < 0)
+                {
+                    addOrUpdate = -1;
+                }
+
+                if (sourceLocationProductInventory != null)
+                {
+                    sourceLocationProductInventory.Balance = sourceLocationProductInventory.Balance + (addOrUpdate * amount);
+                    sourceLocationProductInventory.ModifiedDate = date;
+                }
+                else
+                {
+                    _context.ProductInventory.Add(
+                        new ProductInventory
+                        {
+                            Balance = addOrUpdate * amount,
+                            BinCode = "",
+                            LocationId = order.LocationId,
+                            ModifiedDate = date,
+                            ProductId = item.ProductId
+                        });
+                }
+
+                // Updating Destination Location Product Inventory
+                var destinationLocationProductInventory = await _context.ProductInventory.FirstOrDefaultAsync(m =>
+                    m.ProductId == item.ProductId &&
+                    m.LocationId == locationId);
+
+                // if order is refund we add to inventory
+                addOrUpdate = -1;
+                amount = Math.Abs(item.Amount);
+                if (order.Status == OrderStatus.Return.ToString() || item.Amount < 0)
+                {
+                    addOrUpdate = 1;
+                }
+
+                if (destinationLocationProductInventory != null)
+                {
+                    destinationLocationProductInventory.Balance = sourceLocationProductInventory.Balance + (addOrUpdate * amount);
+                    destinationLocationProductInventory.ModifiedDate = date;
+                }
+                else
+                {
+                    _context.ProductInventory.Add(
+                        new ProductInventory
+                        {
+                            Balance = addOrUpdate * amount,
+                            BinCode = "",
+                            LocationId = locationId,
+                            ModifiedDate = date,
+                            ProductId = item.ProductId
+                        });
+                }
             }
             return true;
         }
