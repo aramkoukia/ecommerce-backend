@@ -235,6 +235,103 @@ namespace EcommerceApi.Controllers
             return Ok(order);
         }
 
+
+        [HttpPut("{id}/Payment")]
+        public async Task<IActionResult> PutOrderPayment([FromRoute] int id, [FromBody] UpdateOrderPayment updateOrderPayment)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            if (updateOrderPayment == null || updateOrderPayment.OrderPayment == null || !updateOrderPayment.OrderPayment.Any())
+            {
+                return BadRequest();
+            }
+
+            var date = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateTime.UtcNow, "Pacific Standard Time");
+
+            var order = await _context.Order
+                .Include(o => o.OrderPayment)
+                  .ThenInclude(o => o.PaymentType)
+                .SingleOrDefaultAsync(m => m.OrderId == id);
+
+            System.Security.Claims.ClaimsPrincipal currentUser = this.User;
+            var userId = _userManager.GetUserId(User);
+            var orderPayments = updateOrderPayment.OrderPayment.Select(m => new { m.PaymentTypeId, m.PaymentAmount, m.ChequeNo }).Distinct().ToList();
+            var originalPaymentTypes = string.Join(",", order.OrderPayment.Select(m => m.PaymentType.PaymentTypeName).ToArray());
+            var originalPaymentAmount = string.Join(",", order.OrderPayment.Select(m => m.PaymentAmount).ToArray());
+            var paymentTypeIds = updateOrderPayment.OrderPayment.Select(o => o.PaymentTypeId);
+            var newPaymentTypes = string.Join(",", _context.PaymentType.Where(p =>  paymentTypeIds.Contains(p.PaymentTypeId)).Select(m => m.PaymentTypeName).ToArray());
+            var newPaymentAmount = string.Join(",", updateOrderPayment.OrderPayment.Select(m => m.PaymentAmount).ToArray());
+            
+            foreach (var payment in order.OrderPayment)
+            { 
+                _context.OrderPayment.Remove(payment);
+            }
+
+            foreach (var payment in orderPayments)
+            {
+                order.OrderPayment.Add(new OrderPayment
+                {
+                    CreatedByUserId = userId,
+                    CreatedDate = date,
+                    PaymentAmount = payment.PaymentAmount,
+                    PaymentDate = date,
+                    PaymentTypeId = payment.PaymentTypeId,
+                    ChequeNo = payment.ChequeNo,
+                    OrderId = id,
+                });
+
+                // Paid by Store Credit. Upating customer store credit and add to history
+                if (payment.PaymentTypeId == 26 && order.CustomerId != null)
+                {
+                    var customer = await _context.Customer.FirstOrDefaultAsync(c => c.CustomerId == order.CustomerId);
+                    if (customer != null)
+                    {
+                        var storeCreditNote = $"Used to pay Order: {order.OrderId}";
+                        if (order.Status == OrderStatus.Return.ToString())
+                        {
+                            storeCreditNote = $"Store Credit added for Refund of Order: {order.OrderId}";
+                        }
+
+                        customer.StoreCredit = customer.StoreCredit + decimal.Multiply(payment.PaymentAmount, decimal.MinusOne);
+                        _context.CustomerStoreCredit.Add(
+                            new CustomerStoreCredit
+                            {
+                                Amount = decimal.Multiply(payment.PaymentAmount, decimal.MinusOne),
+                                CreatedByUserId = userId,
+                                CreatedDate = date,
+                                CustomerId = customer.CustomerId,
+                                Notes = storeCreditNote
+                            }
+                        );
+                    }
+
+                }
+            }
+
+            await _emailSender.SendAdminReportAsync("Order Payment Type Changed", $"Order Payment Type changed. \n Order Id: {id}. \n From Types: {originalPaymentTypes}, Amounts: {originalPaymentAmount}. \n\n To Types: {newPaymentTypes}, Amounts: {newPaymentAmount}");
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!OrderExists(id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+
+            return Ok(order);
+        }
+
         [HttpPut("{id}/Customer")]
         public async Task<IActionResult> PutOrderCustomer([FromRoute] int id, [FromBody] UpdateOrderCustomer updateOrderCustomer)
         {
