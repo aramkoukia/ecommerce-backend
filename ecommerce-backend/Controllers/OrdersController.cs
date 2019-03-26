@@ -243,11 +243,10 @@ namespace EcommerceApi.Controllers
             var originalLocation = order.Location.LocationName;
             var newLocation = _context.Location.FirstOrDefault(l => l.LocationId == locationId).LocationName;
 
-            System.Security.Claims.ClaimsPrincipal currentUser = this.User;
-            var userId = _userManager.GetUserId(User);
- 
             var done = await TransferOrderInventory(order, locationId);
- 
+
+            order.LocationId = locationId;
+
             await _emailSender.SendAdminReportAsync("Order Location Changed", $"Order Location changed. \n Order Id: {id}. \n From: {originalLocation} To: {newLocation}");
 
             try
@@ -908,7 +907,7 @@ www.lightsandparts.com | {user.Email}
 
                 if (destinationLocationProductInventory != null)
                 {
-                    destinationLocationProductInventory.Balance = sourceLocationProductInventory.Balance + (addOrUpdate * amount);
+                    destinationLocationProductInventory.Balance = destinationLocationProductInventory.Balance + (addOrUpdate * amount);
                     destinationLocationProductInventory.ModifiedDate = date;
                 }
                 else
