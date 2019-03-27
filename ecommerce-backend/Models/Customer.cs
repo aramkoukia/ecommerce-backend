@@ -1,6 +1,8 @@
-﻿namespace EcommerceApi.Models
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace EcommerceApi.Models
 {
-    public partial class Customer
+    public class Customer
     {
         public int CustomerId { get; set; }
         public string CustomerCode { get; set; }
@@ -22,5 +24,9 @@
         public string Status { get; set; }
         public string Segment { get; set; }
         public decimal StoreCredit { get; set; }
+
+        [NotMapped]
+        public decimal AccountBalance { get; set; }
+
     }
 }

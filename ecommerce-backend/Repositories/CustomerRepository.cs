@@ -54,6 +54,29 @@ namespace EcommerceApi.Repositories
             }
         }
 
+        public async Task<decimal> GetCustomerBalance(int customerId)
+        {
+            using (IDbConnection conn = Connection)
+            {
+                string query = $@"SELECT SUM(ISNULL(OrderRemainingTotal, 0)) AS AccountBalance FROM (
+		                                SELECT [Order].CustomerId, [Order].OrderId, SUM(Total) - SUM(ISNULL(PaymentAmount,0)) AS OrderRemainingTotal
+		                                FROM [Order]
+		                                LEFT JOIN (
+			                                SELECT OrderId, SUM(PaymentAmount) AS PaymentAmount
+			                                FROM OrderPayment
+			                                GROUP BY OrderId
+		                                ) OrderPayment
+		                                ON [Order].OrderId = OrderPayment.OrderId
+		                                WHERE CustomerId = @customerId
+			                                  AND Status = 'Account'  
+		                                GROUP BY [Order].OrderId, [Order].CustomerId) AS UnPaidOrders
+	                                GROUP BY CustomerId
+                                 ";
+                conn.Open();
+                return await conn.QueryFirstOrDefaultAsync<int>(query, new { customerId });
+            }
+        }
+
         public async Task<IEnumerable<CustomerViewModel>> GetCustomers()
         {
             using (IDbConnection conn = Connection)

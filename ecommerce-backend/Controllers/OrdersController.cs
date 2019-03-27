@@ -25,18 +25,21 @@ namespace EcommerceApi.Controllers
         private readonly EcommerceContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IOrderRepository _orderRepository;
+        private readonly ICustomerRepository _customerRepository;
         private readonly IConverter _converter;
         private readonly IEmailSender _emailSender;
 
         public OrdersController(EcommerceContext context,
                                 UserManager<ApplicationUser> userManager,
                                 IOrderRepository orderRepository,
+                                ICustomerRepository customerRepository,
                                 IConverter converter,
                                 IEmailSender emailSender)
         {
             _context = context;
             _userManager = userManager;
             _orderRepository = orderRepository;
+            _customerRepository = customerRepository;
             _converter = converter;
             _emailSender = emailSender;
         }
@@ -81,6 +84,11 @@ namespace EcommerceApi.Controllers
                 .Include(o => o.Customer)
                 .Include(l => l.Location)
                 .SingleOrDefaultAsync(m => m.OrderId == id);
+
+            if (order.CustomerId != null && order.Customer != null)
+            {
+                order.Customer.AccountBalance = await _customerRepository.GetCustomerBalance(order.CustomerId.Value);
+            }
 
             if (order == null)
             {
