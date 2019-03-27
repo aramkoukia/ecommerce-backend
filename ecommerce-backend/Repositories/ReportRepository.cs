@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
+using System.Linq;
 using System.Threading.Tasks;
 using Dapper;
 using EcommerceApi.ViewModel;
@@ -26,37 +27,40 @@ namespace EcommerceApi.Repositories
             _config = config;
         }
 
-        public async Task<IEnumerable<CurrentMonthSummaryViewModel>> CurrentMonthSummary()
+        public async Task<IEnumerable<CurrentMonthSummaryViewModel>> CurrentMonthSummary(string userId)
         {
             using (IDbConnection conn = Connection)
             {
                 string query = $@"
                                 SELECT 
                                 (SELECT 
-                                SUM(Total) 
+                                FORMAT(SUM(Total), 'N2') 
                                 FROM Purchase
                                 WHERE PurchaseDate >= ''
                                 AND PurchaseDate BETWEEN DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()), 0) AND DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()) + 1, 0)) AS MonthlyPurchases ,
 
                                 (SELECT 
-                                SUM(Total) 
+                                FORMAT(SUM(Total), 'N2')
                                 FROM [Order]
                                 WHERE [Order].Status IN ('Paid', 'Account') 
+                                      AND LocationId IN @locationIds
                                       AND [Order].OrderDate BETWEEN DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()), 0) AND DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()) + 1, 0)) AS MonthlyPaidAccountOrders,
 
 
                                 (SELECT 
-                                SUM(Total)
+                                FORMAT(SUM(Total), 'N2')
                                 FROM [Order]
                                 WHERE [Order].Status = 'Paid'
+                                      AND LocationId IN @locationIds
                                       AND [Order].OrderDate BETWEEN DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()), 0) AND DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()) + 1, 0)) AS MonthlyPaidOrders
                                  ";
                 conn.Open();
-                return await conn.QueryAsync<CurrentMonthSummaryViewModel>(query);
+                var locationIds = (await GetUserLocations(userId)).ToArray();
+                return await conn.QueryAsync<CurrentMonthSummaryViewModel>(query, new { locationIds });
             }
         }
 
-        public async Task<IEnumerable<ChartRecordsViewModel>> MonthlySales()
+        public async Task<IEnumerable<ChartRecordsViewModel>> MonthlySales(string userId)
         {
             using (IDbConnection conn = Connection)
             {
@@ -90,16 +94,18 @@ LEFT JOIN (
 	SELECT datepart(month,OrderDate) AS Month, datepart(year,OrderDate) AS Year, Sum(Total) as OrderTotal 
 	FROM [Order] 
 	WHERE Status IN ('Account', 'Paid')
+    AND LocationId IN @locationIds
 	GROUP BY datepart(month,OrderDate), datepart(year,OrderDate)) B
 ON A.month = B.month) t
 Order By Year, Label
                                  ";
+                var locationIds = (await GetUserLocations(userId)).ToArray();
                 conn.Open();
-                return await conn.QueryAsync<ChartRecordsViewModel>(query);
+                return await conn.QueryAsync<ChartRecordsViewModel>(query, new { locationIds });
             }
         }
 
-        public async Task<IEnumerable<ChartRecordsViewModel>> MonthlyPurchases()
+        public async Task<IEnumerable<ChartRecordsViewModel>> MonthlyPurchases(string userId)
         {
             using (IDbConnection conn = Connection)
             {
@@ -131,17 +137,18 @@ UNION
 SELECT 12 ) A 
 LEFT JOIN (
 	SELECT datepart(month,PurchaseDate) AS Month, datepart(year,PurchaseDate) AS Year, Sum(Total) as PurchaseTotal 
-	FROM [Purchase] 
+	FROM [Purchase]
 	GROUP BY datepart(month,PurchaseDate), datepart(year,PurchaseDate)) B
 ON A.month = B.month) t
 Order By Year, Label
                                  ";
                 conn.Open();
+                var locationIds = (await GetUserLocations(userId)).ToArray();
                 return await conn.QueryAsync<ChartRecordsViewModel>(query);
             }
         }
 
-        public async Task<IEnumerable<ChartRecordsViewModel>> DailySales()
+        public async Task<IEnumerable<ChartRecordsViewModel>> DailySales(string userId)
         {
             using (IDbConnection conn = Connection)
             {
@@ -165,16 +172,18 @@ Order By Year, Label
                     FROM [Order]
                     WHERE [Order].OrderDate > DATEADD(DAY, -7, GETDATE())
                     AND Status IN ('Paid', 'Account')
+                    AND LocationId IN @locationIds
                     GROUP BY datename(dw,OrderDate), CONVERT(date ,OrderDate)) Sales
                     on AllDays.WeekDayName = Sales.Label
                     ORDER BY Sales.ConvertedOrderDate
                                  ";
                 conn.Open();
-                return await conn.QueryAsync<ChartRecordsViewModel>(query);
+                var locationIds = (await GetUserLocations(userId)).ToArray();
+                return await conn.QueryAsync<ChartRecordsViewModel>(query, new { locationIds });
             }
         }
 
-        public async Task<IEnumerable<ProductTypeSalesReportViewModel>> GetProductTypeSalesReport(DateTime fromDate, DateTime toDate)
+        public async Task<IEnumerable<ProductTypeSalesReportViewModel>> GetProductTypeSalesReport(DateTime fromDate, DateTime toDate, string userId)
         {
             using (IDbConnection conn = Connection)
             {
@@ -203,11 +212,12 @@ WHERE ISNULL(VanTotalSales,0) <> 0 OR ISNULL(AbbTotalSales, 0) <> 0
 GROUP BY ProductTypeName
                                  ";
                 conn.Open();
-                return await conn.QueryAsync<ProductTypeSalesReportViewModel>(query, new { fromDate, toDate });
+                var locationIds = (await GetUserLocations(userId)).ToArray();
+                return await conn.QueryAsync<ProductTypeSalesReportViewModel>(query, new { fromDate, toDate, locationIds });
             }
         }
 
-        public async Task<IEnumerable<ProductSalesReportViewModel>> GetProductSalesReport(DateTime fromDate, DateTime toDate)
+        public async Task<IEnumerable<ProductSalesReportViewModel>> GetProductSalesReport(DateTime fromDate, DateTime toDate, string userId)
         {
             using (IDbConnection conn = Connection)
             {
@@ -245,11 +255,12 @@ LEFT JOIN (SELECT ProductId, Balance AS AbbBalance
 WHERE ISNULL(VanTotalSales,0) <> 0 OR ISNULL(AbbTotalSales, 0) <> 0
                                  ";
                 conn.Open();
-                return await conn.QueryAsync<ProductSalesReportViewModel>(query, new { fromDate, toDate });
+                var locationIds = (await GetUserLocations(userId)).ToArray();
+                return await conn.QueryAsync<ProductSalesReportViewModel>(query, new { fromDate, toDate, locationIds });
             }
         }
 
-        public async Task<IEnumerable<ProductSalesDetailReportViewModel>> GetProductSalesDetailReport(DateTime fromDate, DateTime toDate)
+        public async Task<IEnumerable<ProductSalesDetailReportViewModel>> GetProductSalesDetailReport(DateTime fromDate, DateTime toDate, string userId)
         {
             using (IDbConnection conn = Connection)
             {
@@ -264,19 +275,21 @@ LEFT JOIN (SELECT ProductId, [Order].CustomerId, OrderDetail.OrderId, LocationId
 			 ON OrderDetail.OrderId = [Order].OrderId
 		   WHERE OrderDate BETWEEN @fromDate AND @toDate
                  AND [Order].Status IN ('Return', 'Paid', 'Account')
+                 AND [Order].LocationId IN @locationIds
 		   GROUP BY ProductId, OrderDetail.OrderId, LocationId, [Order].CustomerId) Sales
 	ON Product.ProductId = Sales.ProductId
 INNER JOIN [Location]
 	ON Sales.LocationId = [Location].LocationId
 LEFT JOIN Customer
 	ON Customer.CustomerId = Sales.CustomerId
-WHERE ISNULL(TotalSales,0) <> 0 ";
+WHERE [Location].LocationId in @locationIds AND ISNULL(TotalSales,0) <> 0 ";
                 conn.Open();
-                return await conn.QueryAsync<ProductSalesDetailReportViewModel>(query, new { fromDate, toDate });
+                var locationIds = (await GetUserLocations(userId)).ToArray();
+                return await conn.QueryAsync<ProductSalesDetailReportViewModel>(query, new { fromDate, toDate, locationIds });
             }
         }
 
-        public async Task<IEnumerable<SalesReportViewModel>> GetSalesReport(DateTime fromDate, DateTime toDate)
+        public async Task<IEnumerable<SalesReportViewModel>> GetSalesReport(DateTime fromDate, DateTime toDate, string userId)
         {
             using (IDbConnection conn = Connection)
             {
@@ -307,6 +320,7 @@ INTO #Results FROM (
 		ON Location.LocationId = [Order].LocationId
 	WHERE [Order].Status IN ('Return', 'Paid', 'Account')
 		  AND OrderDate BETWEEN @FromDate AND @ToDate
+          AND [Order].LocationId IN @locationIds
 	GROUP BY Location.LocationId, LocationName, [Order].Status
 ) [Order]
 LEFT JOIN (
@@ -319,7 +333,8 @@ LEFT JOIN (
 	WHERE TaxName = 'GST'
           AND Status IN ('Return', 'Paid', 'Account')
           AND OrderDate BETWEEN @FromDate AND @ToDate
-	GROUP BY [Order].LocationId, Status
+          AND [Order].LocationId IN @locationIds	
+    GROUP BY [Order].LocationId, Status
 ) GST
 	ON [Order].LocationId = GST.LocationId
        AND [Order].Status = GST.Status
@@ -333,7 +348,8 @@ LEFT JOIN (
 	WHERE TaxName = 'PST'
           AND Status IN ('Return', 'Paid', 'Account')          
           AND OrderDate BETWEEN @FromDate AND @ToDate
-	GROUP BY [Order].LocationId, [Status]
+          AND [Order].LocationId IN @locationIds	
+    GROUP BY [Order].LocationId, [Status]
 ) PST
 	ON [Order].LocationId = PST.LocationId
        AND [Order].Status = PST.Status
@@ -347,7 +363,8 @@ LEFT JOIN (
 	WHERE TaxName NOT IN ('PST', 'GST')
           AND Status IN ('Return', 'Paid', 'Account')          
           AND OrderDate BETWEEN @FromDate AND @ToDate
-	GROUP BY [Order].LocationId, Status
+          AND [Order].LocationId IN @locationIds	
+          GROUP BY [Order].LocationId, Status
 ) OtherTax
 ON [Order].LocationId = OtherTax.LocationId
    AND [Order].Status = OtherTax.Status
@@ -363,11 +380,12 @@ FROM #Results
 WHERE [Status] <> 'Account'
 ";
                 conn.Open();
-                return await conn.QueryAsync<SalesReportViewModel>(query, new { fromDate, toDate });
+                var locationIds = (await GetUserLocations(userId)).ToArray();
+                return await conn.QueryAsync<SalesReportViewModel>(query, new { fromDate, toDate, locationIds });
             }
         }
 
-        public async Task<IEnumerable<PaymentsTotalViewModel>> GetPaymentsTotalReport(DateTime fromDate, DateTime toDate)
+        public async Task<IEnumerable<PaymentsTotalViewModel>> GetPaymentsTotalReport(DateTime fromDate, DateTime toDate, string userId)
         {
             using (IDbConnection conn = Connection)
             {
@@ -385,14 +403,16 @@ LEFT JOIN Customer
 INNER JOIN Location
     ON [Order].LocationId = Location.LocationId
 WHERE OrderDate BETWEEN @fromDate AND @toDate
+      AND [Location].LocationId IN @locationIds
 GROUP BY PaymentTypeName, Location.LocationName
 WITH ROLLUP                                 ";
                 conn.Open();
-                return await conn.QueryAsync<PaymentsTotalViewModel>(query, new { fromDate, toDate });
+                var locationIds = (await GetUserLocations(userId)).ToArray();
+                return await conn.QueryAsync<PaymentsTotalViewModel>(query, new { fromDate, toDate, locationIds });
             }
         }
 
-        public async Task<IEnumerable<PaymentsReportViewModel>> GetPaymentsReport(DateTime fromDate, DateTime toDate)
+        public async Task<IEnumerable<PaymentsReportViewModel>> GetPaymentsReport(DateTime fromDate, DateTime toDate, string userId)
         {
             using (IDbConnection conn = Connection)
             {
@@ -410,14 +430,16 @@ LEFT JOIN Customer
 INNER JOIN Location
     ON [Order].LocationId = Location.LocationId
 WHERE OrderDate BETWEEN @fromDate AND @toDate
+      AND [Location].LocationId IN @locationIds
 GROUP BY PaymentTypeName, Users.GivenName, [Order].OrderId, Customer.CompanyName, [Order].Status, Location.LocationName
                                  ";
                 conn.Open();
-                return await conn.QueryAsync<PaymentsReportViewModel>(query, new { fromDate, toDate });
+                var locationIds = (await GetUserLocations(userId)).ToArray();
+                return await conn.QueryAsync<PaymentsReportViewModel>(query, new { fromDate, toDate, locationIds });
             }
         }
 
-        public async Task<IEnumerable<PaymentsByPaymentTypeViewModel>> GetPaymentsByPaymentTypeReport(DateTime fromDate, DateTime toDate)
+        public async Task<IEnumerable<PaymentsByPaymentTypeViewModel>> GetPaymentsByPaymentTypeReport(DateTime fromDate, DateTime toDate, string userId)
         {
             using (IDbConnection conn = Connection)
             {
@@ -435,21 +457,24 @@ LEFT JOIN Customer
 INNER JOIN Location
     ON [Order].LocationId = Location.LocationId
 WHERE OrderDate BETWEEN @fromDate AND @toDate
+      AND [Location].LocationId IN @locationIds
 GROUP BY PaymentTypeName, [Order].Status, Location.LocationName
                                  ";
                 conn.Open();
-                return await conn.QueryAsync<PaymentsByPaymentTypeViewModel>(query, new { fromDate, toDate });
+                var locationIds = (await GetUserLocations(userId)).ToArray();
+                return await conn.QueryAsync<PaymentsByPaymentTypeViewModel>(query, new { fromDate, toDate, locationIds });
             }
         }
 
-        public async Task<IEnumerable<PurchasesReportViewModel>> GetPurchasesReport(DateTime fromDate, DateTime toDate)
+        public async Task<IEnumerable<PurchasesReportViewModel>> GetPurchasesReport(DateTime fromDate, DateTime toDate, string userId)
         {
             using (IDbConnection conn = Connection)
             {
                 string query = $@"
                                  ";
                 conn.Open();
-                return await conn.QueryAsync<PurchasesReportViewModel>(query, new { fromDate, toDate });
+                var locationIds = (await GetUserLocations(userId)).ToArray();
+                return await conn.QueryAsync<PurchasesReportViewModel>(query, new { fromDate, toDate, locationIds });
             }
         }
 
@@ -540,6 +565,17 @@ WHERE [Order].CustomerId = @customerId
                                  ";
                 conn.Open();
                 return await conn.QueryAsync<CustomerUnPaidOrdersViewModel>(query, new { customerId, toDate });
+            }
+        }
+
+        private async Task<IEnumerable<int>> GetUserLocations(string userId) {
+            using (IDbConnection conn = Connection)
+            {
+                string query = $@"
+SELECT LocationId FROM UserLocation
+WHERE UserId = @userId";
+                conn.Open();
+                return await conn.QueryAsync<int>(query, new { userId });
             }
         }
     }
