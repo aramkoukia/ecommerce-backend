@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 using EcommerceApi.ViewModel;
 using EcommerceApi.Repositories;
 using System;
+using Microsoft.AspNetCore.Identity;
 
 namespace EcommerceApi.Controllers
 {
@@ -16,36 +17,48 @@ namespace EcommerceApi.Controllers
     {
         private readonly EcommerceContext _context;
         private readonly IReportRepository _reportRepository;
-
-        public ReportsController(EcommerceContext context, IReportRepository reportRepository)
+        private readonly UserManager<ApplicationUser> _userManager;
+        public ReportsController(
+            EcommerceContext context, 
+            IReportRepository reportRepository,
+            UserManager<ApplicationUser> userManager)
         {
             _context = context;
             _reportRepository = reportRepository;
+            _userManager = userManager;
         }
 
         // GET: api/Reports/MonthlySummary
         [HttpGet("MonthlySummary")]
         public async Task<IEnumerable<CurrentMonthSummaryViewModel>> GetMonthlySummary()
         {
-            return await _reportRepository.CurrentMonthSummary();
+            System.Security.Claims.ClaimsPrincipal currentUser = this.User;
+            var user = await _userManager.FindByEmailAsync(currentUser.Identity.Name);
+            return await _reportRepository.CurrentMonthSummary(user.Id);
         }
 
         [HttpGet("MonthlySales")]
         public async Task<IEnumerable<ChartRecordsViewModel>> GetMonthlySales()
         {
-            return await _reportRepository.MonthlySales();
+            System.Security.Claims.ClaimsPrincipal currentUser = this.User;
+            var user = await _userManager.FindByEmailAsync(currentUser.Identity.Name);
+            return await _reportRepository.MonthlySales(user.Id);
         }
 
         [HttpGet("MonthlyPurchases")]
         public async Task<IEnumerable<ChartRecordsViewModel>> GetMonthlyPurchases()
         {
-            return await _reportRepository.MonthlyPurchases();
+            System.Security.Claims.ClaimsPrincipal currentUser = this.User;
+            var user = await _userManager.FindByEmailAsync(currentUser.Identity.Name);
+            return await _reportRepository.MonthlyPurchases(user.Id);
         }
 
         [HttpGet("DailySales")]
         public async Task<IEnumerable<ChartRecordsViewModel>> GetDailySales()
         {
-            return await _reportRepository.DailySales();
+            System.Security.Claims.ClaimsPrincipal currentUser = this.User;
+            var user = await _userManager.FindByEmailAsync(currentUser.Identity.Name);
+            return await _reportRepository.DailySales(user.Id);
         }
 
         [HttpGet("ProductSales")]
@@ -58,7 +71,10 @@ namespace EcommerceApi.Controllers
             else 
                 toDate = toDate.AddDays(1).AddTicks(-1);
 
-            return await _reportRepository.GetProductSalesReport(fromDate, toDate);
+            System.Security.Claims.ClaimsPrincipal currentUser = this.User;
+            var user = await _userManager.FindByEmailAsync(currentUser.Identity.Name);
+
+            return await _reportRepository.GetProductSalesReport(fromDate, toDate, user.Id);
         }
 
         [HttpGet("ProductSalesDetail")]
@@ -71,7 +87,10 @@ namespace EcommerceApi.Controllers
             else
                 toDate = toDate.AddDays(1).AddTicks(-1);
 
-            return await _reportRepository.GetProductSalesDetailReport(fromDate, toDate);
+            System.Security.Claims.ClaimsPrincipal currentUser = this.User;
+            var user = await _userManager.FindByEmailAsync(currentUser.Identity.Name);
+
+            return await _reportRepository.GetProductSalesDetailReport(fromDate, toDate, user.Id);
         }
 
         [HttpGet("ProductTypeSales")]
@@ -84,7 +103,10 @@ namespace EcommerceApi.Controllers
             else
                 toDate = toDate.AddDays(1).AddTicks(-1);
 
-            return await _reportRepository.GetProductTypeSalesReport(fromDate, toDate);
+            System.Security.Claims.ClaimsPrincipal currentUser = this.User;
+            var user = await _userManager.FindByEmailAsync(currentUser.Identity.Name);
+
+            return await _reportRepository.GetProductTypeSalesReport(fromDate, toDate, user.Id);
         }
 
         [HttpGet("Sales")]
@@ -97,7 +119,10 @@ namespace EcommerceApi.Controllers
             else
                 toDate = toDate.AddDays(1).AddTicks(-1);
 
-            return await _reportRepository.GetSalesReport(fromDate, toDate);
+            System.Security.Claims.ClaimsPrincipal currentUser = this.User;
+            var user = await _userManager.FindByEmailAsync(currentUser.Identity.Name);
+
+            return await _reportRepository.GetSalesReport(fromDate, toDate, user.Id);
         }
 
         [HttpGet("PaymentsByPaymentType")]
@@ -110,7 +135,10 @@ namespace EcommerceApi.Controllers
             else
                 toDate = toDate.AddDays(1).AddTicks(-1);
 
-            return await _reportRepository.GetPaymentsByPaymentTypeReport(fromDate, toDate);
+            System.Security.Claims.ClaimsPrincipal currentUser = this.User;
+            var user = await _userManager.FindByEmailAsync(currentUser.Identity.Name);
+
+            return await _reportRepository.GetPaymentsByPaymentTypeReport(fromDate, toDate, user.Id);
         }
 
         [HttpGet("PaymentsTotal")]
@@ -123,7 +151,10 @@ namespace EcommerceApi.Controllers
             else
                 toDate = toDate.AddDays(1).AddTicks(-1);
 
-            return await _reportRepository.GetPaymentsTotalReport(fromDate, toDate);
+            System.Security.Claims.ClaimsPrincipal currentUser = this.User;
+            var user = await _userManager.FindByEmailAsync(currentUser.Identity.Name);
+
+            return await _reportRepository.GetPaymentsTotalReport(fromDate, toDate, user.Id);
         }
 
         [HttpGet("Payments")]
@@ -136,7 +167,10 @@ namespace EcommerceApi.Controllers
             else
                 toDate = toDate.AddDays(1).AddTicks(-1);
 
-            return await _reportRepository.GetPaymentsReport(fromDate, toDate);
+            System.Security.Claims.ClaimsPrincipal currentUser = this.User;
+            var user = await _userManager.FindByEmailAsync(currentUser.Identity.Name);
+
+            return await _reportRepository.GetPaymentsReport(fromDate, toDate, user.Id);
         }
 
         [HttpGet("Purchases")]
@@ -149,7 +183,10 @@ namespace EcommerceApi.Controllers
             else
                 toDate = toDate.AddDays(1).AddTicks(-1);
 
-            return await _reportRepository.GetPurchasesReport(fromDate, toDate);
+            System.Security.Claims.ClaimsPrincipal currentUser = this.User;
+            var user = await _userManager.FindByEmailAsync(currentUser.Identity.Name);
+
+            return await _reportRepository.GetPurchasesReport(fromDate, toDate, user.Id);
         }
 
         [HttpGet("CustomerPaid")]
@@ -161,6 +198,9 @@ namespace EcommerceApi.Controllers
                 toDate = DateTime.Now;
             else
                 toDate = toDate.AddDays(1).AddTicks(-1);
+
+            System.Security.Claims.ClaimsPrincipal currentUser = this.User;
+            var userId = _userManager.GetUserId(User);
 
             return await _reportRepository.GetCustomerPaidReport(fromDate, toDate);
         }
@@ -175,14 +215,9 @@ namespace EcommerceApi.Controllers
             else
                 toDate = toDate.AddDays(1).AddTicks(-1);
 
+            System.Security.Claims.ClaimsPrincipal currentUser = this.User;
+            var userId = _userManager.GetUserId(User);
             return await _reportRepository.GetCustomerUnPaidReport(fromDate, toDate);
-        }
-
-        [AllowAnonymous]
-        [HttpGet("Ping")]
-        public string Ping()
-        {
-            return "Ping";
         }
     }
 }
