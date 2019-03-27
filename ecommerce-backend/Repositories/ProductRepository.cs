@@ -167,7 +167,7 @@ LEFT JOIN (
     SELECT * 
 	FROM ProductInventory
     WHERE ProductId = @ProductId 
-	      ANDLocationId = 1
+	      AND LocationId = 1
 ) Loc1
 ON Loc1.ProductId = Product.ProductId
 LEFT JOIN (
