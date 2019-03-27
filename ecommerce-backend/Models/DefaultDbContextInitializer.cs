@@ -31,7 +31,7 @@ namespace EcommerceApi.Models
             _context.Database.Migrate();
         }
 
-        public async Task Seed(IServiceProvider serviceProvider)
+        public Task Seed(IServiceProvider serviceProvider)
         {
             //adding custom roles
             //var RoleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
@@ -187,6 +187,7 @@ namespace EcommerceApi.Models
             //}
 
             //_context.SaveChanges();
+            return Task.FromResult(true);
         }
     }
 

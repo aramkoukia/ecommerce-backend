@@ -65,7 +65,7 @@ namespace EcommerceApi.Services
                     await client.SendMailAsync(mailMessage);
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
             }
         }
@@ -95,7 +95,7 @@ namespace EcommerceApi.Services
                     await client.SendMailAsync(mailMessage);
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
             }
         }
