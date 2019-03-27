@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Authorization;
 using EcommerceApi.ViewModel;
 using EcommerceApi.Repositories;
 using System;
+using Microsoft.AspNetCore.Identity;
 
 namespace EcommerceApi.Controllers
 {
@@ -18,11 +19,16 @@ namespace EcommerceApi.Controllers
     {
         private readonly EcommerceContext _context;
         private readonly IProductRepository _productRepository;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        public ProductsController(EcommerceContext context, IProductRepository productRepository)
+        public ProductsController(
+            EcommerceContext context, 
+            IProductRepository productRepository,
+            UserManager<ApplicationUser> userManager)
         {
             _context = context;
             _productRepository = productRepository;
+            _userManager = userManager;
         }
 
         // GET: api/Products
@@ -57,7 +63,11 @@ namespace EcommerceApi.Controllers
             else
                 toDate = toDate.AddDays(1).AddTicks(-1);
 
-            return await _productRepository.GetProductTransactions(id, fromDate, toDate);
+
+            System.Security.Claims.ClaimsPrincipal currentUser = this.User;
+            var user = await _userManager.FindByEmailAsync(currentUser.Identity.Name);
+
+            return await _productRepository.GetProductTransactions(id, fromDate, toDate, user.Id);
         }
 
         // PUT: api/Products/5
