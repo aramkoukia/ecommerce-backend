@@ -53,6 +53,8 @@ namespace EcommerceApi.Controllers
             var Purchase = await _context.Purchase.AsNoTracking()
                 .Include(o => o.PurchaseDetail)
                     .ThenInclude(o => o.Product)
+                .Include(o => o.PurchaseDetail)
+                    .ThenInclude(o => o.Location)
                 .SingleOrDefaultAsync(m => m.PurchaseId == id);
 
             if (Purchase == null)
@@ -121,6 +123,7 @@ namespace EcommerceApi.Controllers
                 Status = updatePurchaseDetailStatus.PurchaseStatus,
                 UnitPrice = updatePurchaseDetailStatus.UnitPrice,
                 TotalPrice = updatePurchaseDetailStatus.TotalPrice,
+                PurchaseId = purchaseDetail.PurchaseId
             };
 
             await _context.PurchaseDetail.AddAsync(newPurchaseDetail);
@@ -155,7 +158,7 @@ namespace EcommerceApi.Controllers
                 await _context.ProductInventory.AddAsync(
                     new ProductInventory
                     {
-                        Balance = productInventory.Balance + updatePurchaseDetailStatus.Amount,
+                        Balance = updatePurchaseDetailStatus.Amount,
                         BinCode = "",
                         LocationId = updatePurchaseDetailStatus.ArrivedAtLocationId.Value,
                         ModifiedDate = date,

@@ -957,7 +957,7 @@ www.lightsandparts.com | {user.Email}
                     _context.ProductInventory.Add(
                         new ProductInventory
                         {
-                             Balance = productInventory.Balance + item.Amount,
+                             Balance = item.Amount,
                              BinCode = "",
                              LocationId = order.LocationId,
                              ModifiedDate = date,
