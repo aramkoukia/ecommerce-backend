@@ -236,5 +236,18 @@ namespace EcommerceApi.Controllers
             var userId = _userManager.GetUserId(User);
             return await _reportRepository.GetCustomerUnPaidReport(fromDate, toDate);
         }
+
+        [HttpGet("SalesForcast")]
+        public async Task<IEnumerable<SalesForecastReportViewModel>> GetSalesForecastReport(DateTime fromDate, DateTime toDate)
+        {
+            if (fromDate == DateTime.MinValue)
+                fromDate = DateTime.Now;
+            if (toDate == DateTime.MinValue)
+                toDate = DateTime.Now;
+            else
+                toDate = toDate.AddDays(1).AddTicks(-1);
+
+            return await _reportRepository.GetSalesForecastReport(fromDate, toDate);
+        }
     }
 }

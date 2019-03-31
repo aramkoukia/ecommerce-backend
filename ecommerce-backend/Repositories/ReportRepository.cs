@@ -642,5 +642,65 @@ WHERE UserId = @userId";
                 return await conn.QueryAsync<int>(query, new { userId });
             }
         }
+
+        public async Task<IEnumerable<SalesForecastReportViewModel>> GetSalesForecastReport(DateTime fromDate, DateTime toDate)
+        {
+            using (IDbConnection conn = Connection)
+            {
+                string query = $@"
+SELECT ProductCode, ProductName, Last1Month, Last3Month, Last6Month, FORMAT(Last12Month, 'N2') AS Last12Month, FORMAT(Last12Month / 12 , 'N2') AS Last12MonthAverage, Inventory.Balance,
+       CASE WHEN Inventory.Balance < Last6Month THEN 'Yes' END AS NeedsPurchase
+FROM Product
+LEFT JOIN (
+	SELECT ProductId, FORMAT(SUM(Amount), 'N2') AS Last1Month 
+	FROM [Order]
+	INNER JOIN OrderDetail
+		ON OrderDetail.OrderId = [Order].OrderId
+	WHERE Status IN ('Paid', 'Account')
+		  AND OrderDate >= DATEADD(MONTH, -1, GETDATE()) 
+	GROUP BY ProductId) Last1Month
+ON Last1Month.ProductId = Product.ProductId
+LEFT JOIN (
+	SELECT ProductId, FORMAT(SUM(Amount), 'N2') AS Last3Month 
+	FROM [Order]
+	INNER JOIN OrderDetail
+		ON OrderDetail.OrderId = [Order].OrderId
+	WHERE Status IN ('Paid', 'Account')
+		  AND OrderDate >= DATEADD(MONTH, -3, GETDATE()) 
+	GROUP BY ProductId) Last3Month
+ON Last3Month.ProductId = Product.ProductId
+LEFT JOIN (
+	SELECT ProductId, FORMAT(SUM(Amount), 'N2') AS Last6Month 
+	FROM [Order]
+	INNER JOIN OrderDetail
+		ON OrderDetail.OrderId = [Order].OrderId
+	WHERE Status IN ('Paid', 'Account')
+		  AND OrderDate >= DATEADD(MONTH, -6, GETDATE()) 
+	GROUP BY ProductId) Last6Month
+ON Last6Month.ProductId = Product.ProductId
+LEFT JOIN (
+	SELECT ProductId, SUM(Amount) AS Last12Month 
+	FROM [Order]
+	INNER JOIN OrderDetail
+		ON OrderDetail.OrderId = [Order].OrderId
+	WHERE Status IN ('Paid', 'Account')
+		  AND OrderDate >= DATEADD(MONTH, -12, GETDATE())
+	GROUP BY ProductId) Last12Month
+ON Last12Month.ProductId = Product.ProductId
+LEFT JOIN (
+	SELECT ProductId, FORMAT(SUM(ISNULL(Balance, 0)), 'N2') AS Balance
+	FROM ProductInventory
+	GROUP BY ProductId
+) AS Inventory
+ON Product.ProductId = Inventory.ProductId 
+WHERE Last3Month IS NOT NULL 
+      OR Last6Month IS NOT NULL
+	  OR Last12Month IS NOT NULL
+                                 ";
+                conn.Open();
+                // var locationIds = (await GetUserLocations(userId)).ToArray();
+                return await conn.QueryAsync<SalesForecastReportViewModel>(query);
+            }
+        }
     }
 }
