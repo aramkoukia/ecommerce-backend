@@ -80,6 +80,14 @@ namespace EcommerceApi.Controllers
             Purchase.CreatedDate = date;
             Purchase.PurchaseDate = date;
 
+            foreach (var detail in Purchase.PurchaseDetail)
+            {
+                detail.CreatedByUserId = userId;
+                detail.CreatedDate = date;
+                detail.PoNumber = Purchase.PoNumber;
+                detail.EstimatedDelivery = Purchase.DeliveryDate;
+            }
+
             _context.Purchase.Add(Purchase);
             await _context.SaveChangesAsync();
 
