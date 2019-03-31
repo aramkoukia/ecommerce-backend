@@ -148,8 +148,10 @@ namespace EcommerceApi.Controllers
                                     m.ProductId == purchaseDetail.ProductId &&
                                     m.LocationId == updatePurchaseDetailStatus.ArrivedAtLocationId);
 
+            decimal currentBalance = 0;
             if (productInventory != null)
             {
+                currentBalance = productInventory.Balance;
                 productInventory.Balance = productInventory.Balance + updatePurchaseDetailStatus.Amount;
                 productInventory.ModifiedDate = date;
             }
@@ -165,6 +167,15 @@ namespace EcommerceApi.Controllers
                         ProductId = purchaseDetail.ProductId
                     });
             }
+
+            var productInventoryHistory = new ProductInventoryHistory {
+                ChangedBalance = currentBalance + updatePurchaseDetailStatus.Amount,
+                Balance = updatePurchaseDetailStatus.Amount,
+                Notes = $"Purchase Arrived Id: {purchaseDetail.PurchaseId}",
+                TransactionType = "Purchase Arrived"
+            };
+
+            _context.ProductInventoryHistory.Add(productInventoryHistory);
             return true;
         }
     }

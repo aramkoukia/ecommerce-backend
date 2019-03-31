@@ -242,17 +242,6 @@ WHERE ProductId = @ProductId
 
 UNION ALL 
 
-SELECT PurchaseDate, 'Purchase' AS TransactionType, PurchaseDetail.Amount, '', Users.GivenName, 'Id: ' + CAST([Purchase].PurchaseId AS NVARCHAR(100)) AS Notes, NULL
-FROM [Purchase]
-INNER JOIN PurchaseDetail
-	On Purchase.PurchaseId = PurchaseDetail.PurchaseId
-LEFT JOIN Users
-    ON Users.Id = Purchase.CreatedByUserId
-WHERE ProductId = @ProductId
-      AND PurchaseDate BETWEEN @fromDate AND @toDate
-
-UNION ALL 
-
 SELECT ModifiedDate, TransactionType, Balance AS BalanceChanged, Location.LocationName, Users.GivenName, ProductInventoryHistory.Notes, ChangedBalance as Balance
 FROM ProductInventoryHistory
 INNER JOIN Location
