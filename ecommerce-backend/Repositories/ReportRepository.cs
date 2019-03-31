@@ -466,10 +466,79 @@ GROUP BY PaymentTypeName, [Order].Status, Location.LocationName
             using (IDbConnection conn = Connection)
             {
                 string query = $@"
+SELECT Product.ProductCode,
+       Product.ProductName, 
+       FORMAT(PlannedPurchase.Amount, 'N2') AS PlannedAmount, 
+	   FORMAT(PlannedPurchase.TotalPrice, 'N2') AS PlannedTotalPrice,
+       FORMAT(PaidPurchase.Amount, 'N2') AS PaidAmount, 
+	   FORMAT(PaidPurchase.TotalPrice, 'N2') AS PaidTotalPrice,
+       FORMAT(OnDeliveryPurchase.Amount, 'N2') AS OnDeliveryAmount, 
+	   FORMAT(OnDeliveryPurchase.TotalPrice, 'N2') AS OnDeliveryTotalPrice,
+       FORMAT(CustomClearancePurchase.Amount, 'N2') AS CustomClearanceAmount, 
+	   FORMAT(CustomClearancePurchase.TotalPrice, 'N2') AS CustomClearanceTotalPrice,
+       FORMAT(ArrivedPurchase.Amount, 'N2') AS ArrivedAmount, 
+	   FORMAT(ArrivedPurchase.TotalPrice, 'N2') AS ArrivedTotalPrice
+FROM (
+	SELECT ProductId, SUM(Amount) AS Amount, SUM(ToTalPrice) AS TotalPrice
+	FROM PurchaseDetail
+	WHERE Status = 'Plan'
+		  AND CreatedDate BETWEEN @FromDate AND @ToDate 
+    GROUP BY ProductId) PlannedPurchase
+LEFT JOIN (
+	SELECT ProductId, SUM(Amount) AS Amount, SUM(ToTalPrice) AS TotalPrice
+	FROM PurchaseDetail
+	WHERE Status = 'Paid'
+		  AND CreatedDate BETWEEN @FromDate AND @ToDate 
+    GROUP BY ProductId) PaidPurchase
+ON PlannedPurchase.ProductId = PaidPurchase.ProductId
+LEFT JOIN (
+	SELECT ProductId, SUM(Amount) AS Amount, SUM(ToTalPrice) AS TotalPrice
+	FROM PurchaseDetail
+	WHERE Status = 'OnDelivery'
+		  AND CreatedDate BETWEEN @FromDate AND @ToDate 
+    GROUP BY ProductId) OnDeliveryPurchase
+ON PlannedPurchase.ProductId = OnDeliveryPurchase.ProductId
+LEFT JOIN (
+	SELECT ProductId, SUM(Amount) AS Amount, SUM(ToTalPrice) AS TotalPrice
+	FROM PurchaseDetail
+	WHERE Status = 'CustomClearance'
+		  AND CreatedDate BETWEEN @FromDate AND @ToDate 
+    GROUP BY ProductId) CustomClearancePurchase
+ON PlannedPurchase.ProductId = CustomClearancePurchase.ProductId
+LEFT JOIN (
+	SELECT ProductId, SUM(Amount) AS Amount, SUM(ToTalPrice) AS TotalPrice
+	FROM PurchaseDetail
+	WHERE Status = 'Arrived'
+		  AND CreatedDate BETWEEN @FromDate AND @ToDate 
+    GROUP BY ProductId) ArrivedPurchase
+ON PlannedPurchase.ProductId = ArrivedPurchase.ProductId
+INNER JOIN Product
+	ON PlannedPurchase.ProductId = Product.ProductId
                                  ";
                 conn.Open();
-                var locationIds = (await GetUserLocations(userId)).ToArray();
-                return await conn.QueryAsync<PurchasesReportViewModel>(query, new { fromDate, toDate, locationIds });
+                // var locationIds = (await GetUserLocations(userId)).ToArray();
+                return await conn.QueryAsync<PurchasesReportViewModel>(query, new { fromDate, toDate });
+            }
+        }
+        
+        public async Task<IEnumerable<PurchasesDetailReportViewModel>> GetPurchasesDetailReport(DateTime fromDate, DateTime toDate, string userId)
+        {
+            using (IDbConnection conn = Connection)
+            {
+                string query = $@"
+SELECT ProductCode, ProductName, PurchaseDetail.PurchaseId, Amount, TotalPrice, PaidDate, PurchaseDetail.EstimatedDelivery, ArrivedDate, PurchaseDetail.PoNumber, Supplier, LocationName
+FROM PurchaseDetail
+INNER JOIN Purchase
+	ON Purchase.PurchaseId = PurchaseDetail.PurchaseId 
+		AND PurchaseDetail.CreatedDate BETWEEN @FromDate AND @ToDate 
+INNER JOIN Product
+	ON Product.ProductId = PurchaseDetail.ProductId
+LEFT JOIN Location
+	ON Location.LocationId = PurchaseDetail.ArrivedAtLocationId
+                                 ";
+                conn.Open();
+                // var locationIds = (await GetUserLocations(userId)).ToArray();
+                return await conn.QueryAsync<PurchasesDetailReportViewModel>(query, new { fromDate, toDate });
             }
         }
 
