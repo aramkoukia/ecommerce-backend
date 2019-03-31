@@ -648,11 +648,11 @@ WHERE UserId = @userId";
             using (IDbConnection conn = Connection)
             {
                 string query = $@"
-SELECT ProductCode, ProductName, Last1Month, Last3Month, Last6Month, FORMAT(Last12Month, 'N2') AS Last12Month, FORMAT(Last12Month / 12 , 'N2') AS Last12MonthAverage, Inventory.Balance,
-       CASE WHEN Inventory.Balance < Last6Month THEN 'Yes' END AS NeedsPurchase
+SELECT ProductCode, ProductName, Last1Month, Last3Month, Last6Month, Last12Month AS Last12Month , CAST(Last12Month / 12 AS DECIMAL(12,0)) AS Last12MonthAverage, Inventory.Balance,
+       CASE WHEN Inventory.Balance < Last6Month THEN 'Yes' ELSE 'No' END AS NeedsPurchase  
 FROM Product
 LEFT JOIN (
-	SELECT ProductId, FORMAT(SUM(Amount), 'N2') AS Last1Month 
+	SELECT ProductId, SUM(Amount) AS Last1Month 
 	FROM [Order]
 	INNER JOIN OrderDetail
 		ON OrderDetail.OrderId = [Order].OrderId
@@ -661,7 +661,7 @@ LEFT JOIN (
 	GROUP BY ProductId) Last1Month
 ON Last1Month.ProductId = Product.ProductId
 LEFT JOIN (
-	SELECT ProductId, FORMAT(SUM(Amount), 'N2') AS Last3Month 
+	SELECT ProductId, SUM(Amount) AS Last3Month 
 	FROM [Order]
 	INNER JOIN OrderDetail
 		ON OrderDetail.OrderId = [Order].OrderId
@@ -670,7 +670,7 @@ LEFT JOIN (
 	GROUP BY ProductId) Last3Month
 ON Last3Month.ProductId = Product.ProductId
 LEFT JOIN (
-	SELECT ProductId, FORMAT(SUM(Amount), 'N2') AS Last6Month 
+	SELECT ProductId, SUM(Amount) AS Last6Month 
 	FROM [Order]
 	INNER JOIN OrderDetail
 		ON OrderDetail.OrderId = [Order].OrderId
@@ -688,7 +688,7 @@ LEFT JOIN (
 	GROUP BY ProductId) Last12Month
 ON Last12Month.ProductId = Product.ProductId
 LEFT JOIN (
-	SELECT ProductId, FORMAT(SUM(ISNULL(Balance, 0)), 'N2') AS Balance
+	SELECT ProductId, SUM(ISNULL(Balance, 0)) AS Balance
 	FROM ProductInventory
 	GROUP BY ProductId
 ) AS Inventory
@@ -696,6 +696,7 @@ ON Product.ProductId = Inventory.ProductId
 WHERE Last3Month IS NOT NULL 
       OR Last6Month IS NOT NULL
 	  OR Last12Month IS NOT NULL
+ORDER BY Last12Month DESC
                                  ";
                 conn.Open();
                 // var locationIds = (await GetUserLocations(userId)).ToArray();
