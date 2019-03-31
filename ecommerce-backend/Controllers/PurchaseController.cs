@@ -171,7 +171,12 @@ namespace EcommerceApi.Controllers
             var productInventoryHistory = new ProductInventoryHistory {
                 ChangedBalance = currentBalance + updatePurchaseDetailStatus.Amount,
                 Balance = updatePurchaseDetailStatus.Amount,
-                Notes = $"Purchase Arrived Id: {purchaseDetail.PurchaseId}",
+                Notes = $"Purchase Id: {purchaseDetail.PurchaseId} arrived",
+                BinCode = "",
+                LocationId = updatePurchaseDetailStatus.ArrivedAtLocationId.Value,
+                CreatedByUserId = purchaseDetail.CreatedByUserId,
+                ModifiedDate = date,
+                ProductId = purchaseDetail.ProductId,
                 TransactionType = "Purchase Arrived"
             };
 
