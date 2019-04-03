@@ -116,7 +116,7 @@ namespace EcommerceApi.Controllers
                 var done = await AddToInventory(order, updateOrderStatus);
                 order.Status = OrderStatus.Draft.ToString();
                 order.Notes = $"{order.Notes} - Marked as Draft from OnHold after 14 days by system.";
-                await _emailSender.SendAdminReportAsync("OnHold Order Cancelled", $"OnHold Order Cancelled. \n Order Id: {order.OrderId}");
+                _emailSender.SendAdminReportAsync("OnHold Order Cancelled", $"OnHold Order Cancelled. \n Order Id: {order.OrderId}");
             }
             await _context.SaveChangesAsync();
             return Ok();
@@ -207,7 +207,7 @@ namespace EcommerceApi.Controllers
                 order.OrderDate = date;
             }
 
-            await _emailSender.SendAdminReportAsync("Order Status Changed", $"Order Status changed. \n Order Id: {id}. \n From: {originalOrderStatus} To: {updateOrderStatus.OrderStatus.ToString()}");
+            _emailSender.SendAdminReportAsync("Order Status Changed", $"Order Status changed. \n Order Id: {id}. \n From: {originalOrderStatus} To: {updateOrderStatus.OrderStatus.ToString()}");
 
             try
             {
@@ -255,7 +255,7 @@ namespace EcommerceApi.Controllers
 
             order.LocationId = locationId;
 
-            await _emailSender.SendAdminReportAsync("Order Location Changed", $"Order Location changed. \n Order Id: {id}. \n From: {originalLocation} To: {newLocation}");
+            _emailSender.SendAdminReportAsync("Order Location Changed", $"Order Location changed. \n Order Id: {id}. \n From: {originalLocation} To: {newLocation}");
 
             try
             {
@@ -327,8 +327,6 @@ namespace EcommerceApi.Controllers
             var newPaymentTypes = string.Join(",", _context.PaymentType.Where(p =>  paymentTypeIds.Contains(p.PaymentTypeId)).Select(m => m.PaymentTypeName).ToArray());
             var newPaymentAmount = string.Join(",", updateOrderPayment.OrderPayment.Select(m => m.PaymentAmount).ToArray());
 
-
-            
             foreach (var payment in order.OrderPayment)
             { 
                 _context.OrderPayment.Remove(payment);
@@ -375,7 +373,7 @@ namespace EcommerceApi.Controllers
                 }
             }
 
-            await _emailSender.SendAdminReportAsync("Order Payment Type Changed", $"Order Payment Type changed. \n Order Id: {id}. \n From Types: {originalPaymentTypes}, Amounts: {originalPaymentAmount}. \n\n To Types: {newPaymentTypes}, Amounts: {newPaymentAmount}");
+            _emailSender.SendAdminReportAsync("Order Payment Type Changed", $"Order Payment Type changed. \n Order Id: {id}. \n From Types: {originalPaymentTypes}, Amounts: {originalPaymentAmount}. \n\n To Types: {newPaymentTypes}, Amounts: {newPaymentAmount}");
 
             try
             {
@@ -408,41 +406,6 @@ namespace EcommerceApi.Controllers
             order.CustomerId = updateOrderCustomer.CustomerId;
             await _context.SaveChangesAsync();
             return Ok(order);
-        }
-
-        // PUT: api/Orders/5
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutOrder([FromRoute] int id, [FromBody] Order order)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            if (id != order.OrderId)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(order).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!OrderExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
         }
 
         // POST: api/Orders
@@ -512,7 +475,8 @@ namespace EcommerceApi.Controllers
             order.Location = null;
             var done = await NewOrderUpdateInventory(order);
             _context.Order.Add(order);
-            await _emailSender.SendAdminReportAsync("New Order", $"New Order Created. \n Order Id: {order.OrderId}. \n Status: {order.Status} \n Total: ${order.Total} \n User: {user.GivenName}");
+
+            _emailSender.SendAdminReportAsync("New Order", $"New Order Created. \n Order Id: {order.OrderId}. \n Status: {order.Status} \n Total: ${order.Total} \n User: {user.GivenName}");
 
             await _context.SaveChangesAsync();
 
