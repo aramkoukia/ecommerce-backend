@@ -626,7 +626,7 @@ www.lightsandparts.com | {user.Email}
                 .SingleOrDefaultAsync(m => m.OrderId == orderId);
 
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == order.CreatedByUserId);
-            order.CreatedByUserName = user.UserName;
+            order.CreatedByUserName = user?.UserName;
 
             var includeMerchantCopy = false;
             if (order.Status == OrderStatus.Draft.ToString() || order.Status == OrderStatus.OnHold.ToString())
@@ -690,7 +690,7 @@ www.lightsandparts.com | {user.Email}
                 .SingleOrDefaultAsync(m => m.OrderId == orderId);
 
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == order.CreatedByUserId);
-            order.CreatedByUserName = user.UserName;
+            order.CreatedByUserName = user?.UserName;
 
             var globalSettings = new GlobalSettings
             {
