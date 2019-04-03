@@ -153,7 +153,7 @@ namespace EcommerceApi.Controllers
                 var subject = $"Inventory {productInventoryHistory.TransactionType} - {location.LocationName}";
                 var message = $"Product: {product.ProductCode} - {product.ProductName}.\n";
                 message += $"Inventory {productInventoryHistory.TransactionType}: {productInventoryHistory.Balance}.\n";
-                message += $"Changed From: {currentBalance} To:{productInventory.Balance}. {productInventoryHistory.TransactionType}.\n";
+                message += $"Changed From: {currentBalance} To:{productInventoryHistory.ChangedBalance}. {productInventoryHistory.TransactionType}.\n";
                 message += $"Date: {productInventoryHistory.ModifiedDate}.\n";
                 message += $"Location: {location.LocationName}.\n";
                 message += $"User: {userId}.\n";
