@@ -31,6 +31,7 @@ namespace EcommerceApi.Models
         public string Notes { get; set; }
         public string PoNumber { get; set; }
         public string Status { get; set; }
+        public bool IsAccountReturn { get; set; }
         public DateTime CreatedDate { get; set; }
         public string CreatedByUserId { get; set; }
         public int? OriginalOrderId { get; set; }

@@ -43,8 +43,8 @@ namespace EcommerceApi.Repositories
 		                                ) OrderPayment
 		                                ON [Order].OrderId = OrderPayment.OrderId
 		                                WHERE CustomerId IS NOT NULL 
-			                                    AND Status = 'Account' 
-		                                GROUP BY [Order].OrderId, [Order].CustomerId) AS UnPaidOrders
+			                                    AND (Status = 'Account' OR (Status = 'Return' AND IsAccountReturn = 1))
+                                        GROUP BY [Order].OrderId, [Order].CustomerId) AS UnPaidOrders
 	                                GROUP BY CustomerId
                                 ) CustomerAccount
                                 ON CustomerAccount.CustomerId = Customer.CustomerId
@@ -68,7 +68,7 @@ namespace EcommerceApi.Repositories
 		                                ) OrderPayment
 		                                ON [Order].OrderId = OrderPayment.OrderId
 		                                WHERE CustomerId = @customerId
-			                                  AND Status = 'Account'  
+			                                  AND (Status = 'Account' OR (Status = 'Return' AND IsAccountReturn = 1)) 
 		                                GROUP BY [Order].OrderId, [Order].CustomerId) AS UnPaidOrders
 	                                GROUP BY CustomerId
                                  ";
@@ -108,7 +108,7 @@ namespace EcommerceApi.Repositories
 		                                ) OrderPayment
 		                                ON [Order].OrderId = OrderPayment.OrderId
 		                                WHERE CustomerId IS NOT NULL 
-			                                    AND Status = 'Account' 
+			                                  AND (Status = 'Account' OR (Status = 'Return' AND IsAccountReturn = 1))
 		                                GROUP BY [Order].OrderId, [Order].CustomerId) AS UnPaidOrders
 	                                GROUP BY CustomerId
                                 ) CustomerAccount

@@ -427,6 +427,13 @@ namespace EcommerceApi.Controllers
                 order.Status = OrderStatus.Return.ToString();
             }
 
+            if (order.Status == OrderStatus.Return.ToString() 
+                && order.CustomerId != null 
+                && (order.OrderPayment == null || !order.OrderPayment.Any()))
+            {
+                order.IsAccountReturn = true;
+            }
+
             order.OrderId = _context.Order.Max(o => o.OrderId) + 1;
             if (order.OrderPayment != null && order.OrderPayment.Any())
             {
