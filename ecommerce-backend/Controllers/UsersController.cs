@@ -168,7 +168,7 @@ namespace EcommerceApi.Controllers
             var result = await _userManager.ResetPasswordAsync(user, token, passwordResetInfo.NewPassword);
             if (result.Succeeded)
             {
-                await _emailSender.SendEmailAsync(
+                _emailSender.SendEmailAsync(
                     user.Email,
                     "Password Reset", $"Your password is reset. <br> Your new password is: {passwordResetInfo.NewPassword}");
             }
@@ -190,7 +190,7 @@ namespace EcommerceApi.Controllers
             dbUser.AuthCode = passcodeResetInfo.NewPasscode;
             await _context.SaveChangesAsync();
 
-            await _emailSender.SendEmailAsync(
+            _emailSender.SendEmailAsync(
                 user.Email, "Passcode Reset", $"Your passcode is reset. <br> Your new passcode is: {passcodeResetInfo.NewPasscode}");
 
             return Ok( new { Succeeded = true });

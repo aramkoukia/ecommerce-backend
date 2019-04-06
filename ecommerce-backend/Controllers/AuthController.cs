@@ -133,7 +133,7 @@ namespace EcommerceApi.Controllers
         //                // Send email confirmation email
         //                var confirmToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
         //                var emailConfirmUrl = Url.RouteUrl("ConfirmEmail", new { uid = user.Id, token = confirmToken }, this.Request.Scheme);
-        //                await _emailSender.SendEmailAsync(model.username, "Please confirm your account",
+        //                _emailSender.SendEmailAsync(model.username, "Please confirm your account",
         //$"Please confirm your account by clicking this <a href=\"{emailConfirmUrl}\">link</a>."
         //                );
 

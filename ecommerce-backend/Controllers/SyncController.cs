@@ -150,7 +150,7 @@ namespace EcommerceApi.Controllers
             stopWatch.Stop();
             var timeTook = $"Products Sync Took: {TimeSpan.FromMilliseconds(stopWatch.ElapsedMilliseconds).Minutes} minutes.";
             var message = $"Products Sync Finished. \n Products Created: {productsCreated}. \n Products Updated: {productsUpdated}. {timeTook}\n Errors: {string.Join(",", errorList)}";
-            await _emailSender.SendEmailAsync("aramkoukia@gmail.com", "Sync Finished: Products", message, null, null, null, true);
+            _emailSender.SendEmailAsync("aramkoukia@gmail.com", "Sync Finished: Products", message, null, null, null, true);
             
             return Ok(message);
         }
@@ -201,7 +201,7 @@ namespace EcommerceApi.Controllers
         //        errorList.Add("order taxes:" + ex.ToString());
         //    }
 
-        //    await _emailSender.SendEmailAsync("aramkoukia@gmail.com", "Sync Finished: Products Inventory", $"Sync Finished: Products Inventory. {string.Join(",", errorList)}");
+        //    _emailSender.SendEmailAsync("aramkoukia@gmail.com", "Sync Finished: Products Inventory", $"Sync Finished: Products Inventory. {string.Join(",", errorList)}");
         //    return Ok(errorList);
         //}
 
@@ -284,7 +284,7 @@ namespace EcommerceApi.Controllers
         //        errorList.Add("order taxes:" + ex.ToString());
         //    }
 
-        //    await _emailSender.SendEmailAsync("aramkoukia@gmail.com", "Sync Finished: Customers", $"Sync Finished: Customers.  \n Customers Created: {customersCreated}. \n Customers Updated: {customersUpdated}. \n Errors: {string.Join(",", errorList)}");
+        //    _emailSender.SendEmailAsync("aramkoukia@gmail.com", "Sync Finished: Customers", $"Sync Finished: Customers.  \n Customers Created: {customersCreated}. \n Customers Updated: {customersUpdated}. \n Errors: {string.Join(",", errorList)}");
 
         //    return Ok(errorList);
         //}

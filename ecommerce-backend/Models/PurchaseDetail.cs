@@ -10,6 +10,7 @@ namespace EcommerceApi.Models
         public int ProductId { get; set; }
         public decimal Amount { get; set; }
         public decimal? UnitPrice { get; set; }
+        public decimal? OverheadCost { get; set; }
         public decimal? TotalPrice { get; set; }
         public string Status { get; set; }
         public string PoNumber { get; set; }
