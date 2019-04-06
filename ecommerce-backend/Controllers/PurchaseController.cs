@@ -154,7 +154,7 @@ namespace EcommerceApi.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeletePurchase([FromRoute] int id)
         {
-            var purchase = await _context.Purchase.FindAsync(id);
+            var purchase = await _context.Purchase.FirstOrDefaultAsync(p => p.PurchaseId == id);
             if (purchase == null)
             {
                 return NotFound();
@@ -180,7 +180,7 @@ namespace EcommerceApi.Controllers
         [HttpDelete("purchasedetail/{id}")]
         public async Task<IActionResult> DeletePurchaseDetail([FromRoute] int id)
         {
-            var purchaseDetail = await _context.PurchaseDetail.FindAsync(id);
+            var purchaseDetail = await _context.PurchaseDetail.FirstOrDefaultAsync(p => p.PurchaseDetailId == id);
             if (purchaseDetail == null)
             {
                 return NotFound();
