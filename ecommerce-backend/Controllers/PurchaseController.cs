@@ -150,6 +150,48 @@ namespace EcommerceApi.Controllers
             return Ok(newPurchaseDetail);
         }
 
+        // DELETE: api/Purchases/5
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeletePurchase([FromRoute] int id)
+        {
+            var purchase = await _context.Purchase.FindAsync(id);
+            if (purchase == null)
+            {
+                return NotFound();
+            }
+
+            var purchaseDetails = _context.PurchaseDetail.Where(p => p.PurchaseId == id);
+
+            if (purchaseDetails != null)
+            {
+                foreach (var purchaseDetail in purchaseDetails)
+                {
+                    _context.PurchaseDetail.Remove(purchaseDetail);
+                }
+            }
+
+            _context.Purchase.Remove(purchase);
+            await _context.SaveChangesAsync();
+
+            return Ok();
+        }
+
+        // DELETE: api/Purchases/purchaseDetail/5
+        [HttpDelete("purchasedetail/{id}")]
+        public async Task<IActionResult> DeletePurchaseDetail([FromRoute] int id)
+        {
+            var purchaseDetail = await _context.PurchaseDetail.FindAsync(id);
+            if (purchaseDetail == null)
+            {
+                return NotFound();
+            }
+
+            _context.PurchaseDetail.Remove(purchaseDetail);
+            await _context.SaveChangesAsync();
+
+            return Ok();
+        }
+
         private async Task<bool> AddToInventory(UpdatePurchaseDetailStatus updatePurchaseDetailStatus, PurchaseDetail purchaseDetail, DateTime date)
         {
             var productInventory = await _context.ProductInventory.FirstOrDefaultAsync(m =>
