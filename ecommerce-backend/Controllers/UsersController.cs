@@ -113,6 +113,21 @@ namespace EcommerceApi.Controllers
             return await _context.UserLocation.Where(l => l.UserId == user.Id).ToListAsync();
         }
 
+        [HttpPut("Info")]
+        public async Task<IActionResult> UpdateUser([FromBody] UpdateUserViewModel updateUserViewModel)
+        {
+            ApplicationUser user = await _userManager.FindByNameAsync(updateUserViewModel.UserName);
+
+            user.GivenName = updateUserViewModel.GivenName;
+            user.Email = updateUserViewModel.Email;
+            await _userManager.UpdateAsync(user);
+
+            _emailSender.SendEmailAsync(
+                user.Email, "User Info Update", $"User Info Updated. <br> User Name: {updateUserViewModel.UserName}");
+
+            return Ok(new { Succeeded = true });
+        }
+
         // PUT: api/Users/Permissions
         [HttpPut("Permissions")]
         public async Task<IActionResult> PutUserPermissions([FromBody] UpdateUserPermissionViewModel userInfo)
