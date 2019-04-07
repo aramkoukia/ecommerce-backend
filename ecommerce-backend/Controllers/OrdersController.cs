@@ -122,9 +122,131 @@ namespace EcommerceApi.Controllers
             return Ok();
         }
 
+        [HttpPost]
+        public async Task<IActionResult> PostOrder([FromBody] Order order)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.AuthCode != null && u.AuthCode.Equals(order.AuthCode, StringComparison.InvariantCultureIgnoreCase));
+            order.CreatedByUserId = user.Id;
+            var date = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateTime.UtcNow, "Pacific Standard Time");
+            order.CreatedDate = date;
+            order.OrderDate = date;
+            if (order.Status != OrderStatus.Return.ToString() && order.Total < 0)
+            {
+                order.Status = OrderStatus.Return.ToString();
+            }
+
+            if (order.Status == OrderStatus.Return.ToString()
+                && order.CustomerId != null
+                && (order.OrderPayment == null || !order.OrderPayment.Any()))
+            {
+                order.IsAccountReturn = true;
+            }
+
+            order.OrderId = _context.Order.Max(o => o.OrderId) + 1;
+            if (order.OrderPayment != null && order.OrderPayment.Any())
+            {
+                var orderPayments = order.OrderPayment.Select(m => new { m.PaymentTypeId, m.PaymentAmount, m.ChequeNo }).Distinct().ToList();
+                order.OrderPayment.Clear();
+                foreach (var payment in orderPayments)
+                {
+                    order.OrderPayment.Add(new OrderPayment
+                    {
+                        CreatedByUserId = user.Id,
+                        CreatedDate = date,
+                        PaymentAmount = payment.PaymentAmount,
+                        PaymentDate = date,
+                        PaymentTypeId = payment.PaymentTypeId,
+                        ChequeNo = payment.ChequeNo
+                    });
+
+                    // Paid by Store Credit. Upating customer store credit and add to history
+                    if (payment.PaymentTypeId == 26 && order.CustomerId != null)
+                    {
+                        var customer = await _context.Customer.FirstOrDefaultAsync(c => c.CustomerId == order.CustomerId);
+                        if (customer != null)
+                        {
+                            var storeCreditNote = $"Used to pay Order: {order.OrderId}";
+                            if (order.Status == OrderStatus.Return.ToString())
+                            {
+                                storeCreditNote = $"Store Credit added for Refund of Order: {order.OrderId}";
+                            }
+
+                            customer.StoreCredit = customer.StoreCredit + decimal.Multiply(payment.PaymentAmount, decimal.MinusOne);
+                            _context.CustomerStoreCredit.Add(
+                                new CustomerStoreCredit
+                                {
+                                    Amount = decimal.Multiply(payment.PaymentAmount, decimal.MinusOne),
+                                    CreatedByUserId = user.Email,
+                                    CreatedDate = date,
+                                    CustomerId = customer.CustomerId,
+                                    Notes = storeCreditNote
+                                }
+                            );
+                        }
+                    }
+                }
+            }
+
+            order.Customer = null;
+            order.Location = null;
+            var done = await NewOrderUpdateInventory(order);
+            _context.Order.Add(order);
+
+            _emailSender.SendAdminReportAsync("New Order", $"New Order Created. \n Order Id: {order.OrderId}. \n Status: {order.Status} \n Total: ${order.Total} \n User: {user.GivenName}");
+
+            await _context.SaveChangesAsync();
+
+            return CreatedAtAction("GetOrder", new { id = order.OrderId }, order);
+        }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> PutOrder([FromRoute] int id, [FromBody] Order order)
+        {
+            // only supports draft orders
+            if (!ModelState.IsValid || order.Status != OrderStatus.Draft.ToString())
+            {
+                return BadRequest(ModelState);
+            }
+
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.AuthCode != null && u.AuthCode.Equals(order.AuthCode, StringComparison.InvariantCultureIgnoreCase));
+
+            var existingOrder = _context.Order.FirstOrDefault(o => o.OrderId == id);
+            if (existingOrder == null)
+            {
+                return BadRequest($"Order Id {id} not found");
+            }
+
+            existingOrder.CreatedByUserId = user.Id;
+            existingOrder.CustomerId = order.CustomerId;
+            existingOrder.Email = order.Email;
+            existingOrder.LocationId = order.LocationId;
+            existingOrder.Notes = order.Notes;
+            existingOrder.PoNumber = order.PoNumber;
+            existingOrder.PstNumber = order.PstNumber;
+            existingOrder.SubTotal = order.SubTotal;
+            existingOrder.Total = order.Total;
+            existingOrder.TotalDiscount = order.TotalDiscount;
+
+            foreach (var detail in existingOrder.OrderDetail)
+            {
+                _context.OrderDetail.Remove(detail);
+            }
+
+            await _context.OrderDetail.AddRangeAsync(order.OrderDetail);
+
+            await _context.SaveChangesAsync();
+
+            return CreatedAtAction("GetOrder", new { id = order.OrderId }, order);
+        }
+
         // PUT: api/Orders/5/Status
         [HttpPut("{id}/Status")]
-        public async Task<IActionResult> PutOrder([FromRoute] int id, [FromBody] UpdateOrderStatus updateOrderStatus)
+        public async Task<IActionResult> PutOrderStatus([FromRoute] int id, [FromBody] UpdateOrderStatus updateOrderStatus)
         {
             if (!ModelState.IsValid)
             {
@@ -408,89 +530,6 @@ namespace EcommerceApi.Controllers
             return Ok(order);
         }
 
-        // POST: api/Orders
-        [HttpPost]
-        public async Task<IActionResult> PostOrder([FromBody] Order order)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.AuthCode != null && u.AuthCode.Equals(order.AuthCode, StringComparison.InvariantCultureIgnoreCase));
-            order.CreatedByUserId = user.Id;
-            var date = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateTime.UtcNow, "Pacific Standard Time");
-            order.CreatedDate = date;
-            order.OrderDate = date;
-            if (order.Status != OrderStatus.Return.ToString() && order.Total < 0)
-            {
-                order.Status = OrderStatus.Return.ToString();
-            }
-
-            if (order.Status == OrderStatus.Return.ToString() 
-                && order.CustomerId != null 
-                && (order.OrderPayment == null || !order.OrderPayment.Any()))
-            {
-                order.IsAccountReturn = true;
-            }
-
-            order.OrderId = _context.Order.Max(o => o.OrderId) + 1;
-            if (order.OrderPayment != null && order.OrderPayment.Any())
-            {
-                var orderPayments = order.OrderPayment.Select(m => new { m.PaymentTypeId, m.PaymentAmount, m.ChequeNo }).Distinct().ToList();
-                order.OrderPayment.Clear();
-                foreach (var payment in orderPayments)
-                {
-                    order.OrderPayment.Add(new OrderPayment
-                    {
-                        CreatedByUserId = user.Id,
-                        CreatedDate = date,
-                        PaymentAmount = payment.PaymentAmount,
-                        PaymentDate = date,
-                        PaymentTypeId = payment.PaymentTypeId,
-                        ChequeNo = payment.ChequeNo
-                    });
-
-                    // Paid by Store Credit. Upating customer store credit and add to history
-                    if (payment.PaymentTypeId == 26 && order.CustomerId != null)
-                    {
-                        var customer = await _context.Customer.FirstOrDefaultAsync(c => c.CustomerId == order.CustomerId);
-                        if (customer != null)
-                        {
-                            var storeCreditNote = $"Used to pay Order: {order.OrderId}";
-                            if (order.Status == OrderStatus.Return.ToString())
-                            {
-                                storeCreditNote = $"Store Credit added for Refund of Order: {order.OrderId}";
-                            }
-
-                            customer.StoreCredit = customer.StoreCredit + decimal.Multiply(payment.PaymentAmount, decimal.MinusOne);
-                            _context.CustomerStoreCredit.Add(
-                                new CustomerStoreCredit {
-                                    Amount = decimal.Multiply(payment.PaymentAmount, decimal.MinusOne),
-                                    CreatedByUserId = user.Email,
-                                    CreatedDate = date,
-                                    CustomerId = customer.CustomerId,
-                                    Notes = storeCreditNote
-                                }
-                            );
-                        }
-                    }
-                }
-            }
-
-            order.Customer = null;
-            order.Location = null;
-            var done = await NewOrderUpdateInventory(order);
-            _context.Order.Add(order);
-
-            _emailSender.SendAdminReportAsync("New Order", $"New Order Created. \n Order Id: {order.OrderId}. \n Status: {order.Status} \n Total: ${order.Total} \n User: {user.GivenName}");
-
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetOrder", new { id = order.OrderId }, order);
-        }
-
-        // GET: api/Orders
         [HttpGet("{orderId}/email")]
         public async Task<IActionResult> EmailOrder([FromRoute] int orderId, [FromQuery] string email, string authCode)
         {
@@ -580,7 +619,6 @@ www.lightsandparts.com | {user.Email}
             return Ok();
         }
 
-        // GET: api/Orders
         [HttpGet("{orderId}/print")]
         [AllowAnonymous]
         public async Task<FileResult> PrintOrder([FromRoute] int orderId)
@@ -644,7 +682,6 @@ www.lightsandparts.com | {user.Email}
             return result;
         }
 
-        // GET: api/Orders
         [HttpGet("{orderId}/packingslip")]
         [AllowAnonymous]
         public async Task<FileResult> PackingSlipOrder([FromRoute] int orderId)
