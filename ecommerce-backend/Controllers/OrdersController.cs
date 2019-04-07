@@ -215,7 +215,10 @@ namespace EcommerceApi.Controllers
 
             var user = await _context.Users.FirstOrDefaultAsync(u => u.AuthCode != null && u.AuthCode.Equals(order.AuthCode, StringComparison.InvariantCultureIgnoreCase));
 
-            var existingOrder = _context.Order.FirstOrDefault(o => o.OrderId == id);
+            var existingOrder = _context.Order
+                .Include(o => o.OrderDetail)
+                .Include(o => o.OrderTax)
+                .FirstOrDefault(o => o.OrderId == id);
             if (existingOrder == null)
             {
                 return BadRequest($"Order Id {id} not found");
@@ -237,11 +240,24 @@ namespace EcommerceApi.Controllers
                 _context.OrderDetail.Remove(detail);
             }
 
-            await _context.OrderDetail.AddRangeAsync(order.OrderDetail);
+            foreach (var tax in existingOrder.OrderTax)
+            {
+                _context.OrderTax.Remove(tax);
+            }
+
+            foreach (var detail in order.OrderDetail)
+            {
+                existingOrder.OrderDetail.Add(detail);
+            }
+
+            foreach (var tax in order.OrderTax)
+            {
+                existingOrder.OrderTax.Add(tax);
+            }
 
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetOrder", new { id = order.OrderId }, order);
+            return CreatedAtAction("GetOrder", new { id = existingOrder.OrderId }, existingOrder);
         }
 
         // PUT: api/Orders/5/Status
