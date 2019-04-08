@@ -1,12 +1,10 @@
-﻿using System;
-
-namespace EcommerceApi.ViewModel
+﻿namespace EcommerceApi.ViewModel
 {
     public class OrderViewModel
     {
         public int OrderId { get; set; }
         public int LocationId { get; set; }
-        public DateTime OrderDate { get; set; }
+        public string OrderDate { get; set; }
         public decimal Total { get; set; }
         public decimal SubTotal { get; set; }
         public decimal TotalDiscount { get; set; }

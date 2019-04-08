@@ -30,41 +30,42 @@ namespace EcommerceApi.Repositories
             using (IDbConnection conn = Connection)
             {
                 string query = $@"
-                                    SELECT [Order].[OrderId]
-                                          ,[Order].[CustomerId]
-                                          ,[Order].[LocationId]
-                                          ,[OrderDate]
-                                          ,[Total]
-                                          ,[SubTotal]
-                                          ,[TotalDiscount]
-                                          ,[Order].[PstNumber]
-                                          ,[Notes]
-                                          ,[PoNumber]
-                                          ,[Order].[Status]
-                                          ,Users.GivenName
-	                                      ,ISNULL(OrderPayment.PaidAmount, 0) AS PaidAmount
-	                                      ,Location.LocationName,
-                                          PaymentTypeName,
-                                          ISNULL(Customer.CompanyName, 'WALK-IN') AS CompanyName
-                                    FROM [Order]
-                                    INNER JOIN Location
-	                                    ON Location.LocationId = [Order].LocationId
-                                    LEFT JOIN Users
-	                                    ON Users.Id = [Order].CreatedByUserId
-                                    LEFT JOIN Customer
-                                        ON Customer.CustomerId = [Order].CustomerId
-                                    LEFT JOIN 
-	                                    ( 
-                                            SELECT OrderId, SUM(PaymentAmount) AS PaidAmount , STRING_AGG(PaymentTypeName, ', ') AS PaymentTypeName  
-                                            FROM OrderPayment
-                                            INNER JOIN PaymentType
-	                                            ON PaymentType.PaymentTypeId = OrderPayment.PaymentTypeId 
-                                            GROUP BY OrderId
-                                        ) AS OrderPayment
-	                                    ON OrderPayment.OrderId = [Order].OrderId
-                                    WHERE (@showAll != 0 OR OrderDate >= Dateadd(month, -3, GetDate()))
-										  AND ([Order].LocationId = @locationId OR @locationId = 0)
-                                    ORDER BY [Order].[OrderId] DESC
+                               
+SELECT [Order].[OrderId]
+	,[Order].[CustomerId]
+	,[Order].[LocationId]
+	,FORMAT ([OrderDate], 'dd/MM/yyyy hh:mm tt') AS OrderDate
+	,[Total]
+	,[SubTotal]
+	,[TotalDiscount]
+	,[Order].[PstNumber]
+	,[Notes]
+	,[PoNumber]
+	,[Order].[Status]
+	,Users.GivenName
+	,ISNULL(OrderPayment.PaidAmount, 0) AS PaidAmount
+	,Location.LocationName,
+	PaymentTypeName,
+	ISNULL(Customer.CompanyName, 'WALK-IN') AS CompanyName
+FROM [Order]
+INNER JOIN Location
+	ON Location.LocationId = [Order].LocationId
+LEFT JOIN Users
+	ON Users.Id = [Order].CreatedByUserId
+LEFT JOIN Customer
+    ON Customer.CustomerId = [Order].CustomerId
+LEFT JOIN 
+	( 
+        SELECT OrderId, SUM(PaymentAmount) AS PaidAmount , STRING_AGG(PaymentTypeName, ', ') AS PaymentTypeName  
+        FROM OrderPayment
+        INNER JOIN PaymentType
+	        ON PaymentType.PaymentTypeId = OrderPayment.PaymentTypeId 
+        GROUP BY OrderId
+    ) AS OrderPayment
+	ON OrderPayment.OrderId = [Order].OrderId
+WHERE (@showAll != 0 OR OrderDate >= Dateadd(month, -3, GetDate()))
+		AND ([Order].LocationId = @locationId OR @locationId = 0)
+ORDER BY [Order].[OrderId] DESC
                                  ";
                 conn.Open();
                 return await conn.QueryAsync<OrderViewModel>(query, new { locationId, showAll });
@@ -79,7 +80,7 @@ namespace EcommerceApi.Repositories
                                     SELECT [Order].[OrderId]
                                           ,[CustomerId]
                                           ,[Order].[LocationId]
-                                          ,[OrderDate]
+                                          ,FORMAT ([OrderDate], 'dd/MM/yyyy hh:mm tt') AS OrderDate
                                           ,[Total]
                                           ,[SubTotal]
                                           ,[TotalDiscount]
