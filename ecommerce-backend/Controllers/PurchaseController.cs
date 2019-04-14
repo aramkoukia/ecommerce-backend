@@ -65,7 +65,6 @@ namespace EcommerceApi.Controllers
             return Ok(Purchase);
         }
 
-        // POST: api/Purchases
         [HttpPost]
         public async Task<IActionResult> PostPurchase([FromBody] Purchase Purchase)
         {
@@ -92,6 +91,54 @@ namespace EcommerceApi.Controllers
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetPurchase", new { id = Purchase.PurchaseId }, Purchase);
+        }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> PutPurchase([FromRoute] int id, [FromBody] Purchase purchase)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var date = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateTime.UtcNow, "Pacific Standard Time");
+            System.Security.Claims.ClaimsPrincipal currentUser = this.User;
+            var userId = _userManager.GetUserId(User);
+            var existingPurchase = _context.Purchase
+                .Include(o => o.PurchaseDetail)
+                .FirstOrDefault(o => o.PurchaseId == id);
+
+            if (existingPurchase == null)
+            {
+                return BadRequest($"Order Id {id} not found");
+            }
+
+            existingPurchase.CreatedByUserId = userId;
+            existingPurchase.Supplier = purchase.Supplier;
+            existingPurchase.Notes = purchase.Notes;
+            existingPurchase.CreatedDate = date;
+            existingPurchase.PurchaseDate = date;
+            existingPurchase.PoNumber = purchase.PoNumber;
+            existingPurchase.SubTotal = purchase.SubTotal;
+            existingPurchase.Total = purchase.Total;
+            existingPurchase.DeliveryDate = purchase.DeliveryDate;
+
+            foreach (var detail in existingPurchase.PurchaseDetail.Where(m => m.Status == PurchaseStatus.Plan.ToString()))
+            {
+                _context.PurchaseDetail.Remove(detail);
+            }
+
+            foreach (var detail in purchase.PurchaseDetail)
+            {
+                detail.CreatedByUserId = userId;
+                detail.CreatedDate = date;
+                detail.PoNumber = purchase.PoNumber;
+                detail.EstimatedDelivery = purchase.DeliveryDate;
+                existingPurchase.PurchaseDetail.Add(detail);
+            }
+
+            await _context.SaveChangesAsync();
+            return CreatedAtAction("GetPurchase", new { id }, purchase);
         }
 
         [HttpPut("{id}/Status")]
