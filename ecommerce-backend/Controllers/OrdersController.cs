@@ -48,14 +48,20 @@ namespace EcommerceApi.Controllers
         [HttpGet]
         public async Task<IEnumerable<OrderViewModel>> GetOrder(bool showAllOrders)
         {
-            return await _orderRepository.GetOrders(showAllOrders, 0);
+            System.Security.Claims.ClaimsPrincipal currentUser = this.User;
+            var user = await _userManager.FindByEmailAsync(currentUser.Identity.Name);
+
+            return await _orderRepository.GetOrders(showAllOrders, 0, user.Id);
         }
 
         // GET: api/Orders/Location/{locationId}
         [HttpGet("location/{locationId}")]
         public async Task<IEnumerable<OrderViewModel>> GetOrderByLocation([FromRoute] int locationId, bool showAllOrders)
         {
-            return await _orderRepository.GetOrders(showAllOrders, locationId);
+            System.Security.Claims.ClaimsPrincipal currentUser = this.User;
+            var user = await _userManager.FindByEmailAsync(currentUser.Identity.Name);
+
+            return await _orderRepository.GetOrders(showAllOrders, locationId, user.Id);
         }
 
         // GET: api/Orders/Customer/{customerId}

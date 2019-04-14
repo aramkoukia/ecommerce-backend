@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
+using System.Linq;
 using System.Threading.Tasks;
 using Dapper;
 using EcommerceApi.ViewModel;
@@ -25,12 +26,11 @@ namespace EcommerceApi.Repositories
             _config = config;
         }
 
-        public async Task<IEnumerable<OrderViewModel>> GetOrders(bool showAll, int locationId)
+        public async Task<IEnumerable<OrderViewModel>> GetOrders(bool showAll, int locationId, string userId)
         {
             using (IDbConnection conn = Connection)
             {
                 string query = $@"
-                               
 SELECT [Order].[OrderId]
 	,[Order].[CustomerId]
 	,[Order].[LocationId]
@@ -64,11 +64,21 @@ LEFT JOIN
     ) AS OrderPayment
 	ON OrderPayment.OrderId = [Order].OrderId
 WHERE (@showAll != 0 OR OrderDate >= Dateadd(month, -3, GetDate()))
-		AND ([Order].LocationId = @locationId OR @locationId = 0)
-ORDER BY [Order].[OrderId] DESC
-                                 ";
+		AND [Order].LocationId IN @locIds
+ORDER BY [Order].[OrderId] DESC";
                 conn.Open();
-                return await conn.QueryAsync<OrderViewModel>(query, new { locationId, showAll });
+                var locationIds = new List<int>();
+                if (locationId == 0)
+                {
+                    locationIds = (await GetUserLocations(userId)).ToList();
+                }
+                else
+                {
+                    locationIds.Add(locationId);
+                }
+
+                var locIds = locationIds.ToArray();
+                return await conn.QueryAsync<OrderViewModel>(query, new { locIds, showAll });
             }
         }
 
@@ -145,6 +155,18 @@ WHERE Product.ProductId = @productId
                                  ";
                 conn.Open();
                 return await conn.QueryFirstAsync<InventoryViewModel>(query, new { productId , locationId });
+            }
+        }
+
+        private async Task<IEnumerable<int>> GetUserLocations(string userId)
+        {
+            using (IDbConnection conn = Connection)
+            {
+                string query = $@"
+SELECT LocationId FROM UserLocation
+WHERE UserId = @userId";
+                conn.Open();
+                return await conn.QueryAsync<int>(query, new { userId });
             }
         }
     }

@@ -6,7 +6,7 @@ namespace EcommerceApi.Repositories
 {
     public interface IOrderRepository
     {
-        Task<IEnumerable<OrderViewModel>> GetOrders(bool showAll, int locationId);
+        Task<IEnumerable<OrderViewModel>> GetOrders(bool showAll, int locationId, string userId);
         Task<IEnumerable<OrderViewModel>> GetOrdersByCustomer(int customerId);
         Task<InventoryViewModel> GetProductInventoryForValidation(int productId, int locationId);
     }
