@@ -138,7 +138,7 @@ namespace EcommerceApi.Controllers
             }
 
             await _context.SaveChangesAsync();
-            return CreatedAtAction("GetPurchase", new { id }, purchase);
+            return CreatedAtAction("GetPurchase", new { id }, existingPurchase);
         }
 
         [HttpPut("{id}/Status")]
