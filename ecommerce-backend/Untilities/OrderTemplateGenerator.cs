@@ -41,17 +41,15 @@ namespace EcommerceApi.Untilities
                                 <div class='fullwidth center smaller-font spaceafter-10'>{Note3}</div>
                                 <hr/>
                                 <div>LED Lights And Parts</div>
-                                <div class='xsmall-font spaceafter-10'><b>Vancouver:</b> <br /> 
-                                     3695 E 1st Ave, <br />
-                                     Vancouver, BC V5M 1C2 <br />
-                                     Phone: +1 (604) 559-5000 <br />
-                                     <b>Abbotsford:</b> <br /> 
-                                     33228 S Fraser Way <br />
-                                     Abbotsford, BC, V2S 2B3 <br />
-                                     Phone: +1 (604) 744-4474
+                                <div class='xsmall-font spaceafter-10'><b>{order.Location.LocationName}:</b> <br /> 
+                                     {order.Location.LocationAddress}, <br />
+                                     {order.Location.LocationName}, {order.Location.Province} {order.Location.PostalCode} <br />
+                                     Phone: {order.Location.PhoneNumber}
                                 </div>
 
-                                <div class='right spaceafter-10'>Customer: {customerName}</div>
+                                <div class='right spaceafter-10'>
+                                    Customer: {customerName}
+                                </div>
                                 <div><b>Invoice #{order.OrderId}</b></div>");
             if (!string.IsNullOrEmpty(order.PoNumber))
             {
@@ -145,21 +143,16 @@ namespace EcommerceApi.Untilities
                     <hr class='spaceafter-30'/>
 
                     <div>{CustomerCopy}</div>
-                    <hr class='spaceafter-30'/>   
-                    <div class='header'><p><b>Attention:</b>{Note4}</p></div>
-                    <div class='header'><p><b>Store policy:</b>{Note5}</p></div>");
+                    <hr class='spaceafter-30'/>");
+            if (!string.IsNullOrEmpty(order.Notes))
+            {
+                sbFinal.Append($@"<div class='header'><p><b>Notes: </b>{order.Notes}</p></div>");
+            }
 
-            if (string.IsNullOrEmpty(order.Notes))
-            {
-                sbFinal.Append($@"
+            sbFinal.Append($@"
+                    <div class='header'><p><b>Attention:</b>{Note4}</p></div>
+                    <div class='header'><p><b>Store policy:</b>{Note5}</p></div>
                     <div class='header' {pageBreak}><p><b>{Note6}</b></p></div>");
-            }
-            else
-            {
-                sbFinal.Append($@"
-                    <div class='header'><p><b>{Note6}</b></p></div>
-                    <div class='header' {pageBreak}><p><b>Notes: </b>{order.Notes}</p></div>");
-            }
 
             if (includeMerchantCopy)
             {
@@ -169,7 +162,14 @@ namespace EcommerceApi.Untilities
                     </table>
                     <hr class='spaceafter-30'/>
                     <div>{MerchantCopy}</div>
-                    <hr class='spaceafter-30'/>   
+                    <hr class='spaceafter-30'/>");
+
+                if (!string.IsNullOrEmpty(order.Notes))
+                {
+                    sbFinal.Append($@"<div class='header'><p><b>Notes: </b>{order.Notes}</p></div>");
+                }
+
+                sbFinal.Append($@"
                     <div class='header'><p><b>Attention:</b>{Note4}</p></div>
                     <div class='header'><p><b>Store policy:</b>{Note5}</p></div>
                     <div class='header'><p><b>Agreement: </b>{Note7}</p></div>
@@ -178,11 +178,6 @@ namespace EcommerceApi.Untilities
                     <h4>Customer Signature: ___________________</h4>
                     <br />
                     <h4>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Authorized By: ___________________</h4>");
-
-                if (!string.IsNullOrEmpty(order.Notes))
-                {
-                    sbFinal.Append($@"<div class='header'><p><b>Notes: </b>{order.Notes}</p></div>");
-                }
             }
 
             sbFinal.Append("</body></ html>");
