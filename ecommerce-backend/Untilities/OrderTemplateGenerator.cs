@@ -24,7 +24,13 @@ namespace EcommerceApi.Untilities
             var sbCustomer = new StringBuilder();
             var sbFinal = new StringBuilder();
             var pageBreak = includeMerchantCopy ? "style='page-break-after: always;'" : "";
-            var customerName = string.IsNullOrEmpty(order.Customer.CompanyName) ? "WALK-IN" : order.Customer.CompanyName;
+            var customerName = string.IsNullOrEmpty(order.Customer.CompanyName) ? "WALK-IN" : order.Customer.CompanyName + "<br/>";
+            var customerProvince = string.IsNullOrEmpty(order.Customer.Province) ? "" : order.Customer.Province;
+            var customerCity = string.IsNullOrEmpty(order.Customer.City) ? "" : order.Customer.City;
+            var customerAddress = string.IsNullOrEmpty(order.Customer.Address) ? "" : order.Customer.Address + "<br/>";
+            var customerPostalCode = string.IsNullOrEmpty(order.Customer.PostalCode) ? "" : order.Customer.PostalCode + "<br/>";
+            var customerPhone = string.IsNullOrEmpty(order.Customer.PhoneNumber) ? "" : "Phone:" + order.Customer.PhoneNumber + "<br/>";
+
             sbCustomer.Append($@"
                         <html>
                             <head>
@@ -48,16 +54,26 @@ namespace EcommerceApi.Untilities
                                 </div>
 
                                 <div class='right spaceafter-10'>
-                                    Customer: {customerName}
+                                    <b>Customer:</b> {customerName}
+                                    {customerAddress}                                    
+                                    {customerCity} {customerProvince} {customerPostalCode}
+                                    {customerPhone}
                                 </div>
                                 <div><b>Invoice #{order.OrderId}</b></div>");
             if (!string.IsNullOrEmpty(order.PoNumber))
             {
                 sbCustomer.Append($@"<div>PO Number: {order.PoNumber}</div>");
             }
-
-            sbCustomer.Append($@" <div>Sale Date: {order.OrderDate}</div>
-                                <div>User: {order.CreatedByUserName}</div>
+            sbCustomer.Append($@"<div>Sale Date: {order.OrderDate}</div>");
+            if (order.OrderPayment != null && order.OrderPayment.Any())
+            {
+                sbCustomer.Append($@"<div>Payment Date: {order.OrderPayment.FirstOrDefault().CreatedDate}</div>");
+                if (!string.IsNullOrEmpty(order.OrderPayment.FirstOrDefault().ChequeNo))
+                {
+                    sbCustomer.Append($@"<div>Cheque No: {order.OrderPayment.FirstOrDefault().ChequeNo}</div>");
+                }
+            }
+            sbCustomer.Append($@"<div>User: {order.CreatedByUserName}</div>
                                 <hr class='spaceafter-30'/>");
 
             if (order.Status.Equals(OrderStatus.Account.ToString(), System.StringComparison.InvariantCultureIgnoreCase)) {

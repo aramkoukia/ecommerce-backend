@@ -30,14 +30,10 @@ namespace EcommerceApi.Untilities
                                 <hr/>
                                 <h3>Packing Slip</h3>
                                 <div>LED Lights And Parts</div>
-                                <div class='xsmall-font spaceafter-10'><b>Vancouver:</b> <br /> 
-                                     3695 E 1st Ave, <br />
-                                     Vancouver, BC V5M 1C2 <br />
-                                     Phone: +1 (604) 559-5000 <br />
-                                     <b>Abbotsford:</b> <br /> 
-                                     33228 S Fraser Way <br />
-                                     Abbotsford, BC, V2S 2B3 <br />
-                                     Phone: +1 (604) 744-4474
+                                <div class='xsmall-font spaceafter-10'><b>{order.Location.LocationName}:</b> <br /> 
+                                     {order.Location.LocationAddress}, <br />
+                                     {order.Location.LocationName}, {order.Location.Province} {order.Location.PostalCode} <br />
+                                     Phone: {order.Location.PhoneNumber}
                                 </div>
 
                                 <div class='right spaceafter-10'>Customer: {customerName}</div>
