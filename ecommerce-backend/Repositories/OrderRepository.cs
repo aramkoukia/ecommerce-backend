@@ -46,7 +46,9 @@ SELECT [Order].[OrderId]
 	,ISNULL(OrderPayment.PaidAmount, 0) AS PaidAmount
 	,Location.LocationName,
 	PaymentTypeName,
-	ISNULL(Customer.CompanyName, 'WALK-IN') AS CompanyName
+	ISNULL(Customer.CompanyName, 'WALK-IN') AS CompanyName,
+	CASE WHEN [Order].[Status] = 'Account' THEN FORMAT(DATEADD(DAY, 40, [OrderDate]), 'dd/MM/yyyy hh:mm tt') ELSE NULL END AS DueDate,
+	CASE WHEN [Order].[Status] = 'Account' THEN CASE WHEN DATEADD(DAY, 40, [OrderDate]) >= GETDATE() THEN 'Yes' ELSE 'No' END ELSE NULL END AS OverDue
 FROM [Order]
 INNER JOIN Location
 	ON Location.LocationId = [Order].LocationId

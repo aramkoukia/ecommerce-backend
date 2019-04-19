@@ -1,4 +1,6 @@
-﻿namespace EcommerceApi.ViewModel
+﻿using System;
+
+namespace EcommerceApi.ViewModel
 {
     public class OrderViewModel
     {
@@ -20,5 +22,7 @@
         public string LocationName { get; set; }
         public string PaymentTypeName { get; set; }
         public string CompanyName { get; set; }
+        public string DueDate { get; set; }
+        public string OverDue { get; set; }
     }
 }
