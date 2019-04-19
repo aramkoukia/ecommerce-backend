@@ -52,6 +52,8 @@ namespace EcommerceApi.Models
         public Location Location { get; set; }
         public decimal RestockingFeePercent { get; set; }
         public decimal RestockingFeeAmount { get; set; }
+        public string CardAuthCode { get; set; }
+        public string CardLastFourDigits { get; set; }
     }
 
     public enum OrderStatus {

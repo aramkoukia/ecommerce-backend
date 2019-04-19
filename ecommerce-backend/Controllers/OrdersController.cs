@@ -431,6 +431,9 @@ namespace EcommerceApi.Controllers
             var order = await _context.Order.SingleOrDefaultAsync(m => m.OrderId == id);
             order.Notes = updateOrderInfo.Notes;
             order.PoNumber = updateOrderInfo.PoNumber;
+            order.CardAuthCode = updateOrderInfo.CardAuthCode;
+            order.CardLastFourDigits = updateOrderInfo.CardLastFourDigits;
+
             await _context.SaveChangesAsync();
             return Ok(order);
         }

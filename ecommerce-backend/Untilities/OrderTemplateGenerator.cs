@@ -47,34 +47,45 @@ namespace EcommerceApi.Untilities
                                 <div class='fullwidth center smaller-font spaceafter-10'>{Note3}</div>
                                 <hr/>
                                 <div>LED Lights And Parts</div>
-                                <div class='xsmall-font spaceafter-10'><b>{order.Location.LocationName}:</b> <br /> 
+                                <div class='fullwidth xsmall-font spaceafter-10'><b>{order.Location.LocationName}:</b><br/> 
                                      {order.Location.LocationAddress}, <br />
-                                     {order.Location.LocationName}, {order.Location.Province} {order.Location.PostalCode} <br />
-                                     Phone: {order.Location.PhoneNumber}
+                                     {order.Location.LocationName}, {order.Location.Province} {order.Location.PostalCode} <br/>
+                                     Phone: {order.Location.PhoneNumber} <br/>
                                 </div>
-
-                                <div class='right spaceafter-10'>
-                                    <b>Customer:</b> {customerName}
-                                    {customerAddress}                                    
-                                    {customerCity} {customerProvince} {customerPostalCode}
-                                    {customerPhone}
-                                </div>
-                                <div><b>Invoice #{order.OrderId}</b></div>");
+                                <table style='width:100%'>
+                                <tr><td style='vertical-align: top; width:50%'>
+                                <b>Invoice #{order.OrderId}</b><br/>");
             if (!string.IsNullOrEmpty(order.PoNumber))
             {
-                sbCustomer.Append($@"<div>PO Number: {order.PoNumber}</div>");
+                sbCustomer.Append($@"PO Number: {order.PoNumber}<br/>");
             }
-            sbCustomer.Append($@"<div>Sale Date: {order.OrderDate}</div>");
+            sbCustomer.Append($@"Sale Date: {order.OrderDate}<br/>");
             if (order.OrderPayment != null && order.OrderPayment.Any())
             {
-                sbCustomer.Append($@"<div>Payment Date: {order.OrderPayment.FirstOrDefault().CreatedDate}</div>");
+                sbCustomer.Append($@"Payment Date: {order.OrderPayment.FirstOrDefault().CreatedDate}<br/>");
                 if (!string.IsNullOrEmpty(order.OrderPayment.FirstOrDefault().ChequeNo))
                 {
-                    sbCustomer.Append($@"<div>Cheque No: {order.OrderPayment.FirstOrDefault().ChequeNo}</div>");
+                    sbCustomer.Append($@"Cheque No: {order.OrderPayment.FirstOrDefault().ChequeNo}<br/>");
                 }
             }
-            sbCustomer.Append($@"<div>User: {order.CreatedByUserName}</div>
-                                <hr class='spaceafter-30'/>");
+            if (!string.IsNullOrEmpty(order.CardAuthCode))
+            {
+                sbCustomer.Append($@"Auth Code: {order.CardAuthCode}<br/>");
+            }
+            if (!string.IsNullOrEmpty(order.CardLastFourDigits))
+            {
+                sbCustomer.Append($@"Card: xxxx xxxx xxxx {order.CardLastFourDigits}<br/>");
+            }
+            sbCustomer.Append($@"User: {order.CreatedByUserName} <br/>
+                </td>
+                <td class='right' style='vertical-align: top; width:50%'>
+                    <b>Customer:</b> {customerName}
+                    {customerAddress}                                    
+                    {customerCity} {customerProvince} {customerPostalCode}
+                    {customerPhone}
+                </td>
+                </tr></table>
+                <hr class='spaceafter-30'/>");
 
             if (order.Status.Equals(OrderStatus.Account.ToString(), System.StringComparison.InvariantCultureIgnoreCase)) {
                 sbCustomer.Append($@"<p><b>Please Note: Payment is due on {order.OrderDate.AddDays(40).Date.ToString("dd-MMM-yyyy")}. Additional charges of 2% per month are applicable after due date.</b></p>");

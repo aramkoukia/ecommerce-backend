@@ -4,5 +4,7 @@
     {
         public string Notes { get; set; }
         public string PoNumber { get; set; }
+        public string CardAuthCode { get; set; }
+        public string CardLastFourDigits { get; set; }
     }
 }
