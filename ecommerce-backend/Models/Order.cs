@@ -54,6 +54,8 @@ namespace EcommerceApi.Models
         public decimal RestockingFeeAmount { get; set; }
         public string CardAuthCode { get; set; }
         public string CardLastFourDigits { get; set; }
+        public string AuthorizedBy { get; set; }
+        public string PhoneNumber { get; set; }
     }
 
     public enum OrderStatus {

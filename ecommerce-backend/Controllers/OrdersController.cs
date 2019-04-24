@@ -433,6 +433,8 @@ namespace EcommerceApi.Controllers
             order.PoNumber = updateOrderInfo.PoNumber;
             order.CardAuthCode = updateOrderInfo.CardAuthCode;
             order.CardLastFourDigits = updateOrderInfo.CardLastFourDigits;
+            order.AuthorizedBy = updateOrderInfo.AuthorizedBy;
+            order.PhoneNumber = updateOrderInfo.PhoneNumber;
 
             await _context.SaveChangesAsync();
             return Ok(order);
