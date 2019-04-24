@@ -175,6 +175,14 @@ namespace EcommerceApi.Untilities
             {
                 sbFinal.Append($@"<div class='header'><p><b>Notes: </b>{order.Notes}</p></div>");
             }
+            if (!string.IsNullOrEmpty(order.PhoneNumber))
+            {
+                sbFinal.Append($@"<div class='header'><p><b>Phone Number: </b>{order.PhoneNumber}</p></div>");
+            }
+            if (!string.IsNullOrEmpty(order.AuthorizedBy))
+            {
+                sbFinal.Append($@"<div class='header'><p><b>Authorized By: </b>{order.AuthorizedBy}</p></div>");
+            }
 
             sbFinal.Append($@"
                     <div class='header'><p><b>Attention:</b>{Note4}</p></div>
@@ -194,6 +202,14 @@ namespace EcommerceApi.Untilities
                 if (!string.IsNullOrEmpty(order.Notes))
                 {
                     sbFinal.Append($@"<div class='header'><p><b>Notes: </b>{order.Notes}</p></div>");
+                }
+                if (!string.IsNullOrEmpty(order.PhoneNumber))
+                {
+                    sbFinal.Append($@"<div class='header'><p><b>Phone Number: </b>{order.PhoneNumber}</p></div>");
+                }
+                if (!string.IsNullOrEmpty(order.AuthorizedBy))
+                {
+                    sbFinal.Append($@"<div class='header'><p><b>Authorized By: </b>{order.AuthorizedBy}</p></div>");
                 }
 
                 sbFinal.Append($@"

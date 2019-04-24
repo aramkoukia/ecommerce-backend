@@ -681,7 +681,6 @@ www.lightsandparts.com | {user.Email}
                 PaperSize = PaperKind.A4,
                 Margins = new MarginSettings { Top = 10 },
                 DocumentTitle = $"Order {order.OrderId}",
-                // Out = @"C:\PDFCreator\Employee_Report.pdf"
             };
 
             var objectSettings = new ObjectSettings
@@ -689,8 +688,6 @@ www.lightsandparts.com | {user.Email}
                 PagesCount = true,
                 HtmlContent = OrderTemplateGenerator.GetHtmlString(order, includeMerchantCopy),
                 WebSettings = { DefaultEncoding = "utf-8", UserStyleSheet = Path.Combine(Directory.GetCurrentDirectory(), "assets", "invoice.css") },
-                // HeaderSettings = { FontName = "Arial", FontSize = 9, Right = "Page [page] of [toPage]", Line = true },
-                // FooterSettings = { FontName = "Arial", FontSize = 9, Line = true, Center = "Page [page] of [toPage]" }
             };
 
             var pdf = new HtmlToPdfDocument()
