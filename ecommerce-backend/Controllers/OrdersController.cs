@@ -347,11 +347,14 @@ namespace EcommerceApi.Controllers
                 var done = await ExistingOrderUpdateInventory(order, updateOrderStatus);
             }
 
-            order.Status = updateOrderStatus.OrderStatus;
-            if (updateOrderStatus.OrderStatus == OrderStatus.Paid.ToString())
+            // Update order date when it is set to Paid. 
+            // Keeping the order date when the original order was Account
+            if (updateOrderStatus.OrderStatus == OrderStatus.Paid.ToString() 
+                && order.Status != OrderStatus.Account.ToString())
             {
                 order.OrderDate = date;
             }
+            order.Status = updateOrderStatus.OrderStatus;
 
             _emailSender.SendAdminReportAsync("Order Status Changed", $"Order Status changed. \n Order Id: {id}. \n From: {originalOrderStatus} To: {updateOrderStatus.OrderStatus.ToString()}");
 
