@@ -340,7 +340,9 @@ namespace EcommerceApi.Controllers
             {
                 var done = await AddToInventory(order, updateOrderStatus);
             }
-            else
+            // if existing order status is Account (already deducted inventory, and new status is Paid, no need to update inventory again)
+            else if(!(updateOrderStatus.OrderStatus == OrderStatus.Paid.ToString() 
+                    && order.Status == OrderStatus.Account.ToString()))
             {
                 var done = await ExistingOrderUpdateInventory(order, updateOrderStatus);
             }
