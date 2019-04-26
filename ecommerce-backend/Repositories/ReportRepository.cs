@@ -292,6 +292,81 @@ WHERE [Location].LocationId in @locationIds AND ISNULL(TotalSales,0) <> 0 ";
 IF OBJECT_ID('tempdb..#Results') IS NOT NULL
     DROP TABLE #Results
 
+IF OBJECT_ID('tempdb..#AccountResults') IS NOT NULL
+    DROP TABLE #AccountResults
+
+	SELECT LocationName,
+	   [Order].[Status],
+	   SubTotal,
+	   Total,
+	   Discount,
+	   Transactions,
+	   Pst,
+	   Gst,
+	   OtherTax
+INTO #AccountResults FROM (
+	SELECT 
+	   SUM(SubTotal) AS SubTotal, 
+       SUM(Total) AS Total,
+	   SUM(TotalDiscount) AS Discount,
+	   Count([Order].OrderId) AS Transactions,
+	   Location.LocationId,
+	   Location.LocationName,
+	   [Order].Status
+	FROM [Order]
+	INNER JOIN Location
+			ON Location.LocationId = [Order].LocationId
+	WHERE [Order].Status IN ('Account')
+		  AND OrderDate BETWEEN @FromDate AND @ToDate
+          AND [Order].LocationId IN @locationIds
+	GROUP BY Location.LocationId, LocationName, [Order].Status
+) [Order]
+LEFT JOIN (
+	SELECT SUM(TaxAmount) AS GST, LocationId, Status
+	FROM [Order]
+	INNER JOIN OrderTax
+		ON OrderTax.OrderId = [Order].OrderId
+	INNER JOIN Tax
+		ON Tax.TaxId = OrderTax.TaxId
+	WHERE TaxName = 'GST'
+          AND Status IN ('Account')
+          AND OrderDate BETWEEN @FromDate AND @ToDate
+          AND [Order].LocationId IN @locationIds	
+    GROUP BY [Order].LocationId, Status
+) GST
+	ON [Order].LocationId = GST.LocationId
+       AND [Order].Status = GST.Status
+LEFT JOIN (
+	SELECT SUM(TaxAmount) AS Pst, LocationId, Status 
+	FROM [Order]
+	INNER JOIN OrderTax
+		ON OrderTax.OrderId = [Order].OrderId
+	INNER JOIN Tax
+		ON Tax.TaxId = OrderTax.TaxId
+	WHERE TaxName = 'PST'
+          AND Status IN ('Account')          
+          AND OrderDate BETWEEN @FromDate AND @ToDate
+          AND [Order].LocationId IN @locationIds	
+    GROUP BY [Order].LocationId, [Status]
+) PST
+	ON [Order].LocationId = PST.LocationId
+       AND [Order].Status = PST.Status
+LEFT JOIN (
+	SELECT SUM(TaxAmount) AS OtherTax, LocationId, Status
+	FROM [Order]
+	INNER JOIN OrderTax
+		ON OrderTax.OrderId = [Order].OrderId
+	INNER JOIN Tax
+		ON Tax.TaxId = OrderTax.TaxId
+	WHERE TaxName NOT IN ('PST', 'GST')
+          AND Status IN ('Account')          
+          AND OrderDate BETWEEN @FromDate AND @ToDate
+          AND [Order].LocationId IN @locationIds	
+          GROUP BY [Order].LocationId, Status
+) OtherTax
+ON [Order].LocationId = OtherTax.LocationId
+   AND [Order].Status = OtherTax.Status
+
 SELECT LocationName,
 	   [Order].[Status],
 	   SubTotal,
@@ -312,9 +387,15 @@ INTO #Results FROM (
 	   [Order].Status
 	FROM [Order]
 	INNER JOIN Location
-		ON Location.LocationId = [Order].LocationId
-	WHERE [Order].Status IN ('Return', 'Paid', 'Account')
-		  AND OrderDate BETWEEN @FromDate AND @ToDate
+			ON Location.LocationId = [Order].LocationId
+	INNER JOIN (
+		SELECT SUM(PaymentAmount) AS PaymentAmount, OrderId
+		FROM OrderPayment
+		WHERE PaymentDate BETWEEN @FromDate AND @ToDate
+		GROUP BY OrderId
+	) OrderPayment
+	ON [Order].OrderId = OrderPayment.OrderId
+	WHERE [Order].Status IN ('Return', 'Paid')
           AND [Order].LocationId IN @locationIds
 	GROUP BY Location.LocationId, LocationName, [Order].Status
 ) [Order]
@@ -325,9 +406,16 @@ LEFT JOIN (
 		ON OrderTax.OrderId = [Order].OrderId
 	INNER JOIN Tax
 		ON Tax.TaxId = OrderTax.TaxId
+	INNER JOIN (
+		SELECT SUM(PaymentAmount) AS PaymentAmount, OrderId
+		FROM OrderPayment
+		WHERE PaymentDate BETWEEN @FromDate AND @ToDate
+		GROUP BY OrderId
+	) OrderPayment
+	ON [Order].OrderId = OrderPayment.OrderId
+
 	WHERE TaxName = 'GST'
-          AND Status IN ('Return', 'Paid', 'Account')
-          AND OrderDate BETWEEN @FromDate AND @ToDate
+          AND Status IN ('Return', 'Paid')
           AND [Order].LocationId IN @locationIds	
     GROUP BY [Order].LocationId, Status
 ) GST
@@ -340,9 +428,15 @@ LEFT JOIN (
 		ON OrderTax.OrderId = [Order].OrderId
 	INNER JOIN Tax
 		ON Tax.TaxId = OrderTax.TaxId
+	INNER JOIN (
+		SELECT SUM(PaymentAmount) AS PaymentAmount, OrderId
+		FROM OrderPayment
+		WHERE PaymentDate BETWEEN @FromDate AND @ToDate
+		GROUP BY OrderId
+	) OrderPayment
+	ON [Order].OrderId = OrderPayment.OrderId
 	WHERE TaxName = 'PST'
-          AND Status IN ('Return', 'Paid', 'Account')          
-          AND OrderDate BETWEEN @FromDate AND @ToDate
+          AND Status IN ('Return', 'Paid')          
           AND [Order].LocationId IN @locationIds	
     GROUP BY [Order].LocationId, [Status]
 ) PST
@@ -355,9 +449,15 @@ LEFT JOIN (
 		ON OrderTax.OrderId = [Order].OrderId
 	INNER JOIN Tax
 		ON Tax.TaxId = OrderTax.TaxId
+	INNER JOIN (
+		SELECT SUM(PaymentAmount) AS PaymentAmount, OrderId
+		FROM OrderPayment
+		WHERE PaymentDate BETWEEN @FromDate AND @ToDate
+		GROUP BY OrderId
+	) OrderPayment
+	ON [Order].OrderId = OrderPayment.OrderId
 	WHERE TaxName NOT IN ('PST', 'GST')
-          AND Status IN ('Return', 'Paid', 'Account')          
-          AND OrderDate BETWEEN @FromDate AND @ToDate
+          AND Status IN ('Return', 'Paid')          
           AND [Order].LocationId IN @locationIds	
           GROUP BY [Order].LocationId, Status
 ) OtherTax
@@ -366,13 +466,13 @@ ON [Order].LocationId = OtherTax.LocationId
 
 SELECT LocationName, [Status], FORMAT(SubTotal, 'N2') AS SubTotal, FORMAT(Total, 'N2') AS Total, FORMAT(Discount, 'N2') AS Discount, Transactions, FORMAT(Pst, 'N2') AS Pst, FORMAT(Gst, 'N2') AS Gst, FORMAT(OtherTax, 'N2') AS OtherTax FROM #Results
 UNION 
+SELECT LocationName, [Status], FORMAT(SubTotal, 'N2') AS SubTotal, FORMAT(Total, 'N2') AS Total, FORMAT(Discount, 'N2') AS Discount, Transactions, FORMAT(Pst, 'N2') AS Pst, FORMAT(Gst, 'N2') AS Gst, FORMAT(OtherTax, 'N2') AS OtherTax FROM #AccountResults
+UNION 
 SELECT ' Total Account',  '', FORMAT(SUM(SubTotal), 'N2'), FORMAT(SUM(Total), 'N2'), FORMAT(SUM(Discount), 'N2'), SUM(Transactions), FORMAT(SUM(Pst), 'N2'), FORMAT(SUM(Gst), 'N2'), FORMAT(SUM(OtherTax), 'N2')
-FROM #Results
-WHERE [Status] = 'Account'
+FROM #AccountResults
 UNION 
 SELECT ' Total Without Account',  '', FORMAT(SUM(SubTotal), 'N2'), FORMAT(SUM(Total), 'N2'), FORMAT(SUM(Discount), 'N2'), SUM(Transactions), FORMAT(SUM(Pst), 'N2'), FORMAT(SUM(Gst), 'N2'), FORMAT(SUM(OtherTax), 'N2')
 FROM #Results
-WHERE [Status] <> 'Account'
 ";
                 conn.Open();
                 var locationIds = (await GetUserLocations(userId)).ToArray();

@@ -131,6 +131,17 @@ namespace EcommerceApi.Untilities
                         </tr>", order.RestockingFeeAmount);
             }
 
+            var totalDiscount = order.OrderDetail.Sum(o => o.TotalDiscount);
+            if (totalDiscount > 0)
+            {
+                sbCustomer.AppendFormat(@"<tr>
+                            <td style='width:10%'></td>
+                            <td style='width:55%'></td>
+                            <td style='width:20%'>Discount:</td>
+                            <td style='width:15%' class='right'>${0}</td>
+                            </tr>", totalDiscount);
+            }
+
             sbCustomer.AppendFormat(@"<tr>
                         <td style='width:10%'></td>
                         <td style='width:55%'></td>
@@ -151,17 +162,6 @@ namespace EcommerceApi.Untilities
                         <td style='width:20%'><b>Remain:</b></td>
                         <td style='width:15%' class='right'>${0}</td>
                         </tr>", order.Total - order.OrderPayment.Sum(p => p.PaymentAmount));
-
-            var totalDiscount = order.OrderDetail.Sum(o => o.TotalDiscount);
-            if (totalDiscount > 0)
-            { 
-                sbCustomer.AppendFormat(@"<tr>
-                            <td style='width:10%'></td>
-                            <td style='width:55%'></td>
-                            <td style='width:20%'><b>Discount:</b></td>
-                            <td style='width:15%' class='right'>${0}</td>
-                            </tr>", totalDiscount);
-            }
 
             var paymentType = order.OrderPayment.FirstOrDefault()?.PaymentType?.PaymentTypeName;
             if (paymentType != null)
