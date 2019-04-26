@@ -397,7 +397,7 @@ LEFT JOIN Customer
 	ON Customer.CustomerId = [Order].CustomerId
 INNER JOIN Location
     ON [Order].LocationId = Location.LocationId
-WHERE OrderDate BETWEEN @fromDate AND @toDate
+WHERE PaymentDate BETWEEN @fromDate AND @toDate
       AND [Location].LocationId IN @locationIds
 GROUP BY PaymentTypeName, Location.LocationName
 WITH ROLLUP                                 ";
@@ -424,7 +424,7 @@ LEFT JOIN Customer
 	ON Customer.CustomerId = [Order].CustomerId
 INNER JOIN Location
     ON [Order].LocationId = Location.LocationId
-WHERE OrderDate BETWEEN @fromDate AND @toDate
+WHERE PaymentDate BETWEEN @fromDate AND @toDate
       AND [Location].LocationId IN @locationIds
 GROUP BY PaymentTypeName, Users.GivenName, [Order].OrderId, Customer.CompanyName, [Order].Status, Location.LocationName
                                  ";
@@ -451,7 +451,7 @@ LEFT JOIN Customer
 	ON Customer.CustomerId = [Order].CustomerId
 INNER JOIN Location
     ON [Order].LocationId = Location.LocationId
-WHERE OrderDate BETWEEN @fromDate AND @toDate
+WHERE PaymentDate BETWEEN @fromDate AND @toDate
       AND [Location].LocationId IN @locationIds
 GROUP BY PaymentTypeName, [Order].Status, Location.LocationName
                                  ";
