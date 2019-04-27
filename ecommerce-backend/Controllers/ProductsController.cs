@@ -72,7 +72,7 @@ namespace EcommerceApi.Controllers
 
         // PUT: api/Products/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutProduct([FromRoute] int id, [FromBody] Product product)
+        public async Task<IActionResult> PutProduct([FromRoute] int id, [FromBody] ProductViewModel product)
         {
             if (!ModelState.IsValid)
             {
@@ -84,7 +84,12 @@ namespace EcommerceApi.Controllers
                 return BadRequest();
             }
 
-            _context.Entry(product).State = EntityState.Modified;
+            var exisintgProduct = await _context.Product.FirstOrDefaultAsync(m => m.ProductId == id);
+            if(exisintgProduct == null)
+            {
+                return BadRequest($"ProductId {id} not found.");
+            }
+            exisintgProduct.PurchasePrice = product.PurchasePrice;
 
             try
             {
