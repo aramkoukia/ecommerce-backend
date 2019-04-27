@@ -552,7 +552,7 @@ namespace EcommerceApi.Controllers
         public async Task<IActionResult> PutOrderCustomer([FromRoute] int id, [FromBody] UpdateOrderCustomer updateOrderCustomer)
         {
             var order = await _context.Order.SingleOrDefaultAsync(m => m.OrderId == id);
-            if (!ModelState.IsValid || !order.Status.Equals(OrderStatus.Draft.ToString(), StringComparison.InvariantCultureIgnoreCase))
+            if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
