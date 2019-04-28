@@ -46,22 +46,36 @@ namespace EcommerceApi.Controllers
 
         // GET: api/Orders
         [HttpGet]
-        public async Task<IEnumerable<OrderViewModel>> GetOrder(bool showAllOrders)
+        public async Task<IEnumerable<OrderViewModel>> GetOrder(DateTime fromDate, DateTime toDate)
         {
             System.Security.Claims.ClaimsPrincipal currentUser = this.User;
             var user = await _userManager.FindByEmailAsync(currentUser.Identity.Name);
 
-            return await _orderRepository.GetOrders(showAllOrders, 0, user.Id);
+            if (fromDate == DateTime.MinValue)
+                fromDate = DateTime.Now.AddMonths(-1);
+            if (toDate == DateTime.MinValue)
+                toDate = DateTime.Now;
+            else
+                toDate = toDate.AddDays(1).AddTicks(-1);
+
+            return await _orderRepository.GetOrders(fromDate, toDate, 0, user.Id);
         }
 
         // GET: api/Orders/Location/{locationId}
         [HttpGet("location/{locationId}")]
-        public async Task<IEnumerable<OrderViewModel>> GetOrderByLocation([FromRoute] int locationId, bool showAllOrders)
+        public async Task<IEnumerable<OrderViewModel>> GetOrderByLocation([FromRoute] int locationId, DateTime fromDate, DateTime toDate)
         {
             System.Security.Claims.ClaimsPrincipal currentUser = this.User;
             var user = await _userManager.FindByEmailAsync(currentUser.Identity.Name);
 
-            return await _orderRepository.GetOrders(showAllOrders, locationId, user.Id);
+            if (fromDate == DateTime.MinValue)
+                fromDate = DateTime.Now.AddMonths(-1);
+            if (toDate == DateTime.MinValue)
+                toDate = DateTime.Now;
+            else
+                toDate = toDate.AddDays(1).AddTicks(-1);
+
+            return await _orderRepository.GetOrders(fromDate, toDate, locationId, user.Id);
         }
 
         // GET: api/Orders/Customer/{customerId}

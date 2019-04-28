@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
@@ -26,7 +27,7 @@ namespace EcommerceApi.Repositories
             _config = config;
         }
 
-        public async Task<IEnumerable<OrderViewModel>> GetOrders(bool showAll, int locationId, string userId)
+        public async Task<IEnumerable<OrderViewModel>> GetOrders(DateTime fromDate, DateTime toDate, int locationId, string userId)
         {
             using (IDbConnection conn = Connection)
             {
@@ -65,8 +66,8 @@ LEFT JOIN
         GROUP BY OrderId
     ) AS OrderPayment
 	ON OrderPayment.OrderId = [Order].OrderId
-WHERE (@showAll != 0 OR OrderDate >= Dateadd(month, -3, GetDate()))
-		AND [Order].LocationId IN @locIds
+WHERE OrderDate BETWEEN @fromDate AND @toDate
+      AND [Order].LocationId IN @locIds
 ORDER BY [Order].[OrderId] DESC";
                 conn.Open();
                 var locationIds = new List<int>();
@@ -80,7 +81,7 @@ ORDER BY [Order].[OrderId] DESC";
                 }
 
                 var locIds = locationIds.ToArray();
-                return await conn.QueryAsync<OrderViewModel>(query, new { locIds, showAll });
+                return await conn.QueryAsync<OrderViewModel>(query, new { locIds, fromDate, toDate });
             }
         }
 
