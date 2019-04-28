@@ -190,7 +190,7 @@ namespace EcommerceApi.Controllers
                 var done = await AddToInventory(updatePurchaseDetailStatus, purchaseDetail, date);
             }
 
-            await _emailSender.SendAdminReportAsync("Purchase Status Changed", $"Purchase Status changed. \n Purchase Id: {id}. \n To: {updatePurchaseDetailStatus.PurchaseStatus.ToString()}");
+            _emailSender.SendAdminReportAsync("Purchase Status Changed", $"Purchase Status changed. \n Purchase Id: {id}. \n To: {updatePurchaseDetailStatus.PurchaseStatus.ToString()}");
 
             await _context.SaveChangesAsync();
 
