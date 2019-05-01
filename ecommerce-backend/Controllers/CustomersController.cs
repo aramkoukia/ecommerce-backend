@@ -88,6 +88,14 @@ namespace EcommerceApi.Controllers
             customer.CustomerCode = id.ToString();
             _context.Entry(customer).State = EntityState.Modified;
 
+            if (customer.FirstName == null) customer.FirstName = "";
+            if (customer.LastName == null) customer.LastName = "";
+            if (customer.UserName == null) customer.UserName = "";
+            if (customer.CompanyName == null) customer.CompanyName = "";
+            if (customer.Email == null) customer.Email = "";
+            if (customer.PstNumber == null) customer.PstNumber = "";
+            if (customer.PhoneNumber == null) customer.PhoneNumber = "";
+
             try
             {
                 await _context.SaveChangesAsync();
@@ -119,6 +127,13 @@ namespace EcommerceApi.Controllers
             // temp, until we turn of the customer sync, then we can use identity
             customer.CustomerId = _context.Customer.Max(m => m.CustomerId) + 1;
             customer.CustomerCode = customer.CustomerId.ToString();
+            if (customer.FirstName == null) customer.FirstName = "";
+            if (customer.LastName == null) customer.LastName = "";
+            if (customer.UserName == null) customer.UserName = "";
+            if (customer.CompanyName == null) customer.CompanyName = "";
+            if (customer.Email == null) customer.Email = "";
+            if (customer.PstNumber == null) customer.PstNumber = "";
+            if (customer.PhoneNumber == null) customer.PhoneNumber = "";
 
             _context.Customer.Add(customer);
             await _context.SaveChangesAsync();
