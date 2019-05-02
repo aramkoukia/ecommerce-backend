@@ -208,11 +208,16 @@ namespace EcommerceApi.Controllers
             }
 
             var purchaseDetails = _context.PurchaseDetail.Where(p => p.PurchaseId == id);
+            var date = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateTime.UtcNow, "Pacific Standard Time");
 
             if (purchaseDetails != null)
             {
                 foreach (var purchaseDetail in purchaseDetails)
                 {
+                    if (purchaseDetail.Status == PurchaseStatus.Arrived.ToString())
+                    {
+                        await RemoveFromInventory(purchaseDetail, date);
+                    }
                     _context.PurchaseDetail.Remove(purchaseDetail);
                 }
             }
@@ -233,7 +238,12 @@ namespace EcommerceApi.Controllers
                 return NotFound();
             }
 
+            var date = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateTime.UtcNow, "Pacific Standard Time");
             _context.PurchaseDetail.Remove(purchaseDetail);
+            if (purchaseDetail.Status == PurchaseStatus.Arrived.ToString())
+            {
+                await RemoveFromInventory(purchaseDetail, date);
+            }
             await _context.SaveChangesAsync();
 
             return Ok();
@@ -275,6 +285,49 @@ namespace EcommerceApi.Controllers
                 ModifiedDate = date,
                 ProductId = purchaseDetail.ProductId,
                 TransactionType = "Purchase Arrived"
+            };
+
+            _context.ProductInventoryHistory.Add(productInventoryHistory);
+            return true;
+        }
+
+        private async Task<bool> RemoveFromInventory(PurchaseDetail purchaseDetail, DateTime date)
+        {
+            var productInventory = await _context.ProductInventory.FirstOrDefaultAsync(m =>
+                                    m.ProductId == purchaseDetail.ProductId &&
+                                    m.LocationId == purchaseDetail.ArrivedAtLocationId);
+
+            decimal currentBalance = 0;
+            if (productInventory != null)
+            {
+                currentBalance = productInventory.Balance;
+                productInventory.Balance = productInventory.Balance - purchaseDetail.Amount;
+                productInventory.ModifiedDate = date;
+            }
+            else
+            {
+                await _context.ProductInventory.AddAsync(
+                    new ProductInventory
+                    {
+                        Balance = -1 * purchaseDetail.Amount,
+                        BinCode = "",
+                        LocationId = purchaseDetail.ArrivedAtLocationId.Value,
+                        ModifiedDate = date,
+                        ProductId = purchaseDetail.ProductId
+                    });
+            }
+
+            var productInventoryHistory = new ProductInventoryHistory
+            {
+                ChangedBalance = currentBalance - purchaseDetail.Amount,
+                Balance = -1 * purchaseDetail.Amount,
+                Notes = $"Purchase Id: {purchaseDetail.PurchaseId} Deleted.",
+                BinCode = "",
+                LocationId = purchaseDetail.ArrivedAtLocationId.Value,
+                CreatedByUserId = purchaseDetail.CreatedByUserId,
+                ModifiedDate = date,
+                ProductId = purchaseDetail.ProductId,
+                TransactionType = "Purchase Deleted"
             };
 
             _context.ProductInventoryHistory.Add(productInventoryHistory);
