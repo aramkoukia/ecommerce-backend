@@ -807,21 +807,6 @@ www.lightsandparts.com | {user.Email}
             return Ok(result);
         }
 
-        private async Task<bool> OriginalOrderWasPaid(int? originalOrderId)
-        {
-            if (!originalOrderId.HasValue)
-            {
-                return false;
-            }
-
-            var originalOrder = await _context.Order.SingleOrDefaultAsync(m => m.OrderId == originalOrderId.Value);
-            if (originalOrder != null && originalOrder.Status.Equals(OrderStatus.Paid.ToString(), StringComparison.InvariantCultureIgnoreCase))
-            {
-                return true;
-            }
-            return false;
-        }
-
         private async Task<bool> NewOrderUpdateInventory(Order order)
         {
             if (order.Status == OrderStatus.Draft.ToString())
@@ -844,9 +829,11 @@ www.lightsandparts.com | {user.Email}
                     addOrUpdate = 1;
                 }
 
+                decimal changedBalance = 0;
                 if (productInventory != null)
                 {
-                    productInventory.Balance = productInventory.Balance + (addOrUpdate * amount);
+                    productInventory.Balance += (addOrUpdate * amount);
+                    changedBalance = productInventory.Balance;
                     productInventory.ModifiedDate = date;
                 }
                 else
@@ -860,7 +847,9 @@ www.lightsandparts.com | {user.Email}
                             ModifiedDate = date,
                             ProductId = item.ProductId
                         });
+                    changedBalance = addOrUpdate * amount;
                 }
+                AddTransactionHistory(item.ProductId, order.LocationId, order.CreatedByUserId, date, $"Order {order.Status.ToString()}", changedBalance, addOrUpdate * amount, $"Id: {order.OrderId}");
             }
             return true;
         }
@@ -887,10 +876,12 @@ www.lightsandparts.com | {user.Email}
                     addOrUpdate = 1;
                 }
 
+                decimal changedBalance = 0;
                 if (productInventory != null)
                 {
                     productInventory.Balance = productInventory.Balance + (addOrUpdate * amount);
                     productInventory.ModifiedDate = date;
+                    changedBalance = productInventory.Balance;
                 }
                 else
                 {
@@ -903,8 +894,10 @@ www.lightsandparts.com | {user.Email}
                             ModifiedDate = date,
                             ProductId = item.ProductId
                         });
+                    changedBalance = addOrUpdate * amount;
                 }
 
+                AddTransactionHistory(item.ProductId, order.LocationId, order.CreatedByUserId, date, $"Order {updateOrderStatus.OrderStatus.ToString()}", changedBalance, addOrUpdate * amount, $"Id: {order.OrderId}");
             }
             return true;
         }
@@ -928,6 +921,7 @@ www.lightsandparts.com | {user.Email}
                 // if order is refund we add to inventory
                 var addOrUpdate = 1;
                 var amount = Math.Abs(item.Amount);
+                decimal changedBalance = 0;
                 if (order.Status == OrderStatus.Return.ToString() || item.Amount < 0)
                 {
                     addOrUpdate = -1;
@@ -937,6 +931,7 @@ www.lightsandparts.com | {user.Email}
                 {
                     sourceLocationProductInventory.Balance = sourceLocationProductInventory.Balance + (addOrUpdate * amount);
                     sourceLocationProductInventory.ModifiedDate = date;
+                    changedBalance = sourceLocationProductInventory.Balance;
                 }
                 else
                 {
@@ -949,7 +944,9 @@ www.lightsandparts.com | {user.Email}
                             ModifiedDate = date,
                             ProductId = item.ProductId
                         });
+                    changedBalance = addOrUpdate * amount;
                 }
+                AddTransactionHistory(item.ProductId, order.LocationId, order.CreatedByUserId, date, $"Order {order.Status.ToString()}", changedBalance, addOrUpdate * amount, $"Id: {order.OrderId}");
 
                 // Updating Destination Location Product Inventory
                 var destinationLocationProductInventory = await _context.ProductInventory.FirstOrDefaultAsync(m =>
@@ -968,6 +965,7 @@ www.lightsandparts.com | {user.Email}
                 {
                     destinationLocationProductInventory.Balance = destinationLocationProductInventory.Balance + (addOrUpdate * amount);
                     destinationLocationProductInventory.ModifiedDate = date;
+                    changedBalance = destinationLocationProductInventory.Balance;
                 }
                 else
                 {
@@ -980,7 +978,10 @@ www.lightsandparts.com | {user.Email}
                             ModifiedDate = date,
                             ProductId = item.ProductId
                         });
+                    changedBalance = addOrUpdate * amount;
                 }
+                AddTransactionHistory(item.ProductId, locationId, order.CreatedByUserId, date, $"Order {order.Status.ToString()}", changedBalance, addOrUpdate * amount, $"Id: {order.OrderId}");
+
             }
             return true;
         }
@@ -998,10 +999,12 @@ www.lightsandparts.com | {user.Email}
                     m.ProductId == item.ProductId &&
                     m.LocationId == order.LocationId);
 
+                decimal changedBalance = 0;
                 if (productInventory != null)
                 {
                     productInventory.Balance = productInventory.Balance + item.Amount;
                     productInventory.ModifiedDate = date;
+                    changedBalance = productInventory.Balance;
                 }
                 else
                 {
@@ -1014,9 +1017,37 @@ www.lightsandparts.com | {user.Email}
                              ModifiedDate = date,
                              ProductId = item.ProductId                                 
                         });
+                    changedBalance = item.Amount;
                 }
+
+                AddTransactionHistory(item.ProductId, order.LocationId, order.CreatedByUserId, date, $"Order {order.Status.ToString()} Released", changedBalance, item.Amount, $"Id: {order.OrderId}");
             }
             return true;
+        }
+
+        private void AddTransactionHistory(int productId,
+                                           int locationId,
+                                           string userId,
+                                           DateTime modifiedDate,
+                                           string transactionType,
+                                           decimal changedBalance,
+                                           decimal balance,
+                                           string notes)
+        {
+            var productInventoryHistory = new ProductInventoryHistory
+            {
+                ProductId = productId,
+                LocationId = locationId,
+                CreatedByUserId = userId,
+                ModifiedDate = modifiedDate,
+                ChangedBalance = changedBalance,
+                Balance = balance,
+                TransactionType = transactionType,
+                Notes = notes,
+                BinCode = ""
+            };
+
+            _context.ProductInventoryHistory.Add(productInventoryHistory);
         }
 
         private bool OrderExists(int id)

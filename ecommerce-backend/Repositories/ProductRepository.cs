@@ -211,38 +211,7 @@ WHERE Product.ProductId = @ProductId
             using (IDbConnection conn = Connection)
             {
                 string query = $@"
-SELECT * FROM (
-SELECT OrderDate AS Date, 'Order ' + [Order].[Status] AS TransactionType, (-1 * OrderDetail.Amount) AS Amount, Location.LocationName, Users.GivenName As UserName, 'Id: ' + CAST([Order].OrderId AS NVARCHAR(100)) AS Notes, NULL AS Balance
-FROM [Order]
-INNER JOIN OrderDetail
-	On [Order].OrderId = OrderDetail.OrderId
-INNER JOIN Location
-	ON Location.LocationId = [Order].LocationId
-LEFT JOIN Users
-    ON Users.Id = [Order].CreatedByUserId
-WHERE ProductId = @ProductId 
-      AND OrderDate BETWEEN @fromDate AND @toDate
-	  AND Status IN ('Paid', 'Account', 'OnHold')
-      AND [Order].LocationId IN @locationIds
-
-UNION ALL 
-
-SELECT OrderDate, 'Returned Order' AS TransactionType, OrderDetail.Amount, Location.LocationName, Users.GivenName, 'Id: ' + CAST([Order].OrderId AS NVARCHAR(100)) AS Notes, NULL
-FROM [Order]
-INNER JOIN OrderDetail
-	On [Order].OrderId = OrderDetail.OrderId
-INNER JOIN Location
-	ON Location.LocationId = [Order].LocationId
-LEFT JOIN Users
-    ON Users.Id = [Order].CreatedByUserId
-WHERE ProductId = @ProductId 
-      AND OrderDate BETWEEN @fromDate AND @toDate
-      AND Status IN ('Return') 
-      AND [Order].LocationId IN @locationIds
-
-UNION ALL 
-
-SELECT ModifiedDate, TransactionType, Balance AS BalanceChanged, Location.LocationName, Users.GivenName, ProductInventoryHistory.Notes, ChangedBalance as Balance
+SELECT ModifiedDate AS Date, TransactionType, Balance AS Amount, Location.LocationName, Users.GivenName AS UserName, ProductInventoryHistory.Notes, ChangedBalance as Balance
 FROM ProductInventoryHistory
 INNER JOIN Location
 	ON Location.LocationId = ProductInventoryHistory.LocationId
@@ -251,7 +220,6 @@ LEFT JOIN Users
 WHERE ProductId = @productId
       AND ModifiedDate BETWEEN @fromDate AND @toDate
       AND ProductInventoryHistory.LocationId IN @locationIds
-) Transactions 
 Order By [Date] Desc
 ";
                 conn.Open();
