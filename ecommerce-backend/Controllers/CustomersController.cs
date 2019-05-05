@@ -143,10 +143,10 @@ namespace EcommerceApi.Controllers
 
         // GET: api/Customers/EmailStatement
         [HttpGet("{id}/EmailStatement")]
-        public async Task<IActionResult> EmailCustomerStatement(int id)
+        public async Task<IActionResult> EmailCustomerStatement(int id, DateTime fromDate, DateTime toDate)
         {
             var customer = await _customerRepository.GetCustomer(id);
-            var file = await GenerateStatementPdf(customer);
+            var file = await GenerateStatementPdf(customer, fromDate, toDate);
             var message = @"
 Dear Customer,
 
@@ -181,10 +181,10 @@ www.lightsandparts.com | sina@lightsandparts.com
         // GET: api/Customers/EmailStatement
         [AllowAnonymous]
         [HttpGet("{id}/PrintStatement")]
-        public async Task<FileResult> PrintCustomerStatement(int id)
+        public async Task<FileResult> PrintCustomerStatement(int id, DateTime fromDate, DateTime toDate)
         {
             var customer = await _customerRepository.GetCustomer(id);
-            var file = await GenerateStatementPdf(customer);
+            var file = await GenerateStatementPdf(customer, fromDate, toDate);
             FileContentResult result = new FileContentResult(file, "application/pdf")
             {
                 FileDownloadName = $"CustomerStatement-{id}.pdf"
@@ -213,10 +213,13 @@ www.lightsandparts.com | sina@lightsandparts.com
             return Ok(customer);
         }
 
-        private async Task<byte[]> GenerateStatementPdf(CustomerViewModel customer)
+        private async Task<byte[]> GenerateStatementPdf(CustomerViewModel customer, DateTime fromDate, DateTime toDate)
         {
-            var fromDate = DateTime.Now.AddDays(-30);
-            var toDate = DateTime.Now;
+            if (fromDate == DateTime.MinValue)
+                fromDate = DateTime.Now.AddDays(-30);
+            if (toDate == DateTime.MinValue)
+                toDate = DateTime.Now;
+
             var customerPaidOrders = await _reportRepository.GetCustomerPaidReport(customer.CustomerId, fromDate, toDate);
             var customerUnPaidOrders = await _reportRepository.GetCustomerUnPaidReport(customer.CustomerId, DateTime.MinValue, toDate);
 
