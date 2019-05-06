@@ -355,6 +355,7 @@ namespace EcommerceApi.Controllers
                 var done = await AddToInventory(order, updateOrderStatus);
             }
             // if existing order status is Account (already deducted inventory, and new status is Paid, no need to update inventory again)
+            // TODO: if order was OnHold and changing to Account ot Paid, no need to update inventory
             else if(!(updateOrderStatus.OrderStatus == OrderStatus.Paid.ToString() 
                     && order.Status == OrderStatus.Account.ToString()))
             {
