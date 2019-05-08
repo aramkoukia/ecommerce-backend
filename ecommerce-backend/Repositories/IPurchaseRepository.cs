@@ -7,5 +7,7 @@ namespace EcommerceApi.Repositories
     public interface IPurchaseRepository
     {
         Task<IEnumerable<PurchaseViewModel>> GetPurchases();
+        Task<IEnumerable<PurchaseDetailViewModel>> GetPurchaseDetails();
+        
     }
 }

@@ -41,6 +41,14 @@ namespace EcommerceApi.Controllers
             return await _PurchaseRepository.GetPurchases();
         }
 
+        // GET: api/Purchases
+        [HttpGet("purchasedetail")]
+        public async Task<IEnumerable<PurchaseDetailViewModel>> GetPurchaseDetail()
+        {
+            return await _PurchaseRepository.GetPurchaseDetails();
+        }
+
+
         // GET: api/Purchases/5
         [HttpGet("{id}")]
         public async Task<IActionResult> GetPurchase([FromRoute] int id)
