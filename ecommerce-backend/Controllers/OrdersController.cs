@@ -168,8 +168,42 @@ namespace EcommerceApi.Controllers
             }
 
             order.OrderId = _context.Order.Max(o => o.OrderId) + 1;
+            foreach (var detail in order.OrderDetail)
+            {
+                if (order.Status == OrderStatus.Return.ToString() && detail.Amount > 0)
+                {
+                    detail.Amount *= -1;
+                }
+                if (string.IsNullOrEmpty(detail.DiscountType))
+                {
+                    detail.DiscountType = "percent";
+                }
+                
+                detail.SubTotal = Math.Round(detail.Amount * detail.UnitPrice, 2);
+                detail.TotalDiscount = Math.Round(detail.DiscountType == "percent" ? detail.SubTotal * detail.DiscountPercent / 100 : detail.DiscountAmount, 2);
+                detail.Total = Math.Round(detail.SubTotal - detail.TotalDiscount, 2);
+            }
+
+            order.SubTotal = Math.Round(order.OrderDetail.Sum(o => o.Total), 2);
+            if (order.OrderTax != null && order.OrderTax.Any())
+            {
+                foreach (var tax in order.OrderTax)
+                {
+                    tax.TaxAmount = Math.Round(_context.Tax.AsNoTracking().FirstOrDefault(t => t.TaxId == tax.TaxId).Percentage / 100 * order.SubTotal, 2);
+                }
+            }
+
+            order.Total = Math.Round(order.OrderDetail.Sum(o => o.Total) + order.OrderTax.Sum(o => o.TaxAmount), 2) + order.RestockingFeeAmount;
+
             if (order.OrderPayment != null && order.OrderPayment.Any())
             {
+                // fighting with JS rounding issues
+                var totalPayment = order.OrderPayment.Sum(p => p.PaymentAmount);
+                if (Math.Abs(order.Total - totalPayment) < new decimal(0.05))
+                {
+                    order.Total = totalPayment;
+                }
+
                 var orderPayments = order.OrderPayment.Select(m => new { m.PaymentTypeId, m.PaymentAmount, m.ChequeNo }).Distinct().ToList();
                 order.OrderPayment.Clear();
                 foreach (var payment in orderPayments)
@@ -499,6 +533,13 @@ namespace EcommerceApi.Controllers
             foreach (var payment in order.OrderPayment)
             { 
                 _context.OrderPayment.Remove(payment);
+            }
+
+            // fighting with JS rounding issues
+            var totalPayment = order.OrderPayment.Sum(p => p.PaymentAmount);
+            if (Math.Abs(order.Total - totalPayment) < new decimal(0.05))
+            {
+                order.Total = totalPayment;
             }
 
             foreach (var payment in orderPayments)

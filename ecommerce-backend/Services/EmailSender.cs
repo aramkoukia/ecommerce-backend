@@ -40,7 +40,7 @@ namespace EcommerceApi.Services
 
                 if (ccAdmins)
                 {
-                    mailMessage.To.Add(settings.ReportEmail);
+                    mailMessage.Bcc.Add(settings.ReportEmail);
                 }
 
                 if (!string.IsNullOrEmpty(attachmentName))
