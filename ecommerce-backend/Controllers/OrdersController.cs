@@ -383,15 +383,22 @@ namespace EcommerceApi.Controllers
             }
 
             // When order is marked as Draft from OnHold we should add them to inventory
-            if (updateOrderStatus.OrderStatus == OrderStatus.Draft.ToString() &&
-               order.Status == OrderStatus.OnHold.ToString())
+            if (order.Status == OrderStatus.OnHold.ToString() 
+                && updateOrderStatus.OrderStatus == OrderStatus.Draft.ToString())
             {
                 var done = await AddToInventory(order, updateOrderStatus);
             }
-            // if existing order status is Account (already deducted inventory, and new status is Paid, no need to update inventory again)
-            // TODO: if order was OnHold and changing to Account ot Paid, no need to update inventory
-            else if(!(updateOrderStatus.OrderStatus == OrderStatus.Paid.ToString() 
-                    && order.Status == OrderStatus.Account.ToString()))
+            else if ((order.Status == OrderStatus.OnHold.ToString() 
+                      || order.Status == OrderStatus.Account.ToString())
+                     && 
+                     (updateOrderStatus.OrderStatus == OrderStatus.Account.ToString() 
+                      || updateOrderStatus.OrderStatus == OrderStatus.Paid.ToString()))
+            {
+                // if order was OnHold (already deducted inventory) and changing to Account, no need to update inventory
+                // if order was OnHold (already deducted inventory) and changing to Paid, no need to update inventory
+                // if existing order status is Account (already deducted inventory), and new status is Paid, no need to update inventory again
+            }
+            else
             {
                 var done = await ExistingOrderUpdateInventory(order, updateOrderStatus);
             }
