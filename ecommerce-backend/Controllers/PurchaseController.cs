@@ -163,7 +163,10 @@ namespace EcommerceApi.Controllers
             }
             var date = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateTime.UtcNow, "Pacific Standard Time");
 
-            var purchaseDetail = await _context.PurchaseDetail.FirstOrDefaultAsync(m => m.PurchaseDetailId == id);
+            var purchaseDetail = await _context.PurchaseDetail
+                .Include(o => o.Product)
+                .Include(o => o.Location)
+                .FirstOrDefaultAsync(m => m.PurchaseDetailId == id);
 
             if (purchaseDetail == null)
             {
@@ -171,6 +174,14 @@ namespace EcommerceApi.Controllers
             }
             System.Security.Claims.ClaimsPrincipal currentUser = this.User;
             var userId = _userManager.GetUserId(User);
+            if (updatePurchaseDetailStatus.OverheadCost == null)
+            {
+                updatePurchaseDetailStatus.OverheadCost = 0;
+            }
+            if (updatePurchaseDetailStatus.UnitPrice == null)
+            {
+                updatePurchaseDetailStatus.UnitPrice = 0;
+            }
 
             var newPurchaseDetail = new PurchaseDetail
             {
@@ -185,7 +196,8 @@ namespace EcommerceApi.Controllers
                 ProductId = purchaseDetail.ProductId,
                 Status = updatePurchaseDetailStatus.PurchaseStatus,
                 UnitPrice = updatePurchaseDetailStatus.UnitPrice,
-                TotalPrice = updatePurchaseDetailStatus.TotalPrice,
+                OverheadCost = updatePurchaseDetailStatus.OverheadCost,
+                TotalPrice = Math.Round(updatePurchaseDetailStatus.UnitPrice.Value * updatePurchaseDetailStatus.Amount + updatePurchaseDetailStatus.OverheadCost.Value, 2),
                 PurchaseId = purchaseDetail.PurchaseId
             };
 
@@ -195,14 +207,59 @@ namespace EcommerceApi.Controllers
             if (updatePurchaseDetailStatus.PurchaseStatus == PurchaseStatus.Arrived.ToString() &&
                 updatePurchaseDetailStatus.ArrivedAtLocationId.HasValue)
             {
-                var done = await AddToInventory(updatePurchaseDetailStatus, purchaseDetail, date);
+                var arrivedDate = purchaseDetail.ArrivedDate.HasValue ? purchaseDetail.ArrivedDate.Value : date;
+                var done = await AddToInventory(updatePurchaseDetailStatus, purchaseDetail, arrivedDate);
             }
 
-            _emailSender.SendAdminReportAsync("Purchase Status Changed", $"Purchase Status changed. \n Purchase Id: {id}. \n To: {updatePurchaseDetailStatus.PurchaseStatus.ToString()}");
+            // _emailSender.SendAdminReportAsync("Purchase Status Changed", $"Purchase Status changed. \n Purchase Id: {id}. \n To: {updatePurchaseDetailStatus.PurchaseStatus.ToString()}");
 
             await _context.SaveChangesAsync();
 
             return Ok(newPurchaseDetail);
+        }
+
+        [HttpPut("{id}/Detail")]
+        public async Task<IActionResult> UpdatePurchaseDetail([FromRoute] int id, [FromBody] UpdatePurchaseDetailStatus updatePurchaseDetailStatus)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            if (updatePurchaseDetailStatus == null)
+            {
+                return BadRequest();
+            }
+            var date = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateTime.UtcNow, "Pacific Standard Time");
+
+            var purchaseDetail = await _context.PurchaseDetail
+                .Include(o => o.Product)
+                .Include(o => o.Location)
+                .FirstOrDefaultAsync(m => m.PurchaseDetailId == id);
+
+            if (purchaseDetail == null)
+            {
+                return BadRequest($"Invalid Purchase Detail Id : {id}");
+            }
+            System.Security.Claims.ClaimsPrincipal currentUser = this.User;
+            var userId = _userManager.GetUserId(User);
+            if (updatePurchaseDetailStatus.OverheadCost == null)
+            {
+                updatePurchaseDetailStatus.OverheadCost = 0;
+            }
+            if (updatePurchaseDetailStatus.UnitPrice == null)
+            {
+                updatePurchaseDetailStatus.UnitPrice = 0;
+            }
+
+            purchaseDetail.Amount = updatePurchaseDetailStatus.Amount;
+            purchaseDetail.UnitPrice = updatePurchaseDetailStatus.UnitPrice;
+            purchaseDetail.OverheadCost = updatePurchaseDetailStatus.OverheadCost;
+            purchaseDetail.TotalPrice = Math.Round(updatePurchaseDetailStatus.UnitPrice.Value * updatePurchaseDetailStatus.Amount + updatePurchaseDetailStatus.OverheadCost.Value, 2);
+
+            await _context.SaveChangesAsync();
+
+            return Ok(purchaseDetail);
         }
 
         // DELETE: api/Purchases/5

@@ -521,9 +521,13 @@ namespace EcommerceApi.Controllers
             var originalPaymentAmount = string.Join(",", order.OrderPayment.Select(m => m.PaymentAmount).ToArray());
             var originalAmountTotal = order.OrderPayment.Sum(m => m.PaymentAmount);
             var newAmountTotal = updateOrderPayment.OrderPayment.Sum(m => m.PaymentAmount);
-            if (newAmountTotal != originalAmountTotal)
+
+            if (!order.IsAccountReturn && newAmountTotal != originalAmountTotal)
             {
-                return BadRequest("Original Amount is not the same as New Amount");
+                if (!(order.Status == OrderStatus.Return.ToString() && order.IsAccountReturn))
+                {
+                    return BadRequest("Original Amount is not the same as New Amount");
+                }
             }
 
             var paymentTypeIds = updateOrderPayment.OrderPayment.Select(o => o.PaymentTypeId);
@@ -535,8 +539,14 @@ namespace EcommerceApi.Controllers
                 _context.OrderPayment.Remove(payment);
             }
 
+            // when an order that was returned to be Account, is being updated with payment, we remove this order from user account
+            if (order.Status == OrderStatus.Return.ToString() && order.IsAccountReturn)
+            {
+                order.IsAccountReturn = false;
+            }
+
             // fighting with JS rounding issues
-            var totalPayment = order.OrderPayment.Sum(p => p.PaymentAmount);
+            var totalPayment = orderPayments.Sum(p => p.PaymentAmount);
             if (Math.Abs(order.Total - totalPayment) < new decimal(0.05))
             {
                 order.Total = totalPayment;
@@ -579,7 +589,6 @@ namespace EcommerceApi.Controllers
                             }
                         );
                     }
-
                 }
             }
 

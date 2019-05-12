@@ -6,6 +6,7 @@ namespace EcommerceApi.Controllers
     {
         public decimal Amount { get; set; }
         public decimal? UnitPrice { get; set; }
+        public decimal? OverheadCost { get; set; }
         public decimal? TotalPrice { get; set; }
         public string PurchaseStatus { get; set; }
         public DateTime? PaidDate { get; set; }
