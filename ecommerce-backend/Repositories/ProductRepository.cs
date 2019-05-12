@@ -220,6 +220,7 @@ LEFT JOIN Users
 WHERE ProductId = @productId
       AND ModifiedDate BETWEEN @fromDate AND @toDate
       AND ProductInventoryHistory.LocationId IN @locationIds
+      AND Balance <> 0
 Order By [Date] Desc
 ";
                 conn.Open();

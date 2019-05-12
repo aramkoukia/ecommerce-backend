@@ -161,7 +161,16 @@ namespace EcommerceApi.Untilities
                         <td style='width:55%'></td>
                         <td style='width:20%'><b>Remain:</b></td>
                         <td style='width:15%' class='right'>${0}</td>
-                        </tr>", order.Total - order.OrderPayment.Sum(p => p.PaymentAmount));
+                        </tr>", order.IsAccountReturn ? 0 : order.Total - order.OrderPayment.Sum(p => p.PaymentAmount));
+
+            if (order.IsAccountReturn)
+            {
+                sbCustomer.AppendFormat(@"<tr>
+                        <td style='width:10%'></td>
+                        <td style='width:55%'></td>
+                        <td style='width:35%' colspan='2'><b>Added to customer Account</b></td>
+                        </tr>");
+            }
 
             var paymentType = order.OrderPayment.FirstOrDefault()?.PaymentType?.PaymentTypeName;
             if (paymentType != null)
