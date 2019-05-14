@@ -719,7 +719,7 @@ www.lightsandparts.com | {user.Email}
             orderToUpdateEmail.Email = email;
             await _context.SaveChangesAsync();
 
-            _emailSender.SendEmailAsync(email, subject, null, message, attachment, attachmentName, true);
+            _emailSender.SendEmailAsync(email, subject, message, null, attachmentName, true);
             return Ok();
         }
 

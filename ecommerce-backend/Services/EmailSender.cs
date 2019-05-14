@@ -1,12 +1,10 @@
 ﻿using EcommerceApi.Models;
-using Microsoft.Extensions.Options;
 using System;
 using System.IO;
 using System.Linq;
-using System.Net;
-using System.Net.Mail;
-using System.Text;
 using System.Threading.Tasks;
+using MimeKit;
+using MailKit.Security;
 
 namespace EcommerceApi.Services
 {
@@ -19,50 +17,54 @@ namespace EcommerceApi.Services
             _context = context;
         }
 
-        public async Task SendEmailAsync(string toEmail, string subject, string htmlMessage, string textMessage = null, Stream attachment = null, string attachmentName = null, bool ccAdmins = false)
+        public async Task SendEmailAsync(string toEmail, string subject, string textMessage, Stream attachment = null, string attachmentName = null, bool ccAdmins = false)
         {
             try
             {
                 var settings = _context.Settings.FirstOrDefault();
-                MailMessage mailMessage = new MailMessage
-                {
-                    From = new MailAddress(settings.FromEmail, settings.FromEmail),
-                    Body = textMessage,
-                    BodyEncoding = Encoding.UTF8,
-                    Subject = subject,
-                    SubjectEncoding = Encoding.UTF8
-                };
 
                 if (string.IsNullOrEmpty(toEmail))
                     toEmail = settings.ReportEmail;
 
-                mailMessage.To.Add(toEmail);
+
+                int port = settings.SmtpPort;
+                string host = settings.SmtpHost;
+                string username = settings.FromEmail;
+                string password = settings.FromEmailPassword;
+                string mailFrom = settings.FromEmail;
+
+                var message = new MimeMessage();
+                message.From.Add(new MailboxAddress(mailFrom));
+                message.To.Add(new MailboxAddress(toEmail));
 
                 if (ccAdmins)
                 {
-                    mailMessage.Bcc.Add(settings.ReportEmail);
+                    var adminsEmails = settings.AdminEmail.Split(',').ToArray();
+                    foreach (var item in adminsEmails)
+                    {
+                        message.Bcc.Add(new MailboxAddress(item));
+                    }
                 }
+
+                message.Subject = subject;
+                var builder = new BodyBuilder
+                {
+                    TextBody = textMessage
+                };
 
                 if (!string.IsNullOrEmpty(attachmentName))
                 {
-                    var file = new Attachment(attachment, attachmentName);
-                    mailMessage.Attachments.Add(file);
+                    builder.Attachments.Add(attachmentName, attachment);
                 }
 
-                if (!string.IsNullOrEmpty(htmlMessage))
-                {
-                    AlternateView htmlView = AlternateView.CreateAlternateViewFromString(htmlMessage);
-                    htmlView.ContentType = new System.Net.Mime.ContentType("text/html");
-                    mailMessage.AlternateViews.Add(htmlView);
-                }
+                message.Body = builder.ToMessageBody();
 
-                using (SmtpClient client = new SmtpClient(settings.SmtpHost, settings.SmtpPort))
+                using (var client = new MailKit.Net.Smtp.SmtpClient())
                 {
-                    client.UseDefaultCredentials = false;
-                    client.DeliveryMethod = SmtpDeliveryMethod.Network;
-                    client.Credentials = new NetworkCredential(settings.FromEmail, settings.FromEmailPassword);
-                    client.EnableSsl = settings.SmtpUseSsl;
-                    await client.SendMailAsync(mailMessage);
+                    client.Connect(host, port, SecureSocketOptions.StartTls);
+                    client.Authenticate(username, password);
+                    client.Send(message);
+                    client.Disconnect(true);
                 }
             }
             catch (Exception)
@@ -75,24 +77,24 @@ namespace EcommerceApi.Services
             try
             {
                 var settings = _context.Settings.FirstOrDefault();
-                MailMessage mailMessage = new MailMessage
+                var message = new MimeMessage();
+                message.From.Add(new MailboxAddress(settings.FromEmail));
+                message.To.Add(new MailboxAddress(settings.ReportEmail));
+
+                message.Subject = subject;
+                var builder = new BodyBuilder
                 {
-                    From = new MailAddress(settings.FromEmail, settings.FromEmail),
-                    Body = textMessage,
-                    BodyEncoding = Encoding.UTF8,
-                    Subject = subject,
-                    SubjectEncoding = Encoding.UTF8
+                    TextBody = textMessage
                 };
 
-                mailMessage.To.Add(settings.ReportEmail);
+                message.Body = builder.ToMessageBody();
 
-                using (SmtpClient client = new SmtpClient(settings.SmtpHost, settings.SmtpPort))
+                using (var client = new MailKit.Net.Smtp.SmtpClient())
                 {
-                    client.UseDefaultCredentials = false;
-                    client.DeliveryMethod = SmtpDeliveryMethod.Network;
-                    client.Credentials = new NetworkCredential(settings.FromEmail, settings.FromEmailPassword);
-                    client.EnableSsl = settings.SmtpUseSsl;
-                    await client.SendMailAsync(mailMessage);
+                    client.Connect(settings.SmtpHost, settings.SmtpPort, SecureSocketOptions.StartTls);
+                    client.Authenticate(settings.FromEmail, settings.FromEmailPassword);
+                    client.Send(message);
+                    client.Disconnect(true);
                 }
             }
             catch (Exception)

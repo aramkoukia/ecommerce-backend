@@ -150,7 +150,7 @@ namespace EcommerceApi.Controllers
             stopWatch.Stop();
             var timeTook = $"Products Sync Took: {TimeSpan.FromMilliseconds(stopWatch.ElapsedMilliseconds).Minutes} minutes.";
             var message = $"Products Sync Finished. \n Products Created: {productsCreated}. \n Products Updated: {productsUpdated}. {timeTook}\n Errors: {string.Join(",", errorList)}";
-            _emailSender.SendEmailAsync("aramkoukia@gmail.com", "Sync Finished: Products", message, null, null, null, true);
+            _emailSender.SendEmailAsync("aramkoukia@gmail.com", "Sync Finished: Products", message, null, null, true);
             
             return Ok(message);
         }

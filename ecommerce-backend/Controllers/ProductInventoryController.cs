@@ -158,7 +158,7 @@ namespace EcommerceApi.Controllers
                 message += $"Location: {location.LocationName}.\n";
                 message += $"User: {userId}.\n";
 
-                _emailSender.SendEmailAsync(null, subject, null, message, null, null);
+                _emailSender.SendEmailAsync(null, subject, message, null, null);
             }
 
             return CreatedAtAction("GetProductInventoryHistory", new { id = productInventoryHistory.ProductInventoryHistoryId }, productInventoryHistory);
@@ -259,7 +259,7 @@ namespace EcommerceApi.Controllers
             message += $"Amount: {transferInventory.TransferQuantity}.\n";
             message += $"Date: {toProductInventoryHistory.ModifiedDate}.\n";
             message += $"User: {userId}.\n";
-            _emailSender.SendEmailAsync(null, subject, null, message, null, null);
+            _emailSender.SendEmailAsync(null, subject, message, null, null);
 
             _context.ProductInventoryHistory.Add(fromProductInventoryHistory);
             _context.ProductInventoryHistory.Add(toProductInventoryHistory);
