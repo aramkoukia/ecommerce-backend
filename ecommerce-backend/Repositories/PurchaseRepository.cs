@@ -101,6 +101,7 @@ LEFT JOIN (
   GROUP BY PurchaseId, ProductId, LocationName) PurchaseDetailArrived
 ON Purchase.PurchaseId = PurchaseDetailArrived.PurchaseId
    AND PurchaseDetailPlan.ProductId = PurchaseDetailArrived.ProductId
+ORDER BY Purchase.PoNumber
 ";
                 conn.Open();
                 return await conn.QueryAsync<PurchaseDetailViewModel>(query);
