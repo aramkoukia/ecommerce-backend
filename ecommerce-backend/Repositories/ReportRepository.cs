@@ -803,5 +803,54 @@ ORDER BY Last12Month DESC
                 return await conn.QueryAsync<SalesForecastReportViewModel>(query);
             }
         }
+
+        public async Task<IEnumerable<ProductProfitReportViewModel>> GetProductProfitReport(DateTime salesFromDate,
+                                                                                            DateTime salesToDate,
+                                                                                            DateTime purchaseFromDate,
+                                                                                            DateTime purchaseToDate)
+        {
+            using (IDbConnection conn = Connection)
+            {
+                string query = $@"
+SELECT ProductName, 
+       ProductCode, 
+       ProductTypeName,
+	   FORMAT(ISNULL(PurchaseAmount, 0), 'N2') AS PurchaseAmount, 
+	   FORMAT(ISNULL(AvgPurchasePrice, 0), 'N2') AS AvgPurchasePrice, 
+	   FORMAT(ISNULL(AvgOverheadCost, 0), 'N2') AS AvgOverheadCost, 
+	   FORMAT(ISNULL(AvgTotalCost, 0), 'N2') AS AvgTotalCost, 
+	   FORMAT(ISNULL(SalesAmount, 0), 'N2') AS SalesAmount, 
+	   FORMAT(ISNULL(TotalSales, 0), 'N2') AS TotalSales, 
+	   FORMAT(ISNULL(AvgSalesPrice, 0), 'N2') AS AvgSalesPrice, 
+	   FORMAT(ISNULL(SalesAmount * AvgTotalCost, 0), 'N2') AS TotalCost,
+	   FORMAT(ISNULL(AvgSalesPrice - AvgTotalCost, 0), 'N2') AS AvgProfitPerItem,
+	   -- FORMAT(ISNULL(AvgTotalCost - AvgSalesPrice, 0), 'N2') AS AvgProfitPerItem,
+	   FORMAT(ISNULL(TotalSales - (SalesAmount * AvgTotalCost), 0), 'N2') AS TotalProfit
+FROM Product
+INNER JOIN ProductType
+	ON ProductType.ProductTypeId = Product.ProductTypeId
+INNER JOIN (
+SELECT ProductId, 
+       SUM(Amount) AS PurchaseAmount, 
+	   Avg(UnitPrice) AS AvgPurchasePrice, 
+	   Avg(ISNULL(OverheadCost, 0)/ Amount) AS AvgOverheadCost,
+	   Avg(UnitPrice + ISNULL(OverheadCost, 0)/ Amount ) AS AvgTotalCost  
+FROM purchasedetail
+WHERE PaidDate BETWEEN @purchaseFromDate AND @purchaseToDate
+GROUP BY ProductId) Purchase
+	ON Purchase.ProductId = Product.ProductId
+LEFT JOIN (SELECT ProductId, SUM(OrderDetail.Total) AS TotalSales, SUM(OrderDetail.Amount) AS SalesAmount, AVG(OrderDetail.UnitPrice) AS AvgSalesPrice
+		   FROM [Order]
+		   INNER JOIN OrderDetail
+			 ON OrderDetail.OrderId = [Order].OrderId
+		   WHERE OrderDate BETWEEN @salesFromDate AND @salesToDate
+                 AND [Order].Status IN ('Return', 'Paid', 'Account')
+		   GROUP BY ProductId) Sales
+ON Product.ProductId = Sales.ProductId
+";
+                conn.Open();
+                return await conn.QueryAsync<ProductProfitReportViewModel>(query, new { salesFromDate, salesToDate, purchaseFromDate, purchaseToDate });
+            }
+        }
     }
 }
