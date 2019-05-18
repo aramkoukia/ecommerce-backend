@@ -125,6 +125,24 @@ namespace EcommerceApi.Controllers
                         }
                         else
                         {
+                            if (typeId > 0)
+                            {
+                                var existingProductType = await _context.ProductType.FindAsync(typeId);
+                                if (existingProductType == null)
+                                {
+                                    found.ProductType = new ProductType
+                                    {
+                                        ProductTypeId = typeId,
+                                        ModifiedDate = DateTime.Now,
+                                        ProductTypeName = product._category
+                                    };
+                                }
+                            }
+                            else
+                            {
+                                found.ProductType = null;
+                            }
+
                             productsUpdated++;
                             found.ModifiedDate = DateTime.Now;
                             found.ProductName = product.post_title;
