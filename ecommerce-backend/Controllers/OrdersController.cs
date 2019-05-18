@@ -246,6 +246,12 @@ namespace EcommerceApi.Controllers
                 }
             }
 
+            // trying to set the payment if it is wrong
+            if (order.OrderPayment != null && order.OrderPayment.Count == 1)
+            {
+                order.OrderPayment.First().PaymentAmount = order.Total;
+            }
+
             order.Customer = null;
             order.Location = null;
             var done = await NewOrderUpdateInventory(order);
