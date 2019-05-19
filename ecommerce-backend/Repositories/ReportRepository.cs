@@ -824,7 +824,6 @@ SELECT ProductName,
 	   FORMAT(ISNULL(AvgSalesPrice, 0), 'N2') AS AvgSalesPrice, 
 	   FORMAT(ISNULL(SalesAmount * AvgTotalCost, 0), 'N2') AS TotalCost,
 	   FORMAT(ISNULL(AvgSalesPrice - AvgTotalCost, 0), 'N2') AS AvgProfitPerItem,
-	   -- FORMAT(ISNULL(AvgTotalCost - AvgSalesPrice, 0), 'N2') AS AvgProfitPerItem,
 	   FORMAT(ISNULL(TotalSales - (SalesAmount * AvgTotalCost), 0), 'N2') AS TotalProfit
 FROM Product
 INNER JOIN ProductType
@@ -834,12 +833,12 @@ SELECT ProductId,
        SUM(Amount) AS PurchaseAmount, 
 	   Avg(UnitPrice) AS AvgPurchasePrice, 
 	   Avg(ISNULL(OverheadCost, 0)/ Amount) AS AvgOverheadCost,
-	   Avg(UnitPrice + ISNULL(OverheadCost, 0)/ Amount ) AS AvgTotalCost  
+	   Avg(UnitPrice + (ISNULL(OverheadCost, 0)/ Amount)) AS AvgTotalCost  
 FROM purchasedetail
 WHERE PaidDate BETWEEN @purchaseFromDate AND @purchaseToDate
 GROUP BY ProductId) Purchase
 	ON Purchase.ProductId = Product.ProductId
-LEFT JOIN (SELECT ProductId, SUM(OrderDetail.Total) AS TotalSales, SUM(OrderDetail.Amount) AS SalesAmount, AVG(OrderDetail.UnitPrice) AS AvgSalesPrice
+LEFT JOIN (SELECT ProductId, SUM(OrderDetail.UnitPrice * OrderDetail.Amount) AS TotalSales, SUM(OrderDetail.Amount) AS SalesAmount, AVG(OrderDetail.UnitPrice) AS AvgSalesPrice
 		   FROM [Order]
 		   INNER JOIN OrderDetail
 			 ON OrderDetail.OrderId = [Order].OrderId
@@ -847,6 +846,7 @@ LEFT JOIN (SELECT ProductId, SUM(OrderDetail.Total) AS TotalSales, SUM(OrderDeta
                  AND [Order].Status IN ('Return', 'Paid', 'Account')
 		   GROUP BY ProductId) Sales
 ON Product.ProductId = Sales.ProductId
+ORDER BY ISNULL(TotalSales - (SalesAmount * AvgTotalCost), 0) DESC
 ";
                 conn.Open();
                 return await conn.QueryAsync<ProductProfitReportViewModel>(query, new { salesFromDate, salesToDate, purchaseFromDate, purchaseToDate });

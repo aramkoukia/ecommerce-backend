@@ -173,23 +173,6 @@ namespace EcommerceApi.Controllers
             return await _reportRepository.GetPaymentsReport(fromDate, toDate, user.Id);
         }
 
-        [HttpGet("PurchaseSummary")]
-        public async Task<IEnumerable<PurchasesReportViewModel>> GetPurchasesReport(DateTime fromDate, DateTime toDate)
-        {
-            if (fromDate == DateTime.MinValue)
-                fromDate = DateTime.Now;
-            if (toDate == DateTime.MinValue)
-                toDate = DateTime.Now;
-            else
-                toDate = toDate.AddDays(1).AddTicks(-1);
-
-            //System.Security.Claims.ClaimsPrincipal currentUser = this.User;
-            //var user = await _userManager.FindByEmailAsync(currentUser.Identity.Name);
-
-            return await _reportRepository.GetPurchasesReport(fromDate, toDate, "");
-        }
-
-
         [HttpGet("PurchaseDetail")]
         public async Task<IEnumerable<PurchasesDetailReportViewModel>> GetPurchasesDetailReport(DateTime fromDate, DateTime toDate)
         {
@@ -248,6 +231,30 @@ namespace EcommerceApi.Controllers
                 toDate = toDate.AddDays(1).AddTicks(-1);
 
             return await _reportRepository.GetSalesForecastReport(fromDate, toDate);
+        }
+
+        [HttpGet("PurchaseProfit")]
+        public async Task<IEnumerable<ProductProfitReportViewModel>> GetProductProfitReport(DateTime salesFromDate,
+                                                                                            DateTime salesToDate,
+                                                                                            DateTime purchaseFromDate,
+                                                                                            DateTime purchaseToDate)
+        {
+            if (salesFromDate == DateTime.MinValue)
+                salesFromDate = DateTime.Now.AddYears(-1);
+            if (salesToDate == DateTime.MinValue)
+                salesToDate = DateTime.Now;
+            else
+                salesToDate = salesToDate.AddDays(1).AddTicks(-1);
+
+            if (purchaseFromDate == DateTime.MinValue)
+                purchaseFromDate = DateTime.Now.AddYears(-1);
+            if (purchaseToDate == DateTime.MinValue)
+                purchaseToDate = DateTime.Now;
+            else
+                purchaseToDate = purchaseToDate.AddDays(1).AddTicks(-1);
+
+
+            return await _reportRepository.GetProductProfitReport(salesFromDate, salesToDate, purchaseFromDate, purchaseToDate);
         }
     }
 }
