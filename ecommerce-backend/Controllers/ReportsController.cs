@@ -173,6 +173,22 @@ namespace EcommerceApi.Controllers
             return await _reportRepository.GetPaymentsReport(fromDate, toDate, user.Id);
         }
 
+        [HttpGet("PurchaseSummary")]
+        public async Task<IEnumerable<PurchasesReportViewModel>> GetPurchaseReport(DateTime fromDate, DateTime toDate)
+        {
+            if (fromDate == DateTime.MinValue)
+                fromDate = DateTime.Now;
+            if (toDate == DateTime.MinValue)
+                toDate = DateTime.Now;
+            else
+                toDate = toDate.AddDays(1).AddTicks(-1);
+
+            // System.Security.Claims.ClaimsPrincipal currentUser = this.User;
+            // var user = await _userManager.FindByEmailAsync(currentUser.Identity.Name);
+
+            return await _reportRepository.GetPurchasesReport(fromDate, toDate, "");
+        }
+
         [HttpGet("PurchaseDetail")]
         public async Task<IEnumerable<PurchasesDetailReportViewModel>> GetPurchasesDetailReport(DateTime fromDate, DateTime toDate)
         {
