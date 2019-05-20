@@ -12,5 +12,6 @@
         public bool SmtpUseSsl { get; set; }
         public bool WarnInSufficientStockOnOrder { get; set; }
         public bool BlockInSufficientStockOnOrder { get; set; }
+        public string AllowedIPAddresses { get; set; }
     }
 }
