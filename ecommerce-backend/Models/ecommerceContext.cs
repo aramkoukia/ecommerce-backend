@@ -15,6 +15,7 @@ namespace EcommerceApi.Models
         public virtual DbSet<OrderTax> OrderTax { get; set; }
         public virtual DbSet<PaymentType> PaymentType { get; set; }
         public virtual DbSet<Product> Product { get; set; }
+        public virtual DbSet<ProductPackage> ProductPackage { get; set; }
         public virtual DbSet<ProductType> ProductType { get; set; }
         public virtual DbSet<Tax> Tax { get; set; }
         public virtual DbSet<ProductInventory> ProductInventory { get; set; }

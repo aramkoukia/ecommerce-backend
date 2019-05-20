@@ -8,8 +8,9 @@ namespace EcommerceApi.Models
         public Product()
         {
             ProductInventory = new HashSet<ProductInventory>();
+            ProductPackage = new HashSet<ProductPackage>();
             ProductType = new ProductType();
-    }
+        }
 
         public int ProductId { get; set; }
         public string ProductCode { get; set; }
@@ -25,8 +26,7 @@ namespace EcommerceApi.Models
         public DateTime ModifiedDate { get; set; }
         public ProductType ProductType { get; set; }
         public bool Disabled { get; set; }
-
         public ICollection<ProductInventory> ProductInventory { get; set; }
-
+        public ICollection<ProductPackage> ProductPackage { get; set; }
     }
 }

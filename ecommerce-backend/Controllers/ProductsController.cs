@@ -145,6 +145,63 @@ namespace EcommerceApi.Controllers
             return Ok(product);
         }
 
+        [HttpGet("{id}/productpackage")]
+        public async Task<IEnumerable<ProductPackage>> GetProductPackage([FromRoute] int id)
+        {
+            return await _context.ProductPackage.Where(p => p.ProductId == id).AsNoTracking().ToListAsync();
+        }
+
+        [HttpPost("{id}/productpackage")]
+        public async Task<IActionResult> CreateProductPackage([FromRoute] int id, [FromBody] ProductPackage productPackage)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            productPackage.ProductId = id;
+            productPackage.ModifiedDate = DateTime.Now;
+            _context.ProductPackage.Add(productPackage);
+            await _context.SaveChangesAsync();
+            return Ok();
+        }
+
+        [HttpPut("{id}/productpackage")]
+        public async Task<IActionResult> UpdateProductPackage([FromRoute] int id, [FromBody] ProductPackage productPackage)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var foundPackage = _context.ProductPackage.FirstOrDefault(p => p.ProductPackageId == productPackage.ProductPackageId);
+            if (foundPackage != null)
+            {
+                foundPackage.Package = productPackage.Package;
+                foundPackage.PackagePrice = productPackage.PackagePrice;
+                foundPackage.AmountInMainPackage = productPackage.AmountInMainPackage;
+                foundPackage.ModifiedDate  = DateTime.Now;
+                await _context.SaveChangesAsync();
+            }
+            return Ok();
+        }
+
+        [HttpDelete("{id}/productpackage/{productPackageId}/delete")]
+        public async Task<IActionResult> DeleteProductPackage([FromRoute] int id, [FromRoute] int productPackageId)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var foundPackage = _context.ProductPackage.FirstOrDefault(p => p.ProductPackageId == productPackageId && p.ProductId == id);
+            if (foundPackage != null)
+            {
+                _context.ProductPackage.Remove(foundPackage);
+                await _context.SaveChangesAsync();
+            }
+            return Ok();
+        }
+
         private bool ProductExists(int id)
         {
             return _context.Product.Any(e => e.ProductId == id);
