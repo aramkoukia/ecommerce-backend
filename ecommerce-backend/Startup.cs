@@ -16,6 +16,7 @@ using DinkToPdf;
 using DinkToPdf.Contracts;
 using EcommerceApi.Untilities;
 using System.IO;
+using EcommerceApi.Middleware;
 
 namespace EcommerceApi
 {
@@ -142,7 +143,7 @@ namespace EcommerceApi
                 .AllowCredentials());
 
             app.UseResponseCompression();
-
+            // app.UseMiddleware<AdminSafeListMiddleware>();
             app.UseMvc();
         }
     }

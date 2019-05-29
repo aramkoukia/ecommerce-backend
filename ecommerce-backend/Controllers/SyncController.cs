@@ -140,13 +140,17 @@ namespace EcommerceApi.Controllers
                             }
                             else
                             {
-                                found.ProductType = null;
+                                // found.ProductType = null;
                             }
 
                             productsUpdated++;
                             found.ModifiedDate = DateTime.Now;
                             found.ProductName = product.post_title;
-                            found.ProductTypeId = typeId;
+                            if (found.ProductTypeId != typeId)
+                            {
+                                found.ProductTypeId = typeId;
+                            }
+                            
                             found.SalesPrice = price;
                             found.Barcode = product._sku;
                             found.ProductCode = product._sku;
