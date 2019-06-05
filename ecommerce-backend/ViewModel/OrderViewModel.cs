@@ -24,5 +24,8 @@ namespace EcommerceApi.ViewModel
         public string CompanyName { get; set; }
         public string DueDate { get; set; }
         public string OverDue { get; set; }
+        public string PstCharged { get; set; }
+        public decimal PstAmount { get; set; }
+
     }
 }

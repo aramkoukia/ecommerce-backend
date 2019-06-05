@@ -5,6 +5,7 @@ using System.Data.SqlClient;
 using System.Linq;
 using System.Threading.Tasks;
 using Dapper;
+using EcommerceApi.Models;
 using EcommerceApi.ViewModel;
 using Microsoft.Extensions.Configuration;
 
@@ -129,12 +130,26 @@ LEFT JOIN (
   WHERE [Order].Status = 'OnHold'
   GROUP BY ProductId
 ) AS OnHoldItems
-ON OnHoldItems.ProductId = Product.ProductId
-WHERE Disabled = 0
+  ON OnHoldItems.ProductId = Product.ProductId
+WHERE Disabled = 0 ; 
+
+SELECT * FROM ProductPackage;
 ";
-// WHERE SalesPrice > 0";
+
+                // WHERE SalesPrice > 0";
                 conn.Open();
-                return await conn.QueryAsync<ProductViewModel>(query);
+                var result = await conn.QueryMultipleAsync(query);
+
+                var products = result.Read<ProductViewModel>().ToList();
+                var packages = result.Read<ProductPackage>().ToList(); //(Location will have that extra CourseId on it for the next part)
+                var distinctProductIdsWithPackage = packages.Select(d => d.ProductId).Distinct();
+                foreach (var productId in distinctProductIdsWithPackage)
+                {
+                    products.FirstOrDefault(p => p.ProductId == productId)
+                        .ProductPackages.AddRange(packages.Where(p => p.ProductId == productId));
+                }
+
+                return products;
             }
         }
 

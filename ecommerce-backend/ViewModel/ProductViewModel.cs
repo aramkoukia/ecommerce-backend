@@ -1,9 +1,16 @@
-﻿using System;
+﻿using EcommerceApi.Models;
+using System;
+using System.Collections.Generic;
 
 namespace EcommerceApi.ViewModel
 {
     public class ProductViewModel
     {
+        public ProductViewModel()
+        {
+            ProductPackages = new List<ProductPackage>();
+        }
+
         public int ProductId { get; set; }
         public string ProductCode { get; set; }
         public string ProductName { get; set; }
@@ -22,5 +29,6 @@ namespace EcommerceApi.ViewModel
         public decimal AbbotsfordOnHold { get; set; }
         public decimal OnHoldAmount { get; set; }
         public string Disabled { get; set; }
+        public List<ProductPackage> ProductPackages { get; set; }
     }
 }

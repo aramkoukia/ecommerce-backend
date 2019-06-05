@@ -49,7 +49,9 @@ SELECT [Order].[OrderId]
 	PaymentTypeName,
 	ISNULL(Customer.CompanyName, 'WALK-IN') AS CompanyName,
 	CASE WHEN [Order].[Status] = 'Account' THEN FORMAT(DATEADD(DAY, 40, [OrderDate]), 'dd/MM/yyyy hh:mm tt') ELSE NULL END AS DueDate,
-	CASE WHEN [Order].[Status] = 'Account' THEN CASE WHEN DATEADD(DAY, 40, [OrderDate]) <= GETDATE() THEN 'Yes' ELSE 'No' END ELSE NULL END AS OverDue
+	CASE WHEN [Order].[Status] = 'Account' THEN CASE WHEN DATEADD(DAY, 40, [OrderDate]) <= GETDATE() THEN 'Yes' ELSE 'No' END ELSE NULL END AS OverDue,
+	TaxAmount AS PstAmount,
+	CASE WHEN TaxAmount IS NULL THEN 'No' ELSE 'Yes' END AS PstCharged 
 FROM [Order]
 INNER JOIN Location
 	ON Location.LocationId = [Order].LocationId
@@ -66,6 +68,15 @@ LEFT JOIN
         GROUP BY OrderId
     ) AS OrderPayment
 	ON OrderPayment.OrderId = [Order].OrderId
+LEFT JOIN 
+	( 
+        SELECT OrderId, TaxAmount
+        FROM OrderTax
+		INNER JOIN Tax
+			ON OrderTax.TaxId = Tax.TaxId
+		WHERE TaxName like '%PST%'
+    ) AS OrderTax
+	ON OrderTax.OrderId = [Order].OrderId
 WHERE OrderDate BETWEEN @fromDate AND @toDate
       AND [Order].LocationId IN @locIds
 ORDER BY [Order].[OrderId] DESC";
