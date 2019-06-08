@@ -60,7 +60,7 @@ SELECT Purchase.PurchaseId, Purchase.Supplier, Purchase.PONumber,
 	   PurchaseDetailPlan.Amount - ISNULL(PurchaseDetailPaid.Amount, 0) AS RemainToPay,
 	   PurchaseDetailOnDelivery.Amount AS OnDeliveryAmount, PurchaseDetailOnDelivery.UnitPrice As OnDelivertPrice, PurchaseDetailOnDelivery.OverheadCost AS OnDeliveryOverheadCost,
 	   PurchaseDetailCustomClearance.Amount AS CustomClearanceAmount, PurchaseDetailCustomClearance.UnitPrice AS CustomClearancePrice, PurchaseDetailCustomClearance.OverheadCost AS CustomClearanceOverheadCost,
-	   PurchaseDetailArrived.Amount AS ArrivedAmount, PurchaseDetailArrived.UnitPrice AS ArrivedPrice, PurchaseDetailArrived.OverheadCost AS ArrivedOverheadCost, PurchaseDetailArrived.LocationName, PurchaseDetailArrived.ArrivedDate,
+	   PurchaseDetailArrived.Amount AS ArrivedAmount, PurchaseDetailArrived.UnitPrice AS ArrivedPrice, PurchaseDetailArrived.OverheadCost AS ArrivedOverheadCost, PurchaseDetailArrived.ArrivedDate,
 	   PurchaseDetailPlan.Amount - ISNULL(PurchaseDetailArrived.Amount,0) AS RemainToArrive
 FROM Purchase
 INNER JOIN (
@@ -93,12 +93,10 @@ LEFT JOIN (
 ON Purchase.PurchaseId = PurchaseDetailCustomClearance.PurchaseId
    AND PurchaseDetailPlan.ProductId = PurchaseDetailCustomClearance.ProductId
 LEFT JOIN (
-  SELECT PurchaseId, ProductId, SUM(Amount) AS Amount, AVG(UnitPrice) AS UnitPrice, AVG(OverheadCost) AS OverheadCost, LocationName, MIN(ArrivedDate) AS ArrivedDate
+  SELECT PurchaseId, ProductId, SUM(Amount) AS Amount, AVG(UnitPrice) AS UnitPrice, AVG(OverheadCost) AS OverheadCost, MIN(ArrivedDate) AS ArrivedDate
   FROM PurchaseDetail
-  INNER JOIN [Location]
-	ON PurchaseDetail.ArrivedAtLocationId = [Location].LocationId 
   WHERE [Status] = 'Arrived'
-  GROUP BY PurchaseId, ProductId, LocationName) PurchaseDetailArrived
+  GROUP BY PurchaseId, ProductId) PurchaseDetailArrived
 ON Purchase.PurchaseId = PurchaseDetailArrived.PurchaseId
    AND PurchaseDetailPlan.ProductId = PurchaseDetailArrived.ProductId
 ORDER BY Purchase.PoNumber
