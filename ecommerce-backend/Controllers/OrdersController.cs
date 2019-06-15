@@ -97,6 +97,7 @@ namespace EcommerceApi.Controllers
             var order = await _context.Order.AsNoTracking()
                 .Include(o => o.OrderDetail)
                     .ThenInclude(o =>o.Product)
+                        .ThenInclude(o => o.ProductPackage)
                 .Include(t => t.OrderTax)
                     .ThenInclude(t => t.Tax)
                 .Include(o => o.OrderPayment)
@@ -887,7 +888,10 @@ www.lightsandparts.com | {user.Email}
 
                 // if order is refund we add to inventory
                 var addOrUpdate = -1;
-                var amount = Math.Abs(item.Amount);
+                var amount = item.AmountInMainPackage.HasValue && item.AmountInMainPackage > 0 
+                    ? Math.Abs(item.AmountInMainPackage.Value * item.Amount) 
+                    : Math.Abs(item.Amount);
+
                 if (order.Status == OrderStatus.Return.ToString() || item.Amount < 0)
                 {
                     addOrUpdate = 1;
@@ -934,7 +938,10 @@ www.lightsandparts.com | {user.Email}
 
                 // if order is refund we add to inventory
                 var addOrUpdate = -1;
-                var amount = Math.Abs(item.Amount);
+                var amount = item.AmountInMainPackage.HasValue && item.AmountInMainPackage > 0
+                    ? Math.Abs(item.AmountInMainPackage.Value * item.Amount)
+                    : Math.Abs(item.Amount);
+
                 if (updateOrderStatus.OrderStatus == OrderStatus.Return.ToString() || item.Amount < 0)
                 {
                     addOrUpdate = 1;
@@ -984,7 +991,10 @@ www.lightsandparts.com | {user.Email}
 
                 // if order is refund we add to inventory
                 var addOrUpdate = 1;
-                var amount = Math.Abs(item.Amount);
+                var amount = item.AmountInMainPackage.HasValue && item.AmountInMainPackage > 0
+                    ? Math.Abs(item.AmountInMainPackage.Value * item.Amount)
+                    : Math.Abs(item.Amount);
+
                 decimal changedBalance = 0;
                 if (order.Status == OrderStatus.Return.ToString() || item.Amount < 0)
                 {
@@ -993,7 +1003,7 @@ www.lightsandparts.com | {user.Email}
 
                 if (sourceLocationProductInventory != null)
                 {
-                    sourceLocationProductInventory.Balance = sourceLocationProductInventory.Balance + (addOrUpdate * amount);
+                    sourceLocationProductInventory.Balance += (addOrUpdate * amount);
                     sourceLocationProductInventory.ModifiedDate = date;
                     changedBalance = sourceLocationProductInventory.Balance;
                 }
@@ -1019,7 +1029,10 @@ www.lightsandparts.com | {user.Email}
 
                 // if order is refund we add to inventory
                 addOrUpdate = -1;
-                amount = Math.Abs(item.Amount);
+                amount = item.AmountInMainPackage.HasValue && item.AmountInMainPackage > 0
+                    ? Math.Abs(item.AmountInMainPackage.Value * item.Amount)
+                    : Math.Abs(item.Amount);
+
                 if (order.Status == OrderStatus.Return.ToString() || item.Amount < 0)
                 {
                     addOrUpdate = 1;
@@ -1027,7 +1040,7 @@ www.lightsandparts.com | {user.Email}
 
                 if (destinationLocationProductInventory != null)
                 {
-                    destinationLocationProductInventory.Balance = destinationLocationProductInventory.Balance + (addOrUpdate * amount);
+                    destinationLocationProductInventory.Balance += (addOrUpdate * amount);
                     destinationLocationProductInventory.ModifiedDate = date;
                     changedBalance = destinationLocationProductInventory.Balance;
                 }
@@ -1063,10 +1076,14 @@ www.lightsandparts.com | {user.Email}
                     m.ProductId == item.ProductId &&
                     m.LocationId == order.LocationId);
 
+                var amount = item.AmountInMainPackage.HasValue && item.AmountInMainPackage > 0
+                    ? item.AmountInMainPackage.Value * item.Amount
+                    : item.Amount;
+
                 decimal changedBalance = 0;
                 if (productInventory != null)
                 {
-                    productInventory.Balance = productInventory.Balance + item.Amount;
+                    productInventory.Balance += amount;
                     productInventory.ModifiedDate = date;
                     changedBalance = productInventory.Balance;
                 }
@@ -1075,16 +1092,16 @@ www.lightsandparts.com | {user.Email}
                     _context.ProductInventory.Add(
                         new ProductInventory
                         {
-                             Balance = item.Amount,
+                             Balance = amount,
                              BinCode = "",
                              LocationId = order.LocationId,
                              ModifiedDate = date,
                              ProductId = item.ProductId                                 
                         });
-                    changedBalance = item.Amount;
+                    changedBalance = amount;
                 }
 
-                AddTransactionHistory(item.ProductId, order.LocationId, order.CreatedByUserId, date, $"Order {order.Status.ToString()} Released", changedBalance, item.Amount, $"Id: {order.OrderId}");
+                AddTransactionHistory(item.ProductId, order.LocationId, order.CreatedByUserId, date, $"Order {order.Status.ToString()} Released", changedBalance, amount, $"Id: {order.OrderId}");
             }
             return true;
         }

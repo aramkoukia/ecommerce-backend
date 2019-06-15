@@ -98,12 +98,18 @@ namespace EcommerceApi.Untilities
 
         foreach (var item in order.OrderDetail)
         {
+                var packageInfo = "";
+                if (!string.IsNullOrEmpty(item.Package))
+                {
+                    packageInfo = $" (pkg:{item.Package}) {item.AmountInMainPackage}x";
+                }
+
                 sbCustomer.AppendFormat(@"<tr>
                                 <td style='width:10%'>{0}</td>
                                 <td style='width:55%'>X {1}</td>
                                 <td style='width:20%' class='right'>${2}</td>
                                 <td style='width:15%' class='right'>${3}</td>
-                                </tr>", item.Amount.ToString("G29"), item.Product.ProductCode + " - "+ item.Product.ProductName, item.UnitPrice, item.Total);
+                                </tr>", item.Amount.ToString("G29"), item.Product.ProductCode + " - "+ item.Product.ProductName + packageInfo, item.UnitPrice, item.Total);
         }
             sbCustomer.AppendFormat(@"<tr style='border-top: 1pt solid darkgray;padding-top:10px'>
                         <td style='width:10%'></td>
