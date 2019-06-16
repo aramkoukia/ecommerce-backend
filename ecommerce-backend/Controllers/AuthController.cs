@@ -12,8 +12,9 @@ using System;
 using System.Text;
 using EcommerceApi.Models;
 using EcommerceApi.Services;
-using EcommerceApi.ViewModel;
 using System.Collections.Generic;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Http;
 
 namespace EcommerceApi.Controllers
 {
@@ -26,6 +27,8 @@ namespace EcommerceApi.Controllers
         private readonly IEmailSender _emailSender;
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly ILogger _logger;
+        private readonly EcommerceContext _context;
+        private readonly IHttpContextAccessor _accessor;
 
         public AuthController(
             UserManager<ApplicationUser> userManager,
@@ -34,14 +37,18 @@ namespace EcommerceApi.Controllers
             IOptions<JwtOptions> jwtOptions,
             IEmailSender emailSender,
             SignInManager<ApplicationUser> signInManager,
-            ILoggerFactory loggerFactory)
+            ILoggerFactory loggerFactory,
+            EcommerceContext context,
+            IHttpContextAccessor accessor)
         {
+            _context = context;
             _userManager = userManager;
             _roleManager = roleManager;
             _identityOptions = identityOptions;
             _jwtOptions = jwtOptions.Value;
             _emailSender = emailSender;
             _signInManager = signInManager;
+            _accessor = accessor;
             _logger = loggerFactory.CreateLogger<AuthController>();
         }
 
@@ -50,6 +57,15 @@ namespace EcommerceApi.Controllers
         [Produces("application/json")]
         public async Task<IActionResult> Login(string username, string password)
         {
+            var clientIp = _accessor.HttpContext.Connection.RemoteIpAddress.ToString().Replace("{", "").Replace("}","");
+            if (!UserLocationIsAuthorized(clientIp))
+            {
+                return BadRequest(new
+                {
+                    error = "", //OpenIdConnectConstants.Errors.InvalidGrant,
+                    error_description = $"You are not allowed to access the system from this location. IP: {clientIp}"
+                });
+            }
             // Ensure the username and password is valid.
             var user = await _userManager.FindByNameAsync(username);
             if (user == null || !await _userManager.CheckPasswordAsync(user, password))
@@ -111,6 +127,19 @@ namespace EcommerceApi.Controllers
                     token = new JwtSecurityTokenHandler().WriteToken(token),
                     permissions = permissions.Distinct(),
                 });
+        }
+
+        private bool UserLocationIsAuthorized(string clientIp)
+        {
+            var adminSafeList = _context.Settings.AsNoTracking().FirstOrDefault().AllowedIPAddresses;
+            var ipList = adminSafeList?.Split(',');
+
+            if (ipList == null || !ipList.Any())
+            {
+                return true;
+            }
+
+            return ipList.Contains(clientIp);
         }
 
         //    [AllowAnonymous]

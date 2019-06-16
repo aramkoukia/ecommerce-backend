@@ -17,6 +17,8 @@ using DinkToPdf.Contracts;
 using EcommerceApi.Untilities;
 using System.IO;
 using EcommerceApi.Middleware;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
 
 namespace EcommerceApi
 {
@@ -35,6 +37,8 @@ namespace EcommerceApi
             services.AddMvc()
                 .AddJsonOptions(options => 
                     options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
+
+            services.TryAddSingleton<IActionContextAccessor, ActionContextAccessor>();
 
             try
             {

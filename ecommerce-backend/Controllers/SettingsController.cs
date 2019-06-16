@@ -51,6 +51,7 @@ namespace EcommerceApi.Controllers
                 currentSetting.SmtpUseSsl = settings.SmtpUseSsl;
                 currentSetting.BlockInSufficientStockOnOrder = settings.BlockInSufficientStockOnOrder;
                 currentSetting.WarnInSufficientStockOnOrder = settings.WarnInSufficientStockOnOrder;
+                currentSetting.AllowedIPAddresses = settings.AllowedIPAddresses;
             }
             else
             {
