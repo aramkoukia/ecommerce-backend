@@ -5,6 +5,7 @@ using System.Data.SqlClient;
 using System.Linq;
 using System.Threading.Tasks;
 using Dapper;
+using EcommerceApi.Models;
 using EcommerceApi.ViewModel;
 using Microsoft.Extensions.Configuration;
 
@@ -79,7 +80,29 @@ LEFT JOIN
 	ON OrderTax.OrderId = [Order].OrderId
 WHERE OrderDate BETWEEN @fromDate AND @toDate
       AND [Order].LocationId IN @locIds
-ORDER BY [Order].[OrderId] DESC";
+ORDER BY [Order].[OrderId] DESC;
+
+SELECT [OrderDetail].OrderId, 
+       [OrderDetail].Amount, 
+	   [OrderDetail].UnitPrice, 
+	   [OrderDetail].SubTotal,  
+       [OrderDetail].DiscountType,
+	   [OrderDetail].DiscountAmount,
+	   [OrderDetail].DiscountPercent,
+	   [OrderDetail].TotalDiscount,
+	   [OrderDetail].Total,
+	   [OrderDetail].Package,
+	   [OrderDetail].AmountInMainPackage,
+	   ProductCode,
+	   ProductName
+FROM [Order]
+INNER JOIN [OrderDetail]
+    ON [Order].OrderId = [OrderDetail].OrderId
+INNER JOIN Product
+    ON Product.ProductId = [OrderDetail].ProductId
+WHERE OrderDate BETWEEN @fromDate AND @toDate
+      AND [Order].LocationId IN @locIds
+";
                 conn.Open();
                 var locationIds = new List<int>();
                 if (locationId == 0)
@@ -90,9 +113,18 @@ ORDER BY [Order].[OrderId] DESC";
                 {
                     locationIds.Add(locationId);
                 }
-
                 var locIds = locationIds.ToArray();
-                return await conn.QueryAsync<OrderViewModel>(query, new { locIds, fromDate, toDate });
+
+                var result = await conn.QueryMultipleAsync(query, new { locIds, fromDate, toDate });
+
+                var orders = result.Read<OrderViewModel>().ToList();
+                var orderDetails = result.Read<OrderDetailViewModel>().ToList();
+                foreach (var order in orders)
+                {
+                    order.OrderDetail.AddRange(orderDetails.Where(p => p.OrderId == order.OrderId));
+                }
+
+                return orders;
             }
         }
 

@@ -1,9 +1,15 @@
-﻿using System;
+﻿using EcommerceApi.Models;
+using System.Collections.Generic;
 
 namespace EcommerceApi.ViewModel
 {
     public class OrderViewModel
     {
+        public OrderViewModel()
+        {
+            OrderDetail = new List<OrderDetailViewModel>();
+        }
+
         public int OrderId { get; set; }
         public int LocationId { get; set; }
         public string OrderDate { get; set; }
@@ -26,6 +32,6 @@ namespace EcommerceApi.ViewModel
         public string OverDue { get; set; }
         public string PstCharged { get; set; }
         public decimal PstAmount { get; set; }
-
+        public List<OrderDetailViewModel> OrderDetail { get; set; }
     }
 }
