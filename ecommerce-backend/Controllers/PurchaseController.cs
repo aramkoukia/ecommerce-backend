@@ -43,9 +43,9 @@ namespace EcommerceApi.Controllers
 
         // GET: api/Purchases
         [HttpGet("purchasedetail")]
-        public async Task<IEnumerable<PurchaseDetailViewModel>> GetPurchaseDetail(bool showPending, bool showOnDelivery, bool showCustomClearance, bool showCompletes)
+        public async Task<IEnumerable<PurchaseDetailViewModel>> GetPurchaseDetail(bool showPending, bool showOnDelivery, bool showCustomClearance, bool showArrived)
         {
-            return await _PurchaseRepository.GetPurchaseDetails(showPending, showOnDelivery, showCustomClearance, showCompletes);
+            return await _PurchaseRepository.GetPurchaseDetails(showPending, showOnDelivery, showCustomClearance, showArrived);
         }
 
         // GET: api/Purchases/5
