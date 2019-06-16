@@ -221,7 +221,7 @@ WHERE Product.ProductId = @ProductId
             }
         }
 
-        public async Task<IEnumerable<ProductTransactionViewModel>> GetProductTransactions(int productId, DateTime fromDate, DateTime toDate, string userId)
+        public async Task<IEnumerable<ProductTransactionViewModel>> GetProductTransactions(int productId, DateTime fromDate, DateTime toDate, string userId, int locationId)
         {
             using (IDbConnection conn = Connection)
             {
@@ -234,13 +234,23 @@ LEFT JOIN Users
     ON Users.Email = ProductInventoryHistory.CreatedByUserId
 WHERE ProductId = @productId
       AND ModifiedDate BETWEEN @fromDate AND @toDate
-      AND ProductInventoryHistory.LocationId IN @locationIds
+      AND ProductInventoryHistory.LocationId IN @locIds
       AND Balance <> 0
 Order By [Date] Desc
 ";
                 conn.Open();
-                var locationIds = (await GetUserLocations(userId)).ToArray();
-                return await conn.QueryAsync<ProductTransactionViewModel>(query, new { productId, fromDate, toDate, locationIds });
+                var locationIds = new List<int>();
+                if (locationId == 0)
+                {
+                    locationIds = (await GetUserLocations(userId)).ToList();
+                }
+                else
+                {
+                    locationIds.Add(locationId);
+                }
+
+                var locIds = locationIds.ToArray();
+                return await conn.QueryAsync<ProductTransactionViewModel>(query, new { productId, fromDate, toDate, locIds });
             }
         }
 

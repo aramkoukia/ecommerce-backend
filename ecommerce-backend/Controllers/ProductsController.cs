@@ -54,7 +54,7 @@ namespace EcommerceApi.Controllers
 
         // GET: api/Products/5/Transactions
         [HttpGet("{id}/Transactions")]
-        public async Task<IEnumerable<ProductTransactionViewModel>> GetProductTransactions([FromRoute] int id, DateTime fromDate, DateTime toDate)
+        public async Task<IEnumerable<ProductTransactionViewModel>> GetProductTransactions([FromRoute] int id, int locationId, DateTime fromDate, DateTime toDate)
         {
             if (fromDate == DateTime.MinValue)
                 fromDate = DateTime.Now;
@@ -67,7 +67,7 @@ namespace EcommerceApi.Controllers
             System.Security.Claims.ClaimsPrincipal currentUser = this.User;
             var user = await _userManager.FindByEmailAsync(currentUser.Identity.Name);
 
-            return await _productRepository.GetProductTransactions(id, fromDate, toDate, user.Id);
+            return await _productRepository.GetProductTransactions(id, fromDate, toDate, user.Id, locationId);
         }
 
         // PUT: api/Products/5

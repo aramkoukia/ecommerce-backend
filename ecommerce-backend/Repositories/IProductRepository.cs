@@ -10,6 +10,6 @@ namespace EcommerceApi.Repositories
         Task<IEnumerable<ProductViewModel>> GetProducts();
         Task<IEnumerable<ProductViewModel>> GetAvailableProducts();
         Task<ProductViewModel> GetProduct(int productId);
-        Task<IEnumerable<ProductTransactionViewModel>> GetProductTransactions(int productId, DateTime fromDate, DateTime toDate, string userId);
+        Task<IEnumerable<ProductTransactionViewModel>> GetProductTransactions(int productId, DateTime fromDate, DateTime toDate, string userId, int locationId);
     }
 }
