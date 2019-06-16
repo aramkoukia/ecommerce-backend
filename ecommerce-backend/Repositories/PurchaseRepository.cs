@@ -48,19 +48,35 @@ namespace EcommerceApi.Repositories
             }
         }
 
-        public async Task<IEnumerable<PurchaseDetailViewModel>> GetPurchaseDetails()
+        public async Task<IEnumerable<PurchaseDetailViewModel>> GetPurchaseDetails(bool showPending, bool showOnDelivery, bool showCustomClearance, bool showCompletes)
         {
             using (IDbConnection conn = Connection)
             {
                 string query = $@"
-SELECT Purchase.PurchaseId, Purchase.Supplier, Purchase.PONumber,
-       PurchaseDetailPlan.ProductId, ProductCode, ProductName, 
-	   PurchaseDetailPlan.Amount AS PlanAmount, PurchaseDetailPlan.UnitPrice AS PlanPrice, PurchaseDetailPlan.OverheadCost AS PlanOverheadCost,
-	   PurchaseDetailPaid.Amount AS PaidAmount, PurchaseDetailPaid.UnitPrice AS PaidPrice, PurchaseDetailPaid.OverheadCost AS PaidOverheadCost, 
+SELECT * FROM (
+SELECT Purchase.PurchaseId, 
+       Purchase.Supplier, 
+       Purchase.PONumber,
+       PurchaseDetailPlan.ProductId, 
+	   ProductCode, ProductName, 
+	   PurchaseDetailPlan.Amount AS PlanAmount, 
+	   PurchaseDetailPlan.UnitPrice AS PlanPrice, 
+	   PurchaseDetailPlan.OverheadCost AS PlanOverheadCost,
+	   PurchaseDetailPaid.Amount AS PaidAmount, 
+	   PurchaseDetailPaid.UnitPrice AS PaidPrice, 
+	   PurchaseDetailPaid.OverheadCost AS PaidOverheadCost, 
 	   PurchaseDetailPlan.Amount - ISNULL(PurchaseDetailPaid.Amount, 0) AS RemainToPay,
-	   PurchaseDetailOnDelivery.Amount AS OnDeliveryAmount, PurchaseDetailOnDelivery.UnitPrice As OnDelivertPrice, PurchaseDetailOnDelivery.OverheadCost AS OnDeliveryOverheadCost,
-	   PurchaseDetailCustomClearance.Amount AS CustomClearanceAmount, PurchaseDetailCustomClearance.UnitPrice AS CustomClearancePrice, PurchaseDetailCustomClearance.OverheadCost AS CustomClearanceOverheadCost,
-	   PurchaseDetailArrived.Amount AS ArrivedAmount, PurchaseDetailArrived.UnitPrice AS ArrivedPrice, PurchaseDetailArrived.OverheadCost AS ArrivedOverheadCost, PurchaseDetailArrived.ArrivedDate,
+	   PurchaseDetailOnDelivery.Amount AS OnDeliveryAmount,
+	   PurchaseDetailPlan.Amount - ISNULL(PurchaseDetailOnDelivery.Amount,0) AS RemainOnDelivery,
+	   PurchaseDetailOnDelivery.UnitPrice As OnDelivertPrice, 
+	   PurchaseDetailOnDelivery.OverheadCost AS OnDeliveryOverheadCost,
+	   PurchaseDetailCustomClearance.Amount AS CustomClearanceAmount,
+	   PurchaseDetailPlan.Amount - ISNULL(PurchaseDetailCustomClearance.Amount, 0) AS RemainCustomClearance, 
+	   PurchaseDetailCustomClearance.UnitPrice AS CustomClearancePrice, 
+	   PurchaseDetailCustomClearance.OverheadCost AS CustomClearanceOverheadCost,
+	   PurchaseDetailArrived.Amount AS ArrivedAmount, 
+	   PurchaseDetailArrived.UnitPrice AS ArrivedPrice, 
+	   PurchaseDetailArrived.OverheadCost AS ArrivedOverheadCost, PurchaseDetailArrived.ArrivedDate,
 	   PurchaseDetailPlan.Amount - ISNULL(PurchaseDetailArrived.Amount,0) AS RemainToArrive
 FROM Purchase
 INNER JOIN (
@@ -98,11 +114,15 @@ LEFT JOIN (
   WHERE [Status] = 'Arrived'
   GROUP BY PurchaseId, ProductId) PurchaseDetailArrived
 ON Purchase.PurchaseId = PurchaseDetailArrived.PurchaseId
-   AND PurchaseDetailPlan.ProductId = PurchaseDetailArrived.ProductId
-ORDER BY Purchase.PoNumber
+   AND PurchaseDetailPlan.ProductId = PurchaseDetailArrived.ProductId ) Purchases
+WHERE (@showPending = 0 OR RemainToPay > 0)
+      AND (@showOnDelivery = 0 OR RemainOnDelivery > 0)
+	  AND (@showCustomClearance = 0 OR RemainCustomClearance > 0)
+	  AND (@showCompletes = 0 OR RemainToArrive > 0)
+ORDER BY PoNumber
 ";
                 conn.Open();
-                return await conn.QueryAsync<PurchaseDetailViewModel>(query);
+                return await conn.QueryAsync<PurchaseDetailViewModel>(query, new { showPending, showOnDelivery, showCustomClearance, showCompletes });
             }
         }
     }
