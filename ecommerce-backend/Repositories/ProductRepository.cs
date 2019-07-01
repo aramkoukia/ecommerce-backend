@@ -146,7 +146,7 @@ SELECT * FROM ProductPackage;
                 foreach (var productId in distinctProductIdsWithPackage)
                 {
                     products.FirstOrDefault(p => p.ProductId == productId)
-                        .ProductPackages.AddRange(packages.Where(p => p.ProductId == productId));
+                        ?.ProductPackages.AddRange(packages.Where(p => p.ProductId == productId));
                 }
 
                 return products;
