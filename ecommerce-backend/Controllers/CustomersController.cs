@@ -147,11 +147,11 @@ namespace EcommerceApi.Controllers
         {
             var customer = await _customerRepository.GetCustomer(id);
             var file = await GenerateStatementPdf(customer, fromDate, toDate);
-            var message = @"
+            var message = $@"
 Dear Customer,
 
 
-Thank you for choosing LED Lights and Parts. Your e-statement for the month, January-2019 is attached in the email. For any specific invoice information, get back to us to receive a copy. Please contact us at +1(604) 559-5000 for any other queries. 
+Thank you for choosing LED Lights and Parts. Your e-statement for the month, {toDate.ToString("MMMM")} {toDate.Year} is attached in the email. For any specific invoice information, get back to us to receive a copy. Please contact us at +1(604) 559-5000 for any other queries. 
 
 Regards
 
@@ -168,11 +168,13 @@ Fax:(604) 559-5008
 www.lightsandparts.com | sina@lightsandparts.com
             ";
             var attachment = new MemoryStream(file);
-            var attachmentName = $"Monthly Statement {DateTime.Now.ToString("MMMM")} {DateTime.Now.Year}.pdf";
-            var subject = $"Pixel Print Ltd (LED Lights and Parts) Monthly Statement {DateTime.Now.ToString("MMMM")} {DateTime.Now.Year}";
+            var attachmentName = $"Monthly Statement {toDate.ToString("MMMM")} {toDate.Year}.pdf";
+            var subject = $"Pixel Print Ltd (LED Lights and Parts) Monthly Statement {toDate.ToString("MMMM")} {toDate.Year}";
 
-            // TODO: temp for testing, also set CcAdmin to true when finished testing 
-            customer.Email = "aramkoukia@gmail.com";
+            if (string.IsNullOrEmpty(customer.Email))
+            {
+                customer.Email = "aramkoukia@gmail.com";
+            }
 
             _emailSender.SendEmailAsync(customer.Email, subject, message, attachment, attachmentName, true);
             return Ok();
