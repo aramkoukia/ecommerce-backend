@@ -21,6 +21,7 @@
         public string Status { get; set; }
         public decimal AccountBalance { get; set; }
         public decimal StoreCredit { get; set; }
-        public string PstExempt => string.IsNullOrEmpty(PstNumber) ? "No" : "Yes";        
+        public string PstExempt => string.IsNullOrEmpty(PstNumber) ? "No" : "Yes";
+        public bool Disabled { get; set; }
     }
 }

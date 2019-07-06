@@ -25,6 +25,8 @@ namespace EcommerceApi.Models
         public string Segment { get; set; }
         public decimal StoreCredit { get; set; }
 
+        public bool Disabled { get; set; }
+
         [NotMapped]
         public decimal AccountBalance { get; set; }
 

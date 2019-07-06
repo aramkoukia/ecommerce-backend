@@ -48,6 +48,7 @@ namespace EcommerceApi.Repositories
 	                                GROUP BY CustomerId
                                 ) CustomerAccount
                                 ON CustomerAccount.CustomerId = Customer.CustomerId
+                                WHERE Customer.Disabled = 0
                                  ";
                 conn.Open();
                 return await conn.QueryAsync<CustomerViewModel>(query);
