@@ -96,6 +96,19 @@ namespace EcommerceApi.Controllers
             if (customer.PstNumber == null) customer.PstNumber = "";
             if (customer.PhoneNumber == null) customer.PhoneNumber = "";
 
+            if (customer.Disabled && customer.MergeToCustomerId.HasValue)
+            {
+                var mergeToCustomer = await _context.Customer.FirstOrDefaultAsync(c => c.MergeToCustomerId == customer.MergeToCustomerId);
+                if (mergeToCustomer != null)
+                {
+                    var customerOrders = _context.Order.Where(o => o.CustomerId == id);
+                    foreach (var order in customerOrders)
+                    {
+                        order.CustomerId = customer.MergeToCustomerId;
+                    }
+                }
+            }
+
             try
             {
                 await _context.SaveChangesAsync();

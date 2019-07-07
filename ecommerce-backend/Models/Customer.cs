@@ -24,8 +24,8 @@ namespace EcommerceApi.Models
         public string Status { get; set; }
         public string Segment { get; set; }
         public decimal StoreCredit { get; set; }
-
         public bool Disabled { get; set; }
+        public int? MergeToCustomerId { get; set; }
 
         [NotMapped]
         public decimal AccountBalance { get; set; }
