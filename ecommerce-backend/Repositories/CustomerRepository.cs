@@ -25,7 +25,7 @@ namespace EcommerceApi.Repositories
             _config = config;
         }
 
-        public async Task<IEnumerable<CustomerViewModel>> GetCustomersWithBalance()
+        public async Task<IEnumerable<CustomerViewModel>> GetCustomersWithBalance(bool showDisabled)
         {
             using (IDbConnection conn = Connection)
             {
@@ -48,10 +48,10 @@ namespace EcommerceApi.Repositories
 	                                GROUP BY CustomerId
                                 ) CustomerAccount
                                 ON CustomerAccount.CustomerId = Customer.CustomerId
-                                WHERE Customer.Disabled = 0
+                                WHERE (@showDisabled = 1 OR Customer.Disabled = 0)
                                  ";
                 conn.Open();
-                return await conn.QueryAsync<CustomerViewModel>(query);
+                return await conn.QueryAsync<CustomerViewModel>(query, new { showDisabled });
             }
         }
 

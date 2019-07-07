@@ -49,9 +49,9 @@ namespace EcommerceApi.Controllers
         }
 
         [HttpGet("WithBalance")]
-        public async Task<IEnumerable<CustomerViewModel>> GetCustomerWithBalance()
+        public async Task<IEnumerable<CustomerViewModel>> GetCustomerWithBalance(bool showDisabled)
         {
-            return await _customerRepository.GetCustomersWithBalance();
+            return await _customerRepository.GetCustomersWithBalance(showDisabled);
         }
 
         // GET: api/Customers/5
