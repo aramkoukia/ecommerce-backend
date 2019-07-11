@@ -316,6 +316,33 @@ namespace EcommerceApi.Controllers
                 existingOrder.OrderTax.Add(tax);
             }
 
+            foreach (var detail in existingOrder.OrderDetail)
+            {
+                if (existingOrder.Status == OrderStatus.Return.ToString() && detail.Amount > 0)
+                {
+                    detail.Amount *= -1;
+                }
+                if (string.IsNullOrEmpty(detail.DiscountType))
+                {
+                    detail.DiscountType = "percent";
+                }
+
+                detail.SubTotal = Math.Round(detail.Amount * detail.UnitPrice, 2);
+                detail.TotalDiscount = Math.Round(detail.DiscountType == "percent" ? detail.SubTotal * detail.DiscountPercent / 100 : detail.DiscountAmount, 2);
+                detail.Total = Math.Round(detail.SubTotal - detail.TotalDiscount, 2);
+            }
+
+            existingOrder.SubTotal = Math.Round(order.OrderDetail.Sum(o => o.Total), 2);
+            if (existingOrder.OrderTax != null && existingOrder.OrderTax.Any())
+            {
+                foreach (var tax in existingOrder.OrderTax)
+                {
+                    tax.TaxAmount = Math.Round(_context.Tax.AsNoTracking().FirstOrDefault(t => t.TaxId == tax.TaxId).Percentage / 100 * order.SubTotal, 2);
+                }
+            }
+
+            existingOrder.Total = Math.Round(existingOrder.OrderDetail.Sum(o => o.Total) + order.OrderTax.Sum(o => o.TaxAmount), 2) + order.RestockingFeeAmount;
+
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetOrder", new { id = existingOrder.OrderId }, existingOrder);
