@@ -269,7 +269,7 @@ namespace EcommerceApi.Controllers
         public async Task<IActionResult> PutOrder([FromRoute] int id, [FromBody] Order order)
         {
             // only supports draft orders
-            if (!ModelState.IsValid || order.Status != OrderStatus.Draft.ToString())
+            if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
