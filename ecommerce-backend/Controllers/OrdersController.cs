@@ -308,17 +308,7 @@ namespace EcommerceApi.Controllers
 
             foreach (var detail in order.OrderDetail)
             {
-                existingOrder.OrderDetail.Add(detail);
-            }
-
-            foreach (var tax in order.OrderTax)
-            {
-                existingOrder.OrderTax.Add(tax);
-            }
-
-            foreach (var detail in existingOrder.OrderDetail)
-            {
-                if (existingOrder.Status == OrderStatus.Return.ToString() && detail.Amount > 0)
+                if (order.Status == OrderStatus.Return.ToString() && detail.Amount > 0)
                 {
                     detail.Amount *= -1;
                 }
@@ -333,15 +323,25 @@ namespace EcommerceApi.Controllers
             }
 
             existingOrder.SubTotal = Math.Round(order.OrderDetail.Sum(o => o.Total), 2);
-            if (existingOrder.OrderTax != null && existingOrder.OrderTax.Any())
+            if (order.OrderTax != null && order.OrderTax.Any())
             {
-                foreach (var tax in existingOrder.OrderTax)
+                foreach (var tax in order.OrderTax)
                 {
-                    tax.TaxAmount = Math.Round(_context.Tax.AsNoTracking().FirstOrDefault(t => t.TaxId == tax.TaxId).Percentage / 100 * order.SubTotal, 2);
+                    tax.TaxAmount = Math.Round(_context.Tax.AsNoTracking().FirstOrDefault(t => t.TaxId == tax.TaxId).Percentage / 100 * existingOrder.SubTotal, 2);
                 }
             }
 
-            existingOrder.Total = Math.Round(existingOrder.OrderDetail.Sum(o => o.Total) + order.OrderTax.Sum(o => o.TaxAmount), 2) + order.RestockingFeeAmount;
+            existingOrder.Total = Math.Round(order.OrderDetail.Sum(o => o.Total) + order.OrderTax.Sum(o => o.TaxAmount), 2) + order.RestockingFeeAmount;
+
+            foreach (var detail in order.OrderDetail)
+            {
+                existingOrder.OrderDetail.Add(detail);
+            }
+
+            foreach (var tax in order.OrderTax)
+            {
+                existingOrder.OrderTax.Add(tax);
+            }
 
             await _context.SaveChangesAsync();
 
