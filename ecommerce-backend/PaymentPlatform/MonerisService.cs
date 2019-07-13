@@ -4,6 +4,7 @@ using Microsoft.Net.Http;
 using System.Threading.Tasks;
 using System.Net.Http;
 using Microsoft.Extensions.Configuration;
+using System.Net.Http.Formatting;
 
 namespace EcommerceApi.PaymentPlatform
 {
@@ -23,14 +24,17 @@ namespace EcommerceApi.PaymentPlatform
             Client = client;
         }
 
-        public async Task<IEnumerable<GitHubIssue>> GetAspNetDocsIssues()
+        public async Task<ValidationResponse> TransactionRequest(TransactionRequest transactionRequest)
         {
-            var response = await Client.GetAsync("/repos/aspnet/AspNetCore.Docs/issues?state=open&sort=created&direction=desc");
+            var response = await Client.PostAsync(
+                "/terminal", 
+                transactionRequest,
+                new JsonMediaTypeFormatter());
 
             response.EnsureSuccessStatusCode();
 
             var result = await response.Content
-                .ReadAsAsync<IEnumerable<GitHubIssue>>();
+                .ReadAsAsync<ValidationResponse>();
 
             return result;
         }

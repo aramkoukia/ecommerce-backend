@@ -5,6 +5,7 @@ using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using System;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace IntegrationTests
@@ -22,18 +23,30 @@ namespace IntegrationTests
                     IHostingEnvironment env = builderContext.HostingEnvironment;
 
                     config.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
-                       // .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true, reloadOnChange: true);
                 })
                 .Build();
             _serviceProvider = new DependencyResolver(webHost);
         }
 
         [Fact]
-        public void TestMonerisService()
+        public async Task TestMonerisService()
         {
             var sut = _serviceProvider.GetService<MonerisService>();
-
-            Assert.NotNull(sut);
+            var result = await sut.TransactionRequest(
+                new TransactionRequest
+                {
+                    ApiToken = "example_apiToken",
+                    PostbackUrl = "https://example.client.url",
+                    Request = new Request {
+                       Amount = "1",
+                       OrderId = "1",
+                    },
+                    StoreId = "example_storeId",
+                    TerminalId = "example_terminalId",
+                    TxnType = "example_txnType",
+                }
+            );
+            Assert.NotNull(result);
             // Moner
         }
     }
