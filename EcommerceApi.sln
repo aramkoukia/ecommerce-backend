@@ -1,11 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.28307.136
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.28803.202
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EcommerceApi", "ecommerce-backend\EcommerceApi.csproj", "{F7469E05-1FB7-4044-8E23-69765456F7F6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataSyncFunctions", "DataSyncFunctions\DataSyncFunctions.csproj", "{FFC831D4-769F-45BA-9D00-A2A991D38E94}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataSyncFunctions", "DataSyncFunctions\DataSyncFunctions.csproj", "{FFC831D4-769F-45BA-9D00-A2A991D38E94}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IntegrationTests", "IntegrationTests\IntegrationTests.csproj", "{15B10EA0-E2C6-4273-A6F2-F1D0C60A7ED6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{FFC831D4-769F-45BA-9D00-A2A991D38E94}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FFC831D4-769F-45BA-9D00-A2A991D38E94}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FFC831D4-769F-45BA-9D00-A2A991D38E94}.Release|Any CPU.Build.0 = Release|Any CPU
+		{15B10EA0-E2C6-4273-A6F2-F1D0C60A7ED6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{15B10EA0-E2C6-4273-A6F2-F1D0C60A7ED6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{15B10EA0-E2C6-4273-A6F2-F1D0C60A7ED6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{15B10EA0-E2C6-4273-A6F2-F1D0C60A7ED6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

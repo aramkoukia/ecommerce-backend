@@ -16,9 +16,11 @@ using DinkToPdf;
 using DinkToPdf.Contracts;
 using EcommerceApi.Untilities;
 using System.IO;
-using EcommerceApi.Middleware;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
+using System;
+using EcommerceApi.PaymentPlatform;
+using Polly;
 
 namespace EcommerceApi
 {
@@ -92,6 +94,10 @@ namespace EcommerceApi
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["jwt:key"]))
                 };
             });
+
+            services.AddHttpClient<MonerisService>()
+                .AddTransientHttpErrorPolicy(p =>
+                p.WaitAndRetryAsync(3, _ => TimeSpan.FromMilliseconds(1000)));
 
             services.Configure<JwtOptions>(Configuration.GetSection("jwt"));
             services.AddResponseCompression();
