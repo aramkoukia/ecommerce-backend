@@ -35,15 +35,15 @@ namespace IntegrationTests
             var result = await sut.TransactionRequest(
                 new TransactionRequest
                 {
-                    ApiToken = "example_apiToken",
-                    PostbackUrl = "https://example.client.url",
+                    ApiToken = "7k7ZyQxg68sGUFCMDg4J",
+                    PostbackUrl = "https://lightsandpartsapi-staging.azurewebsites.net/api/moneris",
                     Request = new Request {
-                       Amount = "1",
+                       Amount = "1.0",
                        OrderId = "1",
                     },
-                    StoreId = "example_storeId",
+                    StoreId = "monca03695",
                     TerminalId = "example_terminalId",
-                    TxnType = "example_txnType",
+                    TxnType = "purchase",
                 }
             );
             Assert.NotNull(result);

@@ -27,7 +27,7 @@ namespace EcommerceApi.PaymentPlatform
         public async Task<ValidationResponse> TransactionRequest(TransactionRequest transactionRequest)
         {
             var response = await Client.PostAsync(
-                "/terminal", 
+                "/Terminal", 
                 transactionRequest,
                 new JsonMediaTypeFormatter());
 
