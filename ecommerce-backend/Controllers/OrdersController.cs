@@ -190,7 +190,7 @@ namespace EcommerceApi.Controllers
             {
                 foreach (var tax in order.OrderTax)
                 {
-                    tax.TaxAmount = Math.Round(_context.Tax.AsNoTracking().FirstOrDefault(t => t.TaxId == tax.TaxId).Percentage / 100 * order.SubTotal, 2);
+                    tax.TaxAmount = Math.Round(_context.Tax.AsNoTracking().FirstOrDefault(t => t.TaxId == tax.TaxId).Percentage / 100 * (order.SubTotal + order.RestockingFeeAmount), 2);
                 }
             }
 
@@ -327,7 +327,7 @@ namespace EcommerceApi.Controllers
             {
                 foreach (var tax in order.OrderTax)
                 {
-                    tax.TaxAmount = Math.Round(_context.Tax.AsNoTracking().FirstOrDefault(t => t.TaxId == tax.TaxId).Percentage / 100 * existingOrder.SubTotal, 2);
+                    tax.TaxAmount = Math.Round(_context.Tax.AsNoTracking().FirstOrDefault(t => t.TaxId == tax.TaxId).Percentage / 100 * (existingOrder.SubTotal + order.RestockingFeeAmount), 2);
                 }
             }
 
