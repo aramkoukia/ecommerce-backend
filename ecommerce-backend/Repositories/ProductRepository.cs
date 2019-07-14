@@ -49,7 +49,8 @@ SELECT Product.ProductId,
         ISNULL(Loc2.BinCode,'') AS AbbotsfordBinCode,
 	    ISNULL(Loc1OnHold.OnHold,0) As VancouverOnHold,
 	    ISNULL(Loc2OnHold.OnHold,0) As AbbotsfordOnHold,
-        Product.Disabled
+        Product.Disabled,
+		FORMAT(ISNULL(AvgPurchasePrice, 0), 'N2') AS AvgPurchasePrice
 FROM Product
 LEFT JOIN ProductType
 ON Product.ProductTypeId = ProductType.ProductTypeId
@@ -83,6 +84,15 @@ LEFT JOIN (
 	GROUP BY ProductId
 ) Loc2OnHold
 ON Loc2OnHold.ProductId = Product.ProductId
+LEFT JOIN (
+	SELECT ProductId,  
+		   Avg(UnitPrice) AS AvgPurchasePrice --, 
+		   -- Avg(ISNULL(OverheadCost, 0)/ Amount) AS AvgOverheadCost,
+		   -- Avg(UnitPrice + (ISNULL(OverheadCost, 0)/ Amount)) AS AvgTotalCost  
+	FROM purchasedetail
+	GROUP BY ProductId 
+) Purchase
+ON Purchase.ProductId = Product.ProductId
 ";
                 conn.Open();
                 return await conn.QueryAsync<ProductViewModel>(query);

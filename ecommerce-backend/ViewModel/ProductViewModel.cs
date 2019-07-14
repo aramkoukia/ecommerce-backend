@@ -29,6 +29,7 @@ namespace EcommerceApi.ViewModel
         public decimal AbbotsfordOnHold { get; set; }
         public decimal OnHoldAmount { get; set; }
         public string Disabled { get; set; }
+        public string AvgPurchasePrice { get; set; }
         public List<ProductPackage> ProductPackages { get; set; }
     }
 }
