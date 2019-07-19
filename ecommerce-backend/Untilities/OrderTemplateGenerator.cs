@@ -155,10 +155,30 @@ namespace EcommerceApi.Untilities
                         <td style='width:15%' class='right'>${0}</td>
                         </tr>", order.Total);
 
+            if (order.OrderPayment != null && order.OrderPayment.Any())
+            {
+                sbCustomer.Append($@"<tr>
+                        <td style='width:10%'></td>
+                        <td style='width:55%'></td>
+                        <td style='width:20%'>Paid By:</td>
+                        <td style='width:15%' class='right'></td>
+                        </tr>");
+
+                foreach (var payment in order.OrderPayment)
+                {
+                    sbCustomer.Append($@"<tr>
+                        <td style='width:10%'></td>
+                        <td style='width:55%'></td>
+                        <td style='width:20%'>{payment.PaymentType.PaymentTypeName}</td>
+                        <td style='width:15%' class='right'>${payment.PaymentAmount}</td>
+                        </tr>");
+                }
+            }
+
             sbCustomer.AppendFormat(@"<tr>
                         <td style='width:10%'></td>
                         <td style='width:55%'></td>
-                        <td style='width:20%'>Paid Amount:</td>
+                        <td style='width:20%'>Total Paid Amount:</td>
                         <td style='width:15%' class='right'>${0}</td>
                         </tr>", order.OrderPayment.Sum(p=>p.PaymentAmount));
 
@@ -176,16 +196,6 @@ namespace EcommerceApi.Untilities
                         <td style='width:55%'></td>
                         <td style='width:35%' colspan='2'><b>Added to customer Account</b></td>
                         </tr>");
-            }
-
-            var paymentType = order.OrderPayment.FirstOrDefault()?.PaymentType?.PaymentTypeName;
-            if (paymentType != null)
-            { 
-                sbCustomer.AppendFormat(@"<tr>
-                        <td style='width:10%'></td>
-                        <td style='width:55%'></td>
-                        <td style='width:35%' colspan='2'>Paid by: {0}</td>
-                        </tr>", paymentType);
             }
 
             sbFinal.Append(sbCustomer);

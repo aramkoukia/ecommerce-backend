@@ -11,9 +11,11 @@
         public string AvgTotalCost { get; set; }
         public string SalesAmount { get; set; }
         public string TotalSales { get; set; }
+        public string TotalSalesByPurchasePrice { get; set; }
         public string AvgSalesPrice { get; set; }
         public string TotalCost { get; set; }
         public string AvgProfitPerItem { get; set; }
-        public string TotalProfit { get; set; }
+        public string TotalProfitByAvgCost { get; set; }
+        public string TotalProfitByPurchasePrice { get; set; }
     }
 }

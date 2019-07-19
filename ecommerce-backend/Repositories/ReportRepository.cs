@@ -820,11 +820,13 @@ SELECT ProductName,
 	   FORMAT(ISNULL(AvgOverheadCost, 0), 'N2') AS AvgOverheadCost, 
 	   FORMAT(ISNULL(AvgTotalCost, 0), 'N2') AS AvgTotalCost, 
 	   FORMAT(ISNULL(SalesAmount, 0), 'N2') AS SalesAmount, 
+       FORMAT(ISNULL(SalesAmount,0) * ISNULL(PurchasePrice,0), 'N2') AS TotalSalesByPurchasePrice, 
 	   FORMAT(ISNULL(TotalSales, 0), 'N2') AS TotalSales, 
 	   FORMAT(ISNULL(AvgSalesPrice, 0), 'N2') AS AvgSalesPrice, 
 	   FORMAT(ISNULL(SalesAmount * AvgTotalCost, 0), 'N2') AS TotalCost,
 	   FORMAT(ISNULL(AvgSalesPrice - AvgTotalCost, 0), 'N2') AS AvgProfitPerItem,
-	   FORMAT(ISNULL(TotalSales - (SalesAmount * AvgTotalCost), 0), 'N2') AS TotalProfit
+	   FORMAT(ISNULL(TotalSales - (SalesAmount * AvgTotalCost), 0), 'N2') AS TotalProfitByAvgCost,
+       FORMAT(ISNULL(TotalSales - (SalesAmount * ISNULL(PurchasePrice,0)), 0), 'N2') AS TotalProfitByPurchasePrice
 FROM Product
 INNER JOIN ProductType
 	ON ProductType.ProductTypeId = Product.ProductTypeId
