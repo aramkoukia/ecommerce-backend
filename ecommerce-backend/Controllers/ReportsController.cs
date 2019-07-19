@@ -272,5 +272,11 @@ namespace EcommerceApi.Controllers
 
             return await _reportRepository.GetProductProfitReport(salesFromDate, salesToDate, purchaseFromDate, purchaseToDate);
         }
+
+        [HttpGet("InventoryValueProfit")]
+        public async Task<IEnumerable<InventoryValueReportViewModel>> GetInventoryValueProfit()
+        {
+            return await _reportRepository.GetInventoryValueProfit();
+        }
     }
 }

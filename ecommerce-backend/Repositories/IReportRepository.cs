@@ -29,5 +29,6 @@ namespace EcommerceApi.Repositories
                                                                                 DateTime salesToDate,
                                                                                 DateTime purchaseFromDate,
                                                                                 DateTime purchaseToDate);
+        Task<IEnumerable<InventoryValueReportViewModel>> GetInventoryValueProfit();
     }
 }
