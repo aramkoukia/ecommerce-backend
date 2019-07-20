@@ -523,7 +523,6 @@ GROUP BY OrderId
 ) OrderPayment
 ON [Order].OrderId = OrderPayment.OrderId
 WHERE [Order].Status IN ('Return', 'Paid')
-          AND [Order].LocationId IN @locationId
 GROUP BY Location.LocationId, LocationName, [Order].Status
 ) [Order]
 LEFT JOIN (
@@ -542,7 +541,6 @@ GROUP BY OrderId
 ON [Order].OrderId = OrderPayment.OrderId
 WHERE TaxName = 'GST'
           AND Status IN ('Return', 'Paid')
-          AND [Order].LocationId IN @locationId
     GROUP BY [Order].LocationId, Status
 ) GST
 ON [Order].LocationId = GST.LocationId
@@ -562,8 +560,7 @@ GROUP BY OrderId
 ) OrderPayment
 ON [Order].OrderId = OrderPayment.OrderId
 WHERE TaxName = 'PST'
-          AND Status IN ('Return', 'Paid')          
-          AND [Order].LocationId IN @locationId
+          AND Status IN ('Return', 'Paid') 
     GROUP BY [Order].LocationId, [Status]
 ) PST
 ON [Order].LocationId = PST.LocationId
@@ -583,8 +580,7 @@ GROUP BY OrderId
 ) OrderPayment
 ON [Order].OrderId = OrderPayment.OrderId
 WHERE TaxName NOT IN ('PST', 'GST')
-          AND Status IN ('Return', 'Paid')          
-          AND [Order].LocationId IN @locationId
+          AND Status IN ('Return', 'Paid') 
           GROUP BY [Order].LocationId, Status
 ) OtherTax
 ON [Order].LocationId = OtherTax.LocationId
@@ -596,8 +592,8 @@ SELECT ' Total ',  '', FORMAT(SUM(SubTotal), 'N2'), FORMAT(SUM(TotalBySalePrice)
 FROM #Results
 ";
                 conn.Open();
-                var locationIds = (await GetUserLocations(userId)).ToArray();
-                return await conn.QueryAsync<SalesByPurchasePriceReportViewModel>(query, new { fromDate, toDate, locationIds });
+                // var locationIds = (await GetUserLocations(userId)).ToArray();
+                return await conn.QueryAsync<SalesByPurchasePriceReportViewModel>(query, new { fromDate, toDate });
             }
         }
 
