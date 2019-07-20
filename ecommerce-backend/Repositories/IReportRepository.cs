@@ -15,6 +15,7 @@ namespace EcommerceApi.Repositories
         Task<IEnumerable<ProductSalesReportViewModel>> GetProductSalesReport(DateTime fromDate, DateTime toDate, string userId);
         Task<IEnumerable<ProductSalesDetailReportViewModel>> GetProductSalesDetailReport(DateTime fromDate, DateTime toDate, string userId);
         Task<IEnumerable<SalesReportViewModel>> GetSalesReport(DateTime fromDate, DateTime toDate, string userId);
+        Task<IEnumerable<SalesByPurchasePriceReportViewModel>> GetSalesByPurchasePriceReport(DateTime fromDate, DateTime toDate, string userId);
         Task<IEnumerable<PaymentsReportViewModel>> GetPaymentsReport(DateTime fromDate, DateTime toDate, string userId);
         Task<IEnumerable<PaymentsByPaymentTypeViewModel>> GetPaymentsByPaymentTypeReport(DateTime fromDate, DateTime toDate, string userId);
         Task<IEnumerable<PaymentsTotalViewModel>> GetPaymentsTotalReport(DateTime fromDate, DateTime toDate, string userId);
@@ -29,6 +30,8 @@ namespace EcommerceApi.Repositories
                                                                                 DateTime salesToDate,
                                                                                 DateTime purchaseFromDate,
                                                                                 DateTime purchaseToDate);
-        Task<IEnumerable<InventoryValueReportViewModel>> GetInventoryValueProfit();
+        Task<IEnumerable<InventoryValueReportViewModel>> GetInventoryValue();
+
+        Task<IEnumerable<InventoryValueTotalReportViewModel>> GetInventoryValueTotal();
     }
 }

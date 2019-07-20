@@ -273,10 +273,32 @@ namespace EcommerceApi.Controllers
             return await _reportRepository.GetProductProfitReport(salesFromDate, salesToDate, purchaseFromDate, purchaseToDate);
         }
 
-        [HttpGet("InventoryValueProfit")]
-        public async Task<IEnumerable<InventoryValueReportViewModel>> GetInventoryValueProfit()
+        [HttpGet("SalesByPurchasePrice")]
+        public async Task<IEnumerable<SalesByPurchasePriceReportViewModel>> GetSalesByPurchasePriceReport(DateTime fromDate, DateTime toDate)
         {
-            return await _reportRepository.GetInventoryValueProfit();
+            if (fromDate == DateTime.MinValue)
+                fromDate = DateTime.Now;
+            if (toDate == DateTime.MinValue)
+                toDate = DateTime.Now;
+            else
+                toDate = toDate.AddDays(1).AddTicks(-1);
+
+            System.Security.Claims.ClaimsPrincipal currentUser = this.User;
+            var user = await _userManager.FindByEmailAsync(currentUser.Identity.Name);
+
+            return await _reportRepository.GetSalesByPurchasePriceReport(fromDate, toDate, user.Id);
         }
-    }
+
+        [HttpGet("InventoryValue")]
+        public async Task<IEnumerable<InventoryValueReportViewModel>> GetInventoryValue()
+        {
+            return await _reportRepository.GetInventoryValue();
+        }
+
+        [HttpGet("InventoryValueTotal")]
+        public async Task<IEnumerable<InventoryValueTotalReportViewModel>> GetInventoryValueTotal()
+        {
+            return await _reportRepository.GetInventoryValueTotal();
+        }
+   }
 }

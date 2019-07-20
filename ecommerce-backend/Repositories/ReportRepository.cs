@@ -480,6 +480,128 @@ FROM #Results
             }
         }
 
+        public async Task<IEnumerable<SalesByPurchasePriceReportViewModel>> GetSalesByPurchasePriceReport(DateTime fromDate, DateTime toDate, string userId)
+        {
+            using (IDbConnection conn = Connection)
+            {
+                string query = $@"
+IF OBJECT_ID('tempdb..#Results') IS NOT NULL
+    DROP TABLE #Results
+
+SELECT LocationName,
+  [Order].[Status],
+  SubTotal,
+  TotalBySalePrice,
+  TotalByPurchasePrice,
+  Discount,
+  Transactions,
+  Pst,
+  Gst,
+  OtherTax
+INTO #Results FROM (
+SELECT 
+  SUM(OrderDetail.SubTotal) AS SubTotal,
+  SUM(OrderDetail.DiscountAmount) AS Discount,
+   SUM(OrderDetail.Total) AS TotalBySalePrice,
+  SUM(OrderDetail.Amount * ISNULL(Product.PurchasePrice,0)) AS TotalByPurchasePrice,
+  Count([Order].OrderId) AS Transactions,
+  Location.LocationId,
+  Location.LocationName,
+  [Order].Status
+FROM [Order]
+INNER JOIN [OrderDetail]
+	ON [Order].OrderId = [OrderDetail].OrderId
+INNER JOIN [Product]
+	ON [OrderDetail].ProductId = [Product].ProductId
+INNER JOIN Location
+ON Location.LocationId = [Order].LocationId
+INNER JOIN (
+SELECT OrderId
+FROM OrderPayment
+WHERE PaymentDate BETWEEN @FromDate AND @ToDate
+GROUP BY OrderId
+) OrderPayment
+ON [Order].OrderId = OrderPayment.OrderId
+WHERE [Order].Status IN ('Return', 'Paid')
+          AND [Order].LocationId IN @locationId
+GROUP BY Location.LocationId, LocationName, [Order].Status
+) [Order]
+LEFT JOIN (
+SELECT SUM(TaxAmount) AS GST, LocationId, Status
+FROM [Order]
+INNER JOIN OrderTax
+ON OrderTax.OrderId = [Order].OrderId
+INNER JOIN Tax
+ON Tax.TaxId = OrderTax.TaxId
+INNER JOIN (
+SELECT SUM(PaymentAmount) AS PaymentAmount, OrderId
+FROM OrderPayment
+WHERE PaymentDate BETWEEN @FromDate AND @ToDate
+GROUP BY OrderId
+) OrderPayment
+ON [Order].OrderId = OrderPayment.OrderId
+WHERE TaxName = 'GST'
+          AND Status IN ('Return', 'Paid')
+          AND [Order].LocationId IN @locationId
+    GROUP BY [Order].LocationId, Status
+) GST
+ON [Order].LocationId = GST.LocationId
+       AND [Order].Status = GST.Status
+LEFT JOIN (
+SELECT SUM(TaxAmount) AS Pst, LocationId, Status 
+FROM [Order]
+INNER JOIN OrderTax
+ON OrderTax.OrderId = [Order].OrderId
+INNER JOIN Tax
+ON Tax.TaxId = OrderTax.TaxId
+INNER JOIN (
+SELECT SUM(PaymentAmount) AS PaymentAmount, OrderId
+FROM OrderPayment
+WHERE PaymentDate BETWEEN @FromDate AND @ToDate
+GROUP BY OrderId
+) OrderPayment
+ON [Order].OrderId = OrderPayment.OrderId
+WHERE TaxName = 'PST'
+          AND Status IN ('Return', 'Paid')          
+          AND [Order].LocationId IN @locationId
+    GROUP BY [Order].LocationId, [Status]
+) PST
+ON [Order].LocationId = PST.LocationId
+       AND [Order].Status = PST.Status
+LEFT JOIN (
+SELECT SUM(TaxAmount) AS OtherTax, LocationId, Status
+FROM [Order]
+INNER JOIN OrderTax
+ON OrderTax.OrderId = [Order].OrderId
+INNER JOIN Tax
+ON Tax.TaxId = OrderTax.TaxId
+INNER JOIN (
+SELECT SUM(PaymentAmount) AS PaymentAmount, OrderId
+FROM OrderPayment
+WHERE PaymentDate BETWEEN @FromDate AND @ToDate
+GROUP BY OrderId
+) OrderPayment
+ON [Order].OrderId = OrderPayment.OrderId
+WHERE TaxName NOT IN ('PST', 'GST')
+          AND Status IN ('Return', 'Paid')          
+          AND [Order].LocationId IN @locationId
+          GROUP BY [Order].LocationId, Status
+) OtherTax
+ON [Order].LocationId = OtherTax.LocationId
+   AND [Order].Status = OtherTax.Status
+
+SELECT LocationName, [Status], FORMAT(SubTotal, 'N2') AS SubTotal, FORMAT(TotalBySalePrice, 'N2') AS TotalBySalePrice, FORMAT(TotalByPurchasePrice, 'N2') AS TotalByPurchasePrice, FORMAT(Discount, 'N2') AS Discount, Transactions, FORMAT(Pst, 'N2') AS Pst, FORMAT(Gst, 'N2') AS Gst, FORMAT(OtherTax, 'N2') AS OtherTax FROM #Results
+UNION 
+SELECT ' Total ',  '', FORMAT(SUM(SubTotal), 'N2'), FORMAT(SUM(TotalBySalePrice), 'N2'), FORMAT(SUM(TotalByPurchasePrice), 'N2') AS TotalByPurchasePrice, FORMAT(SUM(Discount), 'N2'), SUM(Transactions), FORMAT(SUM(Pst), 'N2'), FORMAT(SUM(Gst), 'N2'), FORMAT(SUM(OtherTax), 'N2')
+FROM #Results
+";
+                conn.Open();
+                var locationIds = (await GetUserLocations(userId)).ToArray();
+                return await conn.QueryAsync<SalesByPurchasePriceReportViewModel>(query, new { fromDate, toDate, locationIds });
+            }
+        }
+
+
         public async Task<IEnumerable<PaymentsTotalViewModel>> GetPaymentsTotalReport(DateTime fromDate, DateTime toDate, string userId)
         {
             using (IDbConnection conn = Connection)
@@ -855,7 +977,7 @@ ORDER BY ISNULL(TotalSales - (SalesAmount * AvgTotalCost), 0) DESC
             }
         }
 
-        public async Task<IEnumerable<InventoryValueReportViewModel>> GetInventoryValueProfit()
+        public async Task<IEnumerable<InventoryValueReportViewModel>> GetInventoryValue()
         {
             using (IDbConnection conn = Connection)
             {
@@ -899,6 +1021,37 @@ LEFT JOIN (
 ";
                 conn.Open();
                 return await conn.QueryAsync<InventoryValueReportViewModel>(query);
+            }
+        }
+
+        public async Task<IEnumerable<InventoryValueTotalReportViewModel>> GetInventoryValueTotal()
+        {
+            using (IDbConnection conn = Connection)
+            {
+                string query = $@"
+SELECT LocationName, 
+       FORMAT(SUM(Balance * SalesPrice), 'N2') AS ValueBySalePrice, 
+       FORMAT(SUM(Balance * PurchasePrice), 'N2') AS ValueByPurchasePrice
+FROM ProductInventory
+INNER JOIN Product
+	ON Product.ProductId = ProductInventory.ProductId
+INNER JOIN Location
+	ON Location.LocationId = ProductInventory.LocationId
+GROUP BY LocationName
+
+UNION 
+
+SELECT ' Total ', 
+       FORMAT(SUM(Balance * SalesPrice), 'N2') AS ValueBySalePrice, 
+       FORMAT(SUM(Balance * PurchasePrice), 'N2') AS ValueByPurchasePrice
+FROM ProductInventory
+INNER JOIN Product
+	ON Product.ProductId = ProductInventory.ProductId
+INNER JOIN Location
+	ON Location.LocationId = ProductInventory.LocationId
+";
+                conn.Open();
+                return await conn.QueryAsync<InventoryValueTotalReportViewModel>(query);
             }
         }
     }
