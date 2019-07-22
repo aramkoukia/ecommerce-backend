@@ -156,6 +156,7 @@ namespace EcommerceApi.Controllers
             var date = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateTime.UtcNow, "Pacific Standard Time");
             order.CreatedDate = date;
             order.OrderDate = date;
+            var orderMultiplier = 1;
             if (order.Status != OrderStatus.Return.ToString() && order.Total < 0)
             {
                 order.Status = OrderStatus.Return.ToString();
@@ -173,6 +174,7 @@ namespace EcommerceApi.Controllers
             {
                 if (order.Status == OrderStatus.Return.ToString() && detail.Amount > 0)
                 {
+                    orderMultiplier = -1;
                     detail.Amount *= -1;
                 }
                 if (string.IsNullOrEmpty(detail.DiscountType))
@@ -181,7 +183,7 @@ namespace EcommerceApi.Controllers
                 }
                 
                 detail.SubTotal = Math.Round(detail.Amount * detail.UnitPrice, 2);
-                detail.TotalDiscount = Math.Round(detail.DiscountType == "percent" ? detail.SubTotal * detail.DiscountPercent / 100 : detail.DiscountAmount, 2);
+                detail.TotalDiscount = Math.Round(detail.DiscountType == "percent" ? detail.SubTotal * detail.DiscountPercent / 100 : detail.DiscountAmount * orderMultiplier, 2);
                 detail.Total = Math.Round(detail.SubTotal - detail.TotalDiscount, 2);
             }
 
