@@ -378,7 +378,7 @@ SELECT LocationName,
 	   OtherTax
 INTO #Results FROM (
 	SELECT 
-	   SUM(SubTotal) AS SubTotal, 
+	   SUM(SubTotal + RestockingFeeAmount) AS SubTotal, 
        SUM(Total) AS Total,
 	   SUM(TotalDiscount) AS Discount,
 	   Count([Order].OrderId) AS Transactions,
@@ -502,7 +502,7 @@ INTO #Results FROM (
 SELECT 
   SUM(OrderDetail.SubTotal) AS SubTotal,
   SUM(OrderDetail.DiscountAmount) AS Discount,
-   SUM(OrderDetail.Total) AS TotalBySalePrice,
+  SUM(OrderDetail.Total) AS TotalBySalePrice,
   SUM(OrderDetail.Amount * ISNULL(Product.PurchasePrice,0)) AS TotalByPurchasePrice,
   Count([Order].OrderId) AS Transactions,
   Location.LocationId,
