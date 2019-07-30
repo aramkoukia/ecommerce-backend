@@ -46,15 +46,16 @@ namespace EcommerceApi.Untilities
                                 <div class='fullwidth center smaller-font spaceafter-10'>{Note1}&nbsp;<span class='red'>{Note2}</span></div>
                                 <div class='fullwidth center smaller-font spaceafter-10'>{Note3}</div>
                                 <hr/>
-                                <div>LED Lights And Parts</div>
-                                <div class='fullwidth xsmall-font spaceafter-10'><b>{order.Location.LocationName}:</b><br/> 
-                                     {order.Location.LocationAddress}, <br />
-                                     {order.Location.LocationName}, {order.Location.Province} {order.Location.PostalCode} <br/>
-                                     Phone: {order.Location.PhoneNumber} <br/>
-                                </div>
+
+                                <b>Customer:</b> {customerName}
+                                {customerAddress}                                    
+                                {customerCity} {customerProvince} {customerPostalCode}
+                                {customerPhone}
+
                                 <table style='width:100%'>
                                 <tr><td style='vertical-align: top; width:50%'>
-                                <b>Invoice #{order.OrderId}</b><br/>");
+
+            <b>Invoice #{order.OrderId}</b><br/>");
             if (!string.IsNullOrEmpty(order.PoNumber))
             {
                 sbCustomer.Append($@"PO Number: {order.PoNumber}<br/>");
@@ -79,10 +80,14 @@ namespace EcommerceApi.Untilities
             sbCustomer.Append($@"User: {order.CreatedByUserName} <br/>
                 </td>
                 <td class='right' style='vertical-align: top; width:50%'>
-                    <b>Customer:</b> {customerName}
-                    {customerAddress}                                    
-                    {customerCity} {customerProvince} {customerPostalCode}
-                    {customerPhone}
+
+                <div>LED Lights And Parts</div>
+                <div class='fullwidth xsmall-font spaceafter-10'><b>{order.Location.LocationName}:</b><br/> 
+                        {order.Location.LocationAddress}, <br />
+                        {order.Location.LocationName}, {order.Location.Province} {order.Location.PostalCode} <br/>
+                        Phone: {order.Location.PhoneNumber} <br/>
+                </div>
+
                 </td>
                 </tr></table>
                 <hr class='spaceafter-30'/>");
