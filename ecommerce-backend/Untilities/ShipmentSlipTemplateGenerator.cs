@@ -1,4 +1,5 @@
 ﻿using EcommerceApi.Models;
+using System.Linq;
 using System.Text;
 
 namespace EcommerceApi.Untilities
@@ -14,7 +15,13 @@ namespace EcommerceApi.Untilities
         {
             var sbCustomer = new StringBuilder();
             var sbFinal = new StringBuilder();
-            var customerName = string.IsNullOrEmpty(order.Customer.CompanyName) ? "WALK-IN" : order.Customer.CompanyName;
+            var customerName = string.IsNullOrEmpty(order.Customer.CompanyName) ? "WALK-IN" : order.Customer.CompanyName + "<br/>";
+            var customerProvince = string.IsNullOrEmpty(order.Customer.Province) ? "" : order.Customer.Province;
+            var customerCity = string.IsNullOrEmpty(order.Customer.City) ? "" : order.Customer.City;
+            var customerAddress = string.IsNullOrEmpty(order.Customer.Address) ? "" : order.Customer.Address + "<br/>";
+            var customerPostalCode = string.IsNullOrEmpty(order.Customer.PostalCode) ? "" : order.Customer.PostalCode + "<br/>";
+            var customerPhone = string.IsNullOrEmpty(order.Customer.PhoneNumber) ? "" : "Phone:" + order.Customer.PhoneNumber + "<br/>";
+
             sbCustomer.Append($@"
                         <html>
                             <head>
@@ -29,32 +36,60 @@ namespace EcommerceApi.Untilities
                                
                                 <hr/>
                                 <h3>Packing Slip</h3>
-                                <div>LED Lights And Parts</div>
-                                <div class='xsmall-font spaceafter-10'><b>{order.Location.LocationName}:</b> <br /> 
-                                     {order.Location.LocationAddress}, <br />
-                                     {order.Location.LocationName}, {order.Location.Province} {order.Location.PostalCode} <br />
-                                     Phone: {order.Location.PhoneNumber}
-                                </div>
 
-                                <div class='right spaceafter-10'>Customer: {customerName}</div>
-                                <div><b>Invoice #{order.OrderId}</b></div>");
+                                <b>Customer:</b> {customerName}
+                                {customerAddress}                                    
+                                {customerCity} {customerProvince} {customerPostalCode}
+                                {customerPhone}
+
+                                <table style='width:100%'>
+                                <tr><td style='vertical-align: top; width:50%'>
+
+            <b>Invoice #{order.OrderId}</b><br/>");
             if (!string.IsNullOrEmpty(order.PoNumber))
             {
-                sbCustomer.Append($@"<div>PO Number: {order.PoNumber}</div>");
+                sbCustomer.Append($@"PO Number: {order.PoNumber}<br/>");
             }
+            sbCustomer.Append($@"Sale Date: {order.OrderDate}<br/>");
+            if (order.OrderPayment != null && order.OrderPayment.Any())
+            {
+                sbCustomer.Append($@"Payment Date: {order.OrderPayment.FirstOrDefault().CreatedDate}<br/>");
+                if (!string.IsNullOrEmpty(order.OrderPayment.FirstOrDefault().ChequeNo))
+                {
+                    sbCustomer.Append($@"Cheque No: {order.OrderPayment.FirstOrDefault().ChequeNo}<br/>");
+                }
+            }
+            if (!string.IsNullOrEmpty(order.CardAuthCode))
+            {
+                sbCustomer.Append($@"Auth Code: {order.CardAuthCode}<br/>");
+            }
+            if (!string.IsNullOrEmpty(order.CardLastFourDigits))
+            {
+                sbCustomer.Append($@"Card: xxxx xxxx xxxx {order.CardLastFourDigits}<br/>");
+            }
+            sbCustomer.Append($@"User: {order.CreatedByUserName} <br/>
+                </td>
+                <td class='right' style='vertical-align: top; width:50%'>
 
-            sbCustomer.Append($@" <div>Sale Date: {order.OrderDate}</div>
-                                <div>User: {order.CreatedByUserName}</div>
-                                <hr class='spaceafter-30'/>");
+                <div>LED Lights And Parts</div>
+                <div class='fullwidth xsmall-font spaceafter-10'><b>{order.Location.LocationName}:</b><br/> 
+                        {order.Location.LocationAddress}, <br />
+                        {order.Location.LocationName}, {order.Location.Province} {order.Location.PostalCode} <br/>
+                        Phone: {order.Location.PhoneNumber} <br/>
+                </div>
 
-            if (order.Status.Equals(OrderStatus.Account.ToString(), System.StringComparison.InvariantCultureIgnoreCase)) {
+                </td>
+                </tr></table>
+                <hr class='spaceafter-30'/>");
+
+            if (order.Status.Equals(OrderStatus.Account.ToString(), System.StringComparison.InvariantCultureIgnoreCase))
+            {
                 sbCustomer.Append($@"<p><b>Please Note: Payment is due on {order.OrderDate.AddDays(40).Date.ToString("dd-MMM-yyyy")}. Additional charges of 2% per month are applicable after due date.</b></p>");
             }
-                                
 
-                sbCustomer.Append($@"<h3 class='right'>{order.Status}</h3>    
-                                <br/>
-                                <table style='border-collapse: collapse;'>
+            sbCustomer.Append($@"<h3 class='right'>{order.Status}</h3>");
+
+            sbCustomer.Append($@"<table style='border-collapse: collapse;'>
                                 <tr>
                                 <td style='width:70%; padding: 5px; border: 1px solid black;'><b>Product</b></td>
                                 <td style='width:30%; padding: 5px; border: 1px solid black;' class='right'><b>Quantity</b></td>
