@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace EcommerceApi.Controllers
 {
-    //[Authorize]
+    [Authorize]
     [Produces("application/json")]
     [Route("api/CustomerStoreCredits")]
     public class CustomerStoreCreditsController : Controller
