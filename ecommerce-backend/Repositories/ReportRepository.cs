@@ -198,6 +198,7 @@ LEFT JOIN (SELECT SUM(OrderDetail.Total) AS Total, ProductId, LocationId
 			 ON OrderDetail.OrderId = [Order].OrderId
 		   WHERE OrderDate BETWEEN @fromDate AND @toDate
                  AND LocationId IN @locationIds
+                 AND [Order].Status IN ('Return', 'Paid', 'Account')
 		   GROUP BY ProductId, LocationId ) Sales
 ON Product.ProductId = Sales.ProductId
 INNER JOIN [Location]
