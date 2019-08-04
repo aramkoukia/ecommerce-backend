@@ -52,6 +52,7 @@ namespace EcommerceApi.Controllers
                 currentSetting.BlockInSufficientStockOnOrder = settings.BlockInSufficientStockOnOrder;
                 currentSetting.WarnInSufficientStockOnOrder = settings.WarnInSufficientStockOnOrder;
                 currentSetting.AllowedIPAddresses = settings.AllowedIPAddresses;
+                currentSetting.EnablePosIntegration = settings.EnablePosIntegration;
             }
             else
             {
