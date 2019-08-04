@@ -31,21 +31,16 @@ namespace IntegrationTests
         public async Task TestMonerisService()
         {
             var sut = _serviceProvider.GetService<MonerisService>();
-            //var result = await sut.TransactionRequestAsync(
-            //    new MonerisRequest
-            //    {
-            //        ApiToken = "7k7ZyQxg68sGUFCMDg4J",
-            //        PostbackUrl = "https://lightsandpartsapi-staging.azurewebsites.net/api/moneris",
-            //        Request = new Request {
-            //           Amount = "1.0",
-            //           OrderId = "1",
-            //        },
-            //        StoreId = "monca03695",
-            //        TerminalId = "example_terminalId",
-            //        TxnType = "purchase",
-            //    }
-            //);
-            //Assert.NotNull(result);
+            var transactionRequest = new TransactionRequest
+            {
+                OrderId = 1234,
+                Amount = 10,
+                ClientIp = "::1",
+                TransactionType = TransactionType.purchase.ToString()
+            };
+
+            var result = await sut.TransactionRequestAsync(transactionRequest);
+            Assert.NotNull(result);
         }
     }
 }

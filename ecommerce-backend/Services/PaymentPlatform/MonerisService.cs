@@ -2,9 +2,11 @@
 using System.Threading.Tasks;
 using System.Net.Http;
 using Microsoft.Extensions.Configuration;
-using System.Net.Http.Formatting;
 using EcommerceApi.Models;
 using System.Linq;
+using System.Net.Http.Headers;
+using System.Text;
+using Newtonsoft.Json;
 
 namespace EcommerceApi.Services.PaymentPlatform
 {
@@ -13,52 +15,61 @@ namespace EcommerceApi.Services.PaymentPlatform
         public HttpClient Client { get; }
         private readonly IConfiguration _config;
         private readonly EcommerceContext _context;
+        private readonly IHttpClientFactory _clientFactory;
 
-        public MonerisService(HttpClient client,
+        public MonerisService(IHttpClientFactory clientFactory,
                               IConfiguration config,
                               EcommerceContext context)
         {
             _config = config;
             _context = context;
-            client.BaseAddress = new Uri(_config["Moneris:baseUrl"]);
-            // client.DefaultRequestHeaders.Add("Accept", "application/vnd.github.v3+json");
-            // client.DefaultRequestHeaders.Add("User-Agent", "HttpClientFactory-Sample");
-            Client = client;
+            _clientFactory = clientFactory;
         }
 
         public async Task<ValidationResponse> TransactionRequestAsync(TransactionRequest transactionRequest)
         {
-            var clientPosSettings = _context.ClientPosSettings.FirstOrDefault(c => c.ClientIp == transactionRequest.ClientIp);
-            if (clientPosSettings == null)
+            try
             {
-                return null; // log error, and don't return null dude!
-            }
+                var client = _clientFactory.CreateClient();
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
-            var monerisRequest = new MonerisRequest
-            {
-                ApiToken = _config["Moneris:apiToken"],
-                PostbackUrl = _config["Moneris:postbackUrl"],
-                StoreId = clientPosSettings.StoreId,
-                TerminalId = clientPosSettings.TerminalId,
-                TxnType = transactionRequest.TransactionType,
-                Request = new Request
+                var clientPosSettings = _context.ClientPosSettings.FirstOrDefault(c => c.ClientIp == transactionRequest.ClientIp);
+                if (clientPosSettings == null)
                 {
-                    Amount = transactionRequest.Amount.ToString(),
-                    OrderId = transactionRequest.OrderId.ToString()
-                },
-            };
+                    return null; // log error, and don't return null dude!
+                }
 
-            var response = await Client.PostAsync(
-                "/Terminal", 
-                monerisRequest,
-                new JsonMediaTypeFormatter());
+                var monerisRequest = new MonerisRequest
+                {
+                    apiToken = _config["Moneris:apiToken"],
+                    postbackUrl = _config["Moneris:postbackUrl"],
+                    storeId = clientPosSettings.StoreId,
+                    terminalId = clientPosSettings.TerminalId,
+                    txnType = transactionRequest.TransactionType,
+                    request = new Request
+                    {
+                        amount = transactionRequest.Amount.ToString(),
+                        orderId = transactionRequest.OrderId.ToString()
+                    },
+                };
 
-            // response.EnsureSuccessStatusCode();
+                var response = await client.PostAsync(
+                    _config["Moneris:baseUrl"], 
+                    new StringContent(
+                        JsonConvert.SerializeObject(monerisRequest), 
+                        Encoding.UTF8, 
+                        "application/json"));
 
-            var result = await response.Content
-                .ReadAsAsync<ValidationResponse>();
+                var result = await response.Content
+                    .ReadAsAsync<ValidationResponse>();
 
-            return result;
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return null;
+            }
         }
     }
 }

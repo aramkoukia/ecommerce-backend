@@ -72,6 +72,7 @@ namespace EcommerceApi
 
             services.AddTransient<IEmailSender, EmailSender>();
             services.AddTransient<IMonerisService, MonerisService>();
+            services.AddHttpClient();
 
             // Configure Entity Framework Identity for Auth
             services.AddIdentity<ApplicationUser, IdentityRole>()

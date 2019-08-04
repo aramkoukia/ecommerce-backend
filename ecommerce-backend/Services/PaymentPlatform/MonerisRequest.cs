@@ -2,24 +2,25 @@
 {
     public class MonerisRequest
     {
-        public string StoreId { get; set; }
-        public string ApiToken { get; set; }
-        public string TerminalId { get; set; }
-        public string TxnType { get; set; }
-        public string PostbackUrl { get; set; }
-        public Request Request { get; set; }
+        public string storeId { get; set; }
+        public string apiToken { get; set; }
+        public string terminalId { get; set; }
+        public string txnType { get; set; }
+        public string postbackUrl { get; set; }
+        public Request request { get; set; }
     }
 
     public class Request
     {
-        public string OrderId { get; set; }
-        public string Amount { get; set; }
+        public string orderId { get; set; }
+        public string amount { get; set; }
     }
 
     public enum TransactionType
     {
         pairing,
         initialize,
-        purchase
+        purchase,
+        refund
     }
 }

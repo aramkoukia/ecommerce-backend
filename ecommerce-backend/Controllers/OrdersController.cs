@@ -268,7 +268,7 @@ namespace EcommerceApi.Controllers
             var done = await NewOrderUpdateInventory(order);
             _context.Order.Add(order);
 
-            CallPaymentProvider(order);
+            await CallPaymentProvider(order);
 
             _emailSender.SendAdminReportAsync("New Order", $"New Order Created. \n Order Id: {order.OrderId}. \n Status: {order.Status} \n Total: ${order.Total} \n User: {user.GivenName}");
 
@@ -277,22 +277,39 @@ namespace EcommerceApi.Controllers
             return CreatedAtAction("GetOrder", new { id = order.OrderId }, order);
         }
 
-        private void CallPaymentProvider(Order order)
+        private async Task<ValidationResponse> CallPaymentProvider(Order order)
         {
-            if (!_context.Settings.FirstOrDefault().EnablePosIntegration) {
-                return;
+            try
+            {
+                if (!_context.Settings.FirstOrDefault().EnablePosIntegration)
+                {
+                    return null;
+                }
+
+                var creditDebitAmount = order.OrderPayment.Where(m => m.PaymentTypeId == 23).Sum(m => m.PaymentAmount);
+                if (creditDebitAmount == 0)
+                {
+                    return null;
+                }
+
+                TransactionType transactionType = order.Status == OrderStatus.Return.ToString()
+                    ? TransactionType.refund
+                    : TransactionType.purchase;
+                var clientIp = _accessor.HttpContext.Connection.RemoteIpAddress.ToString().Replace("{", "").Replace("}", "");
+
+                var transactionRequest = new TransactionRequest
+                {
+                    OrderId = order.OrderId,
+                    Amount = creditDebitAmount,
+                    ClientIp = clientIp,
+                    TransactionType = transactionType.ToString()
+                };
+                return await _monerisService.TransactionRequestAsync(transactionRequest);
             }
-
-            var creditDebitAmount = 0;
-            var clientIp = _accessor.HttpContext.Connection.RemoteIpAddress.ToString().Replace("{", "").Replace("}", "");
-
-            var transactionRequest = new TransactionRequest {
-                OrderId = order.OrderId,
-                Amount = creditDebitAmount,
-                ClientIp = clientIp,
-                TransactionType = TransactionType.purchase.ToString()
-            };
-            _monerisService.TransactionRequestAsync(transactionRequest);
+            catch (Exception ex)
+            {
+                return null;
+            }
         }
 
         [HttpPut("{id}")]
