@@ -1,8 +1,10 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using EcommerceApi.Models;
 using EcommerceApi.PaymentPlatform;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 
 namespace EcommerceApi.Controllers
 {
@@ -11,6 +13,12 @@ namespace EcommerceApi.Controllers
     [Route("api/Moneris")]
     public class MonerisController : Controller
     {
+        private readonly EcommerceContext _context;
+
+        public MonerisController(EcommerceContext context)
+        {
+            _context = context;
+        }
 
         [HttpPost("/Pair")]
         public IActionResult Pair([FromBody] PairRequest pairRequest)
@@ -25,8 +33,15 @@ namespace EcommerceApi.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Post([FromBody] ValidationResponse validationResponse)
+        public async Task<IActionResult> Post([FromBody] object validationResponse)
         {
+            _context.MonerisCallbackLogs.Add(
+                new MonerisCallbackLog
+                {
+                    CreatedDate = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateTime.UtcNow, "Pacific Standard Time"),
+                    Response = JsonConvert.SerializeObject(validationResponse)
+                });
+            await _context.SaveChangesAsync();
             return Ok(validationResponse);
         }
     }
