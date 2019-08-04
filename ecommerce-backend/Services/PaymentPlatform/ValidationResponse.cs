@@ -1,4 +1,4 @@
-﻿namespace EcommerceApi.PaymentPlatform
+﻿namespace EcommerceApi.Services.PaymentPlatform
 {
     public class ValidationResponse
     {

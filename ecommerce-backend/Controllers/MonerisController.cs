@@ -2,10 +2,9 @@
 using System.Threading.Tasks;
 using EcommerceApi.Models;
 using EcommerceApi.Models.Moneris;
-using EcommerceApi.PaymentPlatform;
+using EcommerceApi.Services.PaymentPlatform;
 using EcommerceApi.ViewModel.Moneris;
 using EcommerceApi.ViewModel.Moneris.EcommerceApi.ViewModel.Moneris;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 
@@ -40,7 +39,7 @@ namespace EcommerceApi.Controllers
         {
             SaveCallbackLog(validationResponse);
             await _context.SaveChangesAsync();
-            if (validationResponse.Receipt.TxnName.Equals("purchase", StringComparison.InvariantCultureIgnoreCase)) {
+            if (validationResponse.Receipt.TxnName.Equals(TransactionType.purchase.ToString(), StringComparison.InvariantCultureIgnoreCase)) {
                 UpdateOrderAuthCode(validationResponse);
             }
             return Ok(validationResponse);

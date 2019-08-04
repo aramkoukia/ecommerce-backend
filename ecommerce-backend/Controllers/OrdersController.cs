@@ -14,6 +14,8 @@ using DinkToPdf;
 using EcommerceApi.Untilities;
 using System.IO;
 using EcommerceApi.Services;
+using EcommerceApi.Services.PaymentPlatform;
+using Microsoft.AspNetCore.Http;
 
 namespace EcommerceApi.Controllers
 {
@@ -28,13 +30,17 @@ namespace EcommerceApi.Controllers
         private readonly ICustomerRepository _customerRepository;
         private readonly IConverter _converter;
         private readonly IEmailSender _emailSender;
+        private readonly IMonerisService _monerisService;
+        private readonly IHttpContextAccessor _accessor;
 
         public OrdersController(EcommerceContext context,
                                 UserManager<ApplicationUser> userManager,
                                 IOrderRepository orderRepository,
                                 ICustomerRepository customerRepository,
                                 IConverter converter,
-                                IEmailSender emailSender)
+                                IEmailSender emailSender,
+                                IMonerisService monerisService,
+                                IHttpContextAccessor accessor)
         {
             _context = context;
             _userManager = userManager;
@@ -42,6 +48,8 @@ namespace EcommerceApi.Controllers
             _customerRepository = customerRepository;
             _converter = converter;
             _emailSender = emailSender;
+            _monerisService = monerisService;
+            _accessor = accessor;
         }
 
         // GET: api/Orders
@@ -260,11 +268,31 @@ namespace EcommerceApi.Controllers
             var done = await NewOrderUpdateInventory(order);
             _context.Order.Add(order);
 
+            CallPaymentProvider(order);
+
             _emailSender.SendAdminReportAsync("New Order", $"New Order Created. \n Order Id: {order.OrderId}. \n Status: {order.Status} \n Total: ${order.Total} \n User: {user.GivenName}");
 
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetOrder", new { id = order.OrderId }, order);
+        }
+
+        private void CallPaymentProvider(Order order)
+        {
+            if (!_context.Settings.FirstOrDefault().EnablePosIntegration) {
+                return;
+            }
+
+            var creditDebitAmount = 0;
+            var clientIp = _accessor.HttpContext.Connection.RemoteIpAddress.ToString().Replace("{", "").Replace("}", "");
+
+            var transactionRequest = new TransactionRequest {
+                OrderId = order.OrderId,
+                Amount = creditDebitAmount,
+                ClientIp = clientIp,
+                TransactionType = TransactionType.purchase.ToString()
+            };
+            _monerisService.TransactionRequestAsync(transactionRequest);
         }
 
         [HttpPut("{id}")]

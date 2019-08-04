@@ -19,8 +19,8 @@ using System.IO;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using System;
-using EcommerceApi.PaymentPlatform;
 using Polly;
+using EcommerceApi.Services.PaymentPlatform;
 
 namespace EcommerceApi
 {
@@ -71,6 +71,7 @@ namespace EcommerceApi
             services.AddTransient(_ => new AppDb(Configuration.GetConnectionString("mysqlConnection")));
 
             services.AddTransient<IEmailSender, EmailSender>();
+            services.AddTransient<IMonerisService, MonerisService>();
 
             // Configure Entity Framework Identity for Auth
             services.AddIdentity<ApplicationUser, IdentityRole>()

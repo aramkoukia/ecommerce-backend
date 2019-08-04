@@ -1,6 +1,6 @@
 ﻿namespace EcommerceApi.Models
 {
-    public partial class Location
+    public class Location
     {
         public int LocationId { get; set; }
         public string LocationName { get; set; }

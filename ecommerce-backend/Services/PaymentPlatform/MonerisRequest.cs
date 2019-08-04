@@ -1,6 +1,6 @@
-﻿namespace EcommerceApi.PaymentPlatform
+﻿namespace EcommerceApi.Services.PaymentPlatform
 {
-    public class TransactionRequest
+    public class MonerisRequest
     {
         public string StoreId { get; set; }
         public string ApiToken { get; set; }
@@ -14,5 +14,12 @@
     {
         public string OrderId { get; set; }
         public string Amount { get; set; }
+    }
+
+    public enum TransactionType
+    {
+        pairing,
+        initialize,
+        purchase
     }
 }
