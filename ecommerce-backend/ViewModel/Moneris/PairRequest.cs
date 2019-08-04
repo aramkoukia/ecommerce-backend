@@ -1,4 +1,4 @@
-﻿namespace EcommerceApi.Models
+﻿namespace EcommerceApi.ViewModel.Moneris
 {
     public class PairRequest
     {

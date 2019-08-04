@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace EcommerceApi.Models
+namespace EcommerceApi.Models.Moneris
 {
     public class MonerisTransactionLog
     {
