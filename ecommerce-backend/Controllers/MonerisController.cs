@@ -4,6 +4,7 @@ using EcommerceApi.Models;
 using EcommerceApi.Models.Moneris;
 using EcommerceApi.PaymentPlatform;
 using EcommerceApi.ViewModel.Moneris;
+using EcommerceApi.ViewModel.Moneris.EcommerceApi.ViewModel.Moneris;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
