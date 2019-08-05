@@ -74,6 +74,8 @@ namespace EcommerceApi.Services.PaymentPlatform
                 var monerisLog = new MonerisTransactionLog
                 {
                     ClientIp = transactionRequest.ClientIp,
+                    OrderId = transactionRequest.OrderId,
+                    Amount = transactionRequest.Amount,
                     CreatedDate = transactionRequest.CreatedDate,
                     Request = requestString,
                     Response = JsonConvert.SerializeObject(result),

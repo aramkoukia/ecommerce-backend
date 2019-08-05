@@ -5,6 +5,7 @@ namespace EcommerceApi.Models.Moneris
     public class MonerisCallbackLog
     {
         public int Id { get; set; }
+        public int? OrderId { get; set; }
         public string Completed { get; set; }
         public string TransType { get; set; }
         public string Error { get; set; }

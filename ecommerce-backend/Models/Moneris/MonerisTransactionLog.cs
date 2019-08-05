@@ -5,6 +5,8 @@ namespace EcommerceApi.Models.Moneris
     public class MonerisTransactionLog
     {
         public int Id { get; set; }
+        public int? OrderId { get; set; }
+        public decimal? Amount { get; set; }
         public string ClientIp { get; set; }
         public string StoreId { get; set; }
         public string TerminalId { get; set; }
