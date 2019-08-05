@@ -66,7 +66,7 @@ namespace EcommerceApi.Controllers
                 new MonerisCallbackLog
                 {
                     AccountType = validationResponse.Receipt.AccountType,
-                    OrderId = validationResponse.Receipt.ReceiptId == "null" ? (int?)null : int.Parse(validationResponse.Receipt.ReceiptId),
+                    // OrderId = validationResponse.Receipt.ReceiptId == "null" ? (int?)null : int.Parse(validationResponse.Receipt.ReceiptId),
                     Aid = validationResponse.Receipt.Aid,
                     Amount = validationResponse.Receipt.Amount,
                     AppLabel = validationResponse.Receipt.AppLabel,
