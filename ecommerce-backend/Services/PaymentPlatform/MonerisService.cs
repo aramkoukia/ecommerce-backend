@@ -8,6 +8,7 @@ using System.Net.Http.Headers;
 using System.Text;
 using Newtonsoft.Json;
 using Microsoft.ApplicationInsights;
+using EcommerceApi.Models.Moneris;
 
 namespace EcommerceApi.Services.PaymentPlatform
 {
@@ -19,7 +20,8 @@ namespace EcommerceApi.Services.PaymentPlatform
         private readonly IHttpClientFactory _clientFactory;
         private static readonly TelemetryClient _telemetryClient;
 
-        static MonerisService() {
+        static MonerisService()
+        {
             _telemetryClient = new TelemetryClient();
         }
         public MonerisService(IHttpClientFactory clientFactory,
@@ -38,7 +40,6 @@ namespace EcommerceApi.Services.PaymentPlatform
                 var client = _clientFactory.CreateClient();
                 client.DefaultRequestHeaders.Accept.Clear();
                 client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-
                 var clientPosSettings = _context.ClientPosSettings.FirstOrDefault(c => c.ClientIp == transactionRequest.ClientIp);
                 if (clientPosSettings == null)
                 {
@@ -59,16 +60,33 @@ namespace EcommerceApi.Services.PaymentPlatform
                         orderId = transactionRequest.OrderId.ToString()
                     },
                 };
-
+                var requestString = JsonConvert.SerializeObject(monerisRequest);
                 var response = await client.PostAsync(
-                    _config["Moneris:baseUrl"], 
+                    _config["Moneris:baseUrl"],
                     new StringContent(
-                        JsonConvert.SerializeObject(monerisRequest), 
-                        Encoding.UTF8, 
+                        requestString,
+                        Encoding.UTF8,
                         "application/json"));
 
                 var result = await response.Content
                     .ReadAsAsync<ValidationResponse>();
+
+                var monerisLog = new MonerisTransactionLog
+                {
+                    ClientIp = transactionRequest.ClientIp,
+                    CreatedDate = transactionRequest.CreatedDate,
+                    Request = requestString,
+                    Response = JsonConvert.SerializeObject(result),
+                    ResponseCode = result.Receipt.ResponseCode,
+                    ResponseMessage = result.Receipt.Message,
+                    StoreId = monerisRequest.storeId,
+                    TerminalId = monerisRequest.terminalId,
+                    TransactionType = monerisRequest.txnType,
+                    UserId = transactionRequest.UserId,
+                };
+
+                await _context.MonerisTransactionLog.AddAsync(monerisLog);
+                await _context.SaveChangesAsync();
 
                 return result;
             }

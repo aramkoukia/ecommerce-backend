@@ -13,6 +13,7 @@
         public string InitRequired { get; set; }
         public string SafIndicator { get; set; }
         public string ResponseCode { get; set; }
+        public string Message { get; set; }
         public string ISO { get; set; }
         public string LanguageCode { get; set; }
         public string PartialAuthAmount { get; set; }

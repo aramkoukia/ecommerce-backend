@@ -302,7 +302,9 @@ namespace EcommerceApi.Controllers
                     OrderId = order.OrderId,
                     Amount = creditDebitAmount,
                     ClientIp = clientIp,
-                    TransactionType = transactionType.ToString()
+                    TransactionType = transactionType.ToString(),
+                    UserId = order.CreatedByUserId,
+                    CreatedDate = order.CreatedDate
                 };
                 return await _monerisService.TransactionRequestAsync(transactionRequest);
             }
