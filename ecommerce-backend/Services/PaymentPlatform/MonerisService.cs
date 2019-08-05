@@ -7,6 +7,7 @@ using System.Linq;
 using System.Net.Http.Headers;
 using System.Text;
 using Newtonsoft.Json;
+using Microsoft.ApplicationInsights;
 
 namespace EcommerceApi.Services.PaymentPlatform
 {
@@ -16,7 +17,11 @@ namespace EcommerceApi.Services.PaymentPlatform
         private readonly IConfiguration _config;
         private readonly EcommerceContext _context;
         private readonly IHttpClientFactory _clientFactory;
+        private static readonly TelemetryClient _telemetryClient;
 
+        static MonerisService() {
+            _telemetryClient = new TelemetryClient();
+        }
         public MonerisService(IHttpClientFactory clientFactory,
                               IConfiguration config,
                               EcommerceContext context)
@@ -37,6 +42,7 @@ namespace EcommerceApi.Services.PaymentPlatform
                 var clientPosSettings = _context.ClientPosSettings.FirstOrDefault(c => c.ClientIp == transactionRequest.ClientIp);
                 if (clientPosSettings == null)
                 {
+                    _telemetryClient.TrackException(new Exception($"ClientPosSettings missing for client IP: {transactionRequest.ClientIp}"));
                     return null; // log error, and don't return null dude!
                 }
 
@@ -68,6 +74,7 @@ namespace EcommerceApi.Services.PaymentPlatform
             }
             catch (Exception ex)
             {
+                _telemetryClient.TrackException(ex);
                 return null;
             }
         }
