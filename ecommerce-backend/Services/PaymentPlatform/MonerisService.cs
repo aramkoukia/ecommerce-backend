@@ -9,6 +9,8 @@ using System.Text;
 using Newtonsoft.Json;
 using Microsoft.ApplicationInsights;
 using EcommerceApi.Models.Moneris;
+using EcommerceApi.ViewModel.Moneris;
+using EcommerceApi.ViewModel.Moneris.EcommerceApi.ViewModel.Moneris;
 
 namespace EcommerceApi.Services.PaymentPlatform
 {
@@ -97,6 +99,26 @@ namespace EcommerceApi.Services.PaymentPlatform
                 _telemetryClient.TrackException(ex);
                 return null;
             }
+        }
+
+        public Task<object> BatchClose(BatchCloseRequest batchCloseRequest)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<object> UnPair(UnPairRequest unPairRequest)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<object> Pair(PairRequest pairRequest)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<object> Initialize(InitializeRequest initializeRequest)
+        {
+            throw new NotImplementedException();
         }
     }
 }

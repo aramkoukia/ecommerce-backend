@@ -5,33 +5,49 @@ using EcommerceApi.Models.Moneris;
 using EcommerceApi.Services.PaymentPlatform;
 using EcommerceApi.ViewModel.Moneris;
 using EcommerceApi.ViewModel.Moneris.EcommerceApi.ViewModel.Moneris;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 
 namespace EcommerceApi.Controllers
 {
-    // [Authorize]
+    [Authorize]
     [Produces("application/json")]
     [Route("api/Moneris")]
     public class MonerisController : Controller
     {
         private readonly EcommerceContext _context;
+        private readonly IMonerisService _monerisService;
 
-        public MonerisController(EcommerceContext context)
+        public MonerisController(EcommerceContext context,
+                                 MonerisService monerisService)
         {
             _context = context;
+            _monerisService = monerisService;
         }
 
         [HttpPost("/Pair")]
-        public IActionResult Pair([FromBody] PairRequest pairRequest)
+        public async Task<IActionResult> Pair([FromBody] PairRequest pairRequest)
         {
-            return Ok(pairRequest);
+            return Ok(await _monerisService.Pair(pairRequest));
+        }
+
+        [HttpPost("/UnPair")]
+        public async Task<IActionResult> UnPair([FromBody] UnPairRequest unPairRequest)
+        {
+            return Ok(await _monerisService.UnPair(unPairRequest));
         }
 
         [HttpPost("/Initialize")]
-        public IActionResult Initialize([FromBody] InitializeRequest initializeRequest)
+        public async Task<IActionResult> Initialize([FromBody] InitializeRequest initializeRequest)
         {
-            return Ok(initializeRequest);
+            return Ok(await _monerisService.Initialize(initializeRequest));
+        }
+
+        [HttpPost("/BatchClose")]
+        public async Task<IActionResult> BatchClose([FromBody] BatchCloseRequest batchCloseRequest)
+        {
+            return Ok(await _monerisService.BatchClose(batchCloseRequest));
         }
 
         [HttpPost]
