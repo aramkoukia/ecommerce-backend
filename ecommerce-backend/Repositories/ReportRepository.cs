@@ -504,7 +504,7 @@ SELECT
   SUM(OrderDetail.SubTotal) AS SubTotal,
   SUM(OrderDetail.DiscountAmount) AS Discount,
   SUM(OrderDetail.Amount * OrderDetail.UnitPrice) AS TotalBySalePrice,
-  SUM(OrderDetail.Amount * ISNULL(Product.PurchasePrice,0)) AS TotalByPurchasePrice,
+  SUM(OrderDetail.Amount * ISNULL(Product.PurchasePrice,0) * ISNULL(AmountInMainPackage, 1)) AS TotalByPurchasePrice,
   Count([Order].OrderId) AS Transactions,
   Location.LocationId,
   Location.LocationName,
@@ -617,7 +617,7 @@ SELECT LocationName,
 INTO #Results FROM (
 SELECT 
   SUM(OrderDetail.Amount * OrderDetail.UnitPrice) AS TotalBySalePrice,
-  SUM(OrderDetail.Amount * ISNULL(Product.PurchasePrice,0)) AS TotalByPurchasePrice,
+  SUM(OrderDetail.Amount * ISNULL(Product.PurchasePrice,0) * ISNULL(AmountInMainPackage, 1)) AS TotalByPurchasePrice,
   SUM(OrderDetail.Amount) As Amount,
   Product.PurchasePrice,
   AVG(UnitPrice) AS SalesPrice,
