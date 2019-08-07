@@ -33,5 +33,6 @@ namespace EcommerceApi.Repositories
         Task<IEnumerable<InventoryValueReportViewModel>> GetInventoryValue();
 
         Task<IEnumerable<InventoryValueTotalReportViewModel>> GetInventoryValueTotal();
+        Task<IEnumerable<SalesByPurchasePriceDetailReportViewModel>> GetSalesByPurchasePriceDetailReport(DateTime fromDate, DateTime toDate, string id);
     }
 }

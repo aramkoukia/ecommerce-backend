@@ -289,6 +289,22 @@ namespace EcommerceApi.Controllers
             return await _reportRepository.GetSalesByPurchasePriceReport(fromDate, toDate, user.Id);
         }
 
+        [HttpGet("SalesByPurchasePriceDetail")]
+        public async Task<IEnumerable<SalesByPurchasePriceDetailReportViewModel>> GetSalesByPurchasePriceDetailReport(DateTime fromDate, DateTime toDate)
+        {
+            if (fromDate == DateTime.MinValue)
+                fromDate = DateTime.Now;
+            if (toDate == DateTime.MinValue)
+                toDate = DateTime.Now;
+            else
+                toDate = toDate.AddDays(1).AddTicks(-1);
+
+            System.Security.Claims.ClaimsPrincipal currentUser = this.User;
+            var user = await _userManager.FindByEmailAsync(currentUser.Identity.Name);
+
+            return await _reportRepository.GetSalesByPurchasePriceDetailReport(fromDate, toDate, user.Id);
+        }
+
         [HttpGet("InventoryValue")]
         public async Task<IEnumerable<InventoryValueReportViewModel>> GetInventoryValue()
         {

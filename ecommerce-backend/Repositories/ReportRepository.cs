@@ -598,6 +598,61 @@ FROM #Results
             }
         }
 
+        public async Task<IEnumerable<SalesByPurchasePriceDetailReportViewModel>> GetSalesByPurchasePriceDetailReport(DateTime fromDate, DateTime toDate, string id)
+        {
+            using (IDbConnection conn = Connection)
+            {
+                string query = $@"
+IF OBJECT_ID('tempdb..#Results') IS NOT NULL
+    DROP TABLE #Results
+
+SELECT LocationName,
+  ProductCode, 
+  ProductName,
+  Amount,
+  PurchasePrice,
+  SalesPrice,
+  TotalBySalePrice,
+  TotalByPurchasePrice
+INTO #Results FROM (
+SELECT 
+  SUM(OrderDetail.Amount * OrderDetail.UnitPrice) AS TotalBySalePrice,
+  SUM(OrderDetail.Amount * ISNULL(Product.PurchasePrice,0)) AS TotalByPurchasePrice,
+  SUM(OrderDetail.Amount) As Amount,
+  Product.PurchasePrice,
+  AVG(UnitPrice) AS SalesPrice,
+  Location.LocationId,
+  Location.LocationName,
+  Product.ProductCode,
+  Product.ProductName
+FROM [Order]
+INNER JOIN [OrderDetail]
+	ON [Order].OrderId = [OrderDetail].OrderId
+INNER JOIN [Product]
+	ON [OrderDetail].ProductId = [Product].ProductId
+INNER JOIN Location
+ON Location.LocationId = [Order].LocationId
+INNER JOIN (
+SELECT OrderId
+FROM OrderPayment
+WHERE PaymentDate BETWEEN @FromDate AND @ToDate
+GROUP BY OrderId
+) OrderPayment
+ON [Order].OrderId = OrderPayment.OrderId
+WHERE [Order].Status IN ('Return', 'Paid')
+GROUP BY Location.LocationId, LocationName, [Order].Status, ProductCode, ProductName, Product.PurchasePrice
+) [Order]
+
+SELECT LocationName, ProductCode, ProductName, FORMAT(Amount, 'N2') AS Amount, FORMAT(SalesPrice, 'N2') AS SalesPrice, FORMAT(PurchasePrice, 'N2') AS PurchasePrice,  FORMAT(TotalBySalePrice, 'N2') AS TotalBySalePrice, FORMAT(TotalByPurchasePrice, 'N2') AS TotalByPurchasePrice FROM #Results
+UNION 
+SELECT ' Total ',  '', '', '', '', '',FORMAT(SUM(TotalBySalePrice), 'N2'), FORMAT(SUM(TotalByPurchasePrice), 'N2') AS TotalByPurchasePrice
+FROM #Results
+";
+                conn.Open();
+                // var locationIds = (await GetUserLocations(userId)).ToArray();
+                return await conn.QueryAsync<SalesByPurchasePriceDetailReportViewModel>(query, new { fromDate, toDate });
+            }
+        }
 
         public async Task<IEnumerable<PaymentsTotalViewModel>> GetPaymentsTotalReport(DateTime fromDate, DateTime toDate, string userId)
         {
