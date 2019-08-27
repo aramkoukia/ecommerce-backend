@@ -865,7 +865,8 @@ WHERE [Order].[Status] IN ('Account')
             using (IDbConnection conn = Connection)
             {
                 string query = $@"
-SELECT [Order].OrderId, PoNumber, OrderDate, [Order].Total, OrderPayment.PaymentAmount, [Order].[Status], ISNULL(PaymentType.PaymentTypeName, 'Account Return') AS PaymentTypeName, Customer.CompanyName, Customer.CustomerCode, Customer.[Address], Customer.City, Customer.Province, Customer.PostalCode
+SELECT [Order].OrderId, PoNumber, OrderDate, [Order].Total, OrderPayment.PaymentAmount, [Order].[Status], 
+       ISNULL(PaymentType.PaymentTypeName, '') AS PaymentTypeName, Customer.CompanyName, Customer.CustomerCode, Customer.[Address], Customer.City, Customer.Province, Customer.PostalCode
 FROM [Order]
 INNER JOIN Customer
 	ON Customer.CustomerId = [Order].CustomerId
@@ -873,7 +874,6 @@ LEFT JOIN
 ( 
 	SELECT OrderId, PaymentDate, PaymentTypeId, SUM(PaymentAmount) AS PaymentAmount
 	FROM OrderPayment
-	WHERE PaymentDate BETWEEN @FromDate AND @ToDate
 	GROUP BY OrderId, PaymentDate, PaymentTypeId
 ) OrderPayment
 	ON [Order].OrderId = OrderPayment.OrderId
