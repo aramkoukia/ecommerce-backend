@@ -28,7 +28,7 @@ namespace EcommerceApi.Controllers
             return _context.ProductType;
         }
 
-        // GET: api/Locations/5
+        // GET: api/ProductTypes/5
         [HttpGet("{id}")]
         public async Task<IActionResult> GetProductType([FromRoute] int id)
         {
