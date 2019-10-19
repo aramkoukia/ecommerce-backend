@@ -90,6 +90,7 @@ namespace EcommerceApi.Controllers
                 return BadRequest($"ProductId {id} not found.");
             }
             exisintgProduct.PurchasePrice = product.PurchasePrice;
+            exisintgProduct.ProductTypeId = product.ProductTypeId;
 
             try
             {
