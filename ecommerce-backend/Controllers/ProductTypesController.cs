@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using EcommerceApi.Models;
 using Microsoft.AspNetCore.Authorization;
+using System;
 
 namespace EcommerceApi.Controllers
 {
@@ -60,7 +61,7 @@ namespace EcommerceApi.Controllers
             {
                 return BadRequest();
             }
-
+            productType.ModifiedDate = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateTime.UtcNow, "Pacific Standard Time");
             _context.Entry(productType).State = EntityState.Modified;
 
             try

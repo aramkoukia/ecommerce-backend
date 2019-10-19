@@ -79,23 +79,23 @@ namespace EcommerceApi.Controllers
                                 SalesPrice = price
                             };
 
-                            if (typeId > 0)
-                            {
-                                var existingProductType = await _context.ProductType.FindAsync(typeId);
-                                if (existingProductType == null)
-                                {
-                                    newProduct.ProductType = new ProductType
-                                    {
-                                        ProductTypeId = typeId,
-                                        ModifiedDate = DateTime.Now,
-                                        ProductTypeName = product._category
-                                    };
-                                }
-                            }
-                            else
-                            {
-                                newProduct.ProductType = null;
-                            }
+                            //if (typeId > 0)
+                            //{
+                            //    var existingProductType = await _context.ProductType.FindAsync(typeId);
+                            //    if (existingProductType == null)
+                            //    {
+                            //        newProduct.ProductType = new ProductType
+                            //        {
+                            //            ProductTypeId = typeId,
+                            //            ModifiedDate = DateTime.Now,
+                            //            ProductTypeName = product._category
+                            //        };
+                            //    }
+                            //}
+                            //else
+                            //{
+                            //    newProduct.ProductType = null;
+                            //}
                             await _context.Product.AddAsync(newProduct);
                             await _context.ProductInventory.AddAsync(new ProductInventory {
                                 Balance = 0,
@@ -125,31 +125,31 @@ namespace EcommerceApi.Controllers
                         }
                         else
                         {
-                            if (typeId > 0)
-                            {
-                                var existingProductType = await _context.ProductType.FindAsync(typeId);
-                                if (existingProductType == null)
-                                {
-                                    found.ProductType = new ProductType
-                                    {
-                                        ProductTypeId = typeId,
-                                        ModifiedDate = DateTime.Now,
-                                        ProductTypeName = product._category
-                                    };
-                                }
-                            }
-                            else
-                            {
-                                // found.ProductType = null;
-                            }
+                            //if (typeId > 0)
+                            //{
+                            //    var existingProductType = await _context.ProductType.FindAsync(typeId);
+                            //    if (existingProductType == null)
+                            //    {
+                            //        found.ProductType = new ProductType
+                            //        {
+                            //            ProductTypeId = typeId,
+                            //            ModifiedDate = DateTime.Now,
+                            //            ProductTypeName = product._category
+                            //        };
+                            //    }
+                            //}
+                            //else
+                            //{
+                            //    // found.ProductType = null;
+                            //}
 
                             productsUpdated++;
                             found.ModifiedDate = DateTime.Now;
                             found.ProductName = product.post_title;
-                            if (found.ProductTypeId != typeId)
-                            {
-                                found.ProductTypeId = typeId;
-                            }
+                            //if (found.ProductTypeId != typeId)
+                            //{
+                            //    found.ProductTypeId = typeId;
+                            //}
                             
                             found.SalesPrice = price;
                             found.Barcode = product._sku;
