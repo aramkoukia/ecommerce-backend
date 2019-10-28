@@ -53,11 +53,6 @@ namespace EcommerceApi.Controllers
                         {
                             decimal.TryParse(product._price, out price);
                         }
-                        int typeId = 0;
-                        if (!string.IsNullOrEmpty(product._cat_id))
-                        {
-                            int.TryParse(product._cat_id, out typeId);
-                        }
 
                         var found = await _context.Product.FindAsync(int.Parse(product.id.ToString()));
                         if (found == null)
@@ -73,31 +68,17 @@ namespace EcommerceApi.Controllers
                                 ProductDescription = "",
                                 ProductId = int.Parse(product.id.ToString()),
                                 ProductName = product.post_title,
-                                ProductTypeId = typeId,
+                                ProductTypeId = 0,
                                 PurchasePrice = 0,
                                 Sku = product._sku,
                                 SalesPrice = price
                             };
 
-                            //if (typeId > 0)
-                            //{
-                            //    var existingProductType = await _context.ProductType.FindAsync(typeId);
-                            //    if (existingProductType == null)
-                            //    {
-                            //        newProduct.ProductType = new ProductType
-                            //        {
-                            //            ProductTypeId = typeId,
-                            //            ModifiedDate = DateTime.Now,
-                            //            ProductTypeName = product._category
-                            //        };
-                            //    }
-                            //}
-                            //else
-                            //{
-                            //    newProduct.ProductType = null;
-                            //}
+                            newProduct.ProductType = null;
+
                             await _context.Product.AddAsync(newProduct);
-                            await _context.ProductInventory.AddAsync(new ProductInventory {
+                            await _context.ProductInventory.AddAsync(new ProductInventory 
+                            {
                                 Balance = 0,
                                 BinCode = "",
                                 LocationId = 1,
@@ -125,32 +106,9 @@ namespace EcommerceApi.Controllers
                         }
                         else
                         {
-                            //if (typeId > 0)
-                            //{
-                            //    var existingProductType = await _context.ProductType.FindAsync(typeId);
-                            //    if (existingProductType == null)
-                            //    {
-                            //        found.ProductType = new ProductType
-                            //        {
-                            //            ProductTypeId = typeId,
-                            //            ModifiedDate = DateTime.Now,
-                            //            ProductTypeName = product._category
-                            //        };
-                            //    }
-                            //}
-                            //else
-                            //{
-                            //    // found.ProductType = null;
-                            //}
-
                             productsUpdated++;
                             found.ModifiedDate = DateTime.Now;
                             found.ProductName = product.post_title;
-                            //if (found.ProductTypeId != typeId)
-                            //{
-                            //    found.ProductTypeId = typeId;
-                            //}
-                            
                             found.SalesPrice = price;
                             found.Barcode = product._sku;
                             found.ProductCode = product._sku;
@@ -160,6 +118,7 @@ namespace EcommerceApi.Controllers
                     }
                     catch (Exception e)
                     {
+                        Console.WriteLine(e.ToString());
                         errorList.Add("products error:" + e.ToString());
                     }
                 }
@@ -167,6 +126,7 @@ namespace EcommerceApi.Controllers
             }
             catch (Exception ex)
             {
+                Console.WriteLine(ex.ToString());
                 errorList.Add("products error:" + ex.ToString());
             }
             stopWatch.Stop();
