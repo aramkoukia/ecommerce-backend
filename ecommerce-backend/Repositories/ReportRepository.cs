@@ -188,6 +188,24 @@ Order By Year, Label
             using (IDbConnection conn = Connection)
             {
                 string query = $@"
+SELECT 'Total' AS ProductTypeName, FORMAT(SUM(ISNULL(Total,0)), 'N2') AS TotalSales, Null AS LocationName
+FROM Product
+INNER JOIN ProductType
+	ON ProductType.ProductTypeId = Product.ProductTypeId
+LEFT JOIN (SELECT SUM(OrderDetail.Total) AS Total, ProductId, LocationId 
+		   FROM [Order]
+		   INNER JOIN OrderDetail
+			 ON OrderDetail.OrderId = [Order].OrderId
+		   WHERE OrderDate BETWEEN @fromDate AND @toDate
+                 AND LocationId IN @locationId
+                 AND [Order].Status IN ('Return', 'Paid', 'Account')
+		   GROUP BY ProductId, LocationId ) Sales
+ON Product.ProductId = Sales.ProductId
+INNER JOIN [Location]
+	ON [Location].LocationId = Sales.LocationId
+
+UNION 
+
 SELECT ProductTypeName, FORMAT(SUM(ISNULL(Total,0)), 'N2') AS TotalSales, Location.LocationName
 FROM Product
 INNER JOIN ProductType
@@ -197,13 +215,14 @@ LEFT JOIN (SELECT SUM(OrderDetail.Total) AS Total, ProductId, LocationId
 		   INNER JOIN OrderDetail
 			 ON OrderDetail.OrderId = [Order].OrderId
 		   WHERE OrderDate BETWEEN @fromDate AND @toDate
-                 AND LocationId IN @locationIds
+                 AND LocationId IN @locationId
                  AND [Order].Status IN ('Return', 'Paid', 'Account')
 		   GROUP BY ProductId, LocationId ) Sales
 ON Product.ProductId = Sales.ProductId
 INNER JOIN [Location]
 	ON [Location].LocationId = Sales.LocationId
-GROUP BY ProductTypeName, [Location].LocationId, LocationName                                 ";
+GROUP BY ProductTypeName, [Location].LocationId, LocationName
+";
                 conn.Open();
                 var locationIds = (await GetUserLocations(userId)).ToArray();
                 return await conn.QueryAsync<ProductTypeSalesReportViewModel>(query, new { fromDate, toDate, locationIds });
