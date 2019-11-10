@@ -90,8 +90,6 @@ namespace EcommerceApi.Controllers
             {
                 return BadRequest(ModelState);
             }
-
-            clientPosSetting.Id = _context.ClientPosSettings.Max(l => l.Id) + 1;
             _context.ClientPosSettings.Add(clientPosSetting);
             try
             {
