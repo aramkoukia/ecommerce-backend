@@ -188,40 +188,54 @@ Order By Year, Label
             using (IDbConnection conn = Connection)
             {
                 string query = $@"
-SELECT 'Total' AS ProductTypeName, FORMAT(SUM(ISNULL(Total,0)), 'N2') AS TotalSales, Null AS LocationName
-FROM Product
+SELECT * FROM (
+SELECT 'TotalSales' AS ProductTypeName, 
+       FORMAT(SUM([OrderDetail].Amount * [OrderDetail].UnitPrice), 'N2') AS TotalSales, 
+       '' AS LocationName, SUM([OrderDetail].Amount * [OrderDetail].UnitPrice) AS Total
+FROM [Order]
+INNER JOIN OrderDetail
+	ON [Order].OrderId = [OrderDetail].OrderId
+INNER JOIN [Product]
+	ON [OrderDetail].ProductId = [Product].ProductId
+INNER JOIN Location
+ON Location.LocationId = [Order].LocationId
 INNER JOIN ProductType
 	ON ProductType.ProductTypeId = Product.ProductTypeId
-LEFT JOIN (SELECT SUM(OrderDetail.Total) AS Total, ProductId, LocationId 
-		   FROM [Order]
-		   INNER JOIN OrderDetail
-			 ON OrderDetail.OrderId = [Order].OrderId
-		   WHERE OrderDate BETWEEN @fromDate AND @toDate
-                 AND LocationId IN @locationId
-                 AND [Order].Status IN ('Return', 'Paid', 'Account')
-		   GROUP BY ProductId, LocationId ) Sales
-ON Product.ProductId = Sales.ProductId
-INNER JOIN [Location]
-	ON [Location].LocationId = Sales.LocationId
+INNER JOIN (
+SELECT OrderId
+FROM OrderPayment
+WHERE PaymentDate BETWEEN @FromDate AND @ToDate
+GROUP BY OrderId
+) OrderPayment
+ON [Order].OrderId = OrderPayment.OrderId
+WHERE [Order].Status IN ('Return', 'Paid')
 
 UNION 
 
-SELECT ProductTypeName, FORMAT(SUM(ISNULL(Total,0)), 'N2') AS TotalSales, Location.LocationName
-FROM Product
+SELECT ProductTypeName, 
+       FORMAT(SUM([OrderDetail].Amount * [OrderDetail].UnitPrice), 'N2') AS TotalSales, 
+       Location.LocationName, SUM([OrderDetail].Amount * [OrderDetail].UnitPrice) AS Total
+FROM [Order]
+INNER JOIN OrderDetail
+	ON [Order].OrderId = [OrderDetail].OrderId
+INNER JOIN [Product]
+	ON [OrderDetail].ProductId = [Product].ProductId
+INNER JOIN Location
+ON Location.LocationId = [Order].LocationId
 INNER JOIN ProductType
 	ON ProductType.ProductTypeId = Product.ProductTypeId
-LEFT JOIN (SELECT SUM(OrderDetail.Total) AS Total, ProductId, LocationId 
-		   FROM [Order]
-		   INNER JOIN OrderDetail
-			 ON OrderDetail.OrderId = [Order].OrderId
-		   WHERE OrderDate BETWEEN @fromDate AND @toDate
-                 AND LocationId IN @locationId
-                 AND [Order].Status IN ('Return', 'Paid', 'Account')
-		   GROUP BY ProductId, LocationId ) Sales
-ON Product.ProductId = Sales.ProductId
-INNER JOIN [Location]
-	ON [Location].LocationId = Sales.LocationId
-GROUP BY ProductTypeName, [Location].LocationId, LocationName
+INNER JOIN (
+SELECT OrderId
+FROM OrderPayment
+WHERE PaymentDate BETWEEN @FromDate AND @ToDate
+GROUP BY OrderId
+) OrderPayment
+ON [Order].OrderId = OrderPayment.OrderId
+WHERE [Order].Status IN ('Return', 'Paid')
+GROUP BY Location.LocationId, LocationName, ProductTypeName 
+) t
+ORDER BY Total DESC
+
 ";
                 conn.Open();
                 var locationIds = (await GetUserLocations(userId)).ToArray();
