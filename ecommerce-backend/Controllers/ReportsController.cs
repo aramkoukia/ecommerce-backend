@@ -250,27 +250,27 @@ namespace EcommerceApi.Controllers
         }
 
         [HttpGet("PurchaseProfit")]
-        public async Task<IEnumerable<ProductProfitReportViewModel>> GetProductProfitReport(DateTime salesFromDate,
-                                                                                            DateTime salesToDate,
-                                                                                            DateTime purchaseFromDate,
-                                                                                            DateTime purchaseToDate)
+        public async Task<IEnumerable<ProductProfitReportViewModel>> GetProductProfitReport(DateTime fromSalesDate,
+                                                                                            DateTime toSalesDate,
+                                                                                            DateTime fromPurchaseDate,
+                                                                                            DateTime toPurchaseDate)
         {
-            if (salesFromDate == DateTime.MinValue)
-                salesFromDate = DateTime.Now.AddYears(-1);
-            if (salesToDate == DateTime.MinValue)
-                salesToDate = DateTime.Now;
+            if (fromSalesDate == DateTime.MinValue)
+                fromSalesDate = DateTime.Now.AddYears(-1);
+            if (toSalesDate == DateTime.MinValue)
+                toSalesDate = DateTime.Now;
             else
-                salesToDate = salesToDate.AddDays(1).AddTicks(-1);
+                toSalesDate = toSalesDate.AddDays(1).AddTicks(-1);
 
-            if (purchaseFromDate == DateTime.MinValue)
-                purchaseFromDate = DateTime.Now.AddYears(-1);
-            if (purchaseToDate == DateTime.MinValue)
-                purchaseToDate = DateTime.Now;
+            if (fromPurchaseDate == DateTime.MinValue)
+                fromPurchaseDate = DateTime.Now.AddYears(-1);
+            if (toPurchaseDate == DateTime.MinValue)
+                toPurchaseDate = DateTime.Now;
             else
-                purchaseToDate = purchaseToDate.AddDays(1).AddTicks(-1);
+                toPurchaseDate = toPurchaseDate.AddDays(1).AddTicks(-1);
 
 
-            return await _reportRepository.GetProductProfitReport(salesFromDate, salesToDate, purchaseFromDate, purchaseToDate);
+            return await _reportRepository.GetProductProfitReport(fromSalesDate, toSalesDate, fromPurchaseDate, toPurchaseDate);
         }
 
         [HttpGet("SalesByPurchasePrice")]
