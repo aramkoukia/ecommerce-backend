@@ -316,5 +316,11 @@ namespace EcommerceApi.Controllers
         {
             return await _reportRepository.GetInventoryValueTotal();
         }
-   }
+
+        [HttpGet("InventoryValueTotalByCategory")]
+        public async Task<IEnumerable<InventoryValueTotalByCategoryReportViewModel>> GetInventoryValueTotalByCategory()
+        {
+            return await _reportRepository.GetInventoryValueTotalByCategory();
+        }
+    }
 }

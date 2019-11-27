@@ -1139,5 +1139,30 @@ INNER JOIN Location
                 return await conn.QueryAsync<InventoryValueTotalReportViewModel>(query);
             }
         }
+
+        public async Task<IEnumerable<InventoryValueTotalByCategoryReportViewModel>> GetInventoryValueTotalByCategory()
+        {
+            using (IDbConnection conn = Connection)
+            {
+                string query = $@"
+SELECT LocationName, 
+       ProductTypeName AS CategoryName,
+       FORMAT(SUM(Balance * SalesPrice), 'N2') AS ValueBySalePrice, 
+       FORMAT(SUM(Balance * PurchasePrice), 'N2') AS ValueByPurchasePrice,
+	   SUM(Balance * SalesPrice) AS ValueBySalePriceValue
+FROM ProductInventory
+INNER JOIN Product
+	ON Product.ProductId = ProductInventory.ProductId
+INNER JOIN ProductType
+	ON ProductType.ProductTypeId = Product.ProductTypeId
+INNER JOIN Location
+	ON Location.LocationId = ProductInventory.LocationId
+GROUP BY LocationName, ProductTypeName
+ORDER BY ValueBySalePriceValue DESC
+";
+                conn.Open();
+                return await conn.QueryAsync<InventoryValueTotalByCategoryReportViewModel>(query);
+            }
+        }
     }
 }
