@@ -6,9 +6,9 @@ namespace EcommerceApi.Services.PaymentPlatform
     public interface IMonerisService
     {
         Task<ValidationResponse> TransactionRequestAsync(TransactionRequest transactionRequest);
-        Task<object> BatchClose(MonerisAdminRequest monerisAdminRequest);
-        Task<object> UnPair(MonerisAdminRequest monerisAdminRequest);
-        Task<object> Pair(MonerisAdminRequest monerisAdminRequest);
-        Task<object> Initialize(MonerisAdminRequest monerisAdminRequest);
+        Task<ValidationResponse> BatchClose(MonerisAdminRequest monerisAdminRequest);
+        Task<ValidationResponse> UnPair(MonerisAdminRequest monerisAdminRequest);
+        Task<ValidationResponse> Pair(MonerisAdminRequest monerisAdminRequest);
+        Task<ValidationResponse> Initialize(MonerisAdminRequest monerisAdminRequest);
     }
 }

@@ -21,7 +21,7 @@ namespace EcommerceApi.Controllers
         private readonly IHttpContextAccessor _accessor;
 
         public MonerisController(EcommerceContext context,
-                                 MonerisService monerisService,
+                                 IMonerisService monerisService,
                                  IHttpContextAccessor accessor)
         {
             _context = context;
@@ -29,47 +29,68 @@ namespace EcommerceApi.Controllers
             _accessor = accessor;
         }
 
-        [HttpPost("/Pair")]
+        [HttpPost("pair")]
         public async Task<IActionResult> Pair([FromBody] MonerisAdminRequest monerisAdminRequest)
         {
             System.Security.Claims.ClaimsPrincipal currentUser = User;
             var clientIp = _accessor.HttpContext.Connection.RemoteIpAddress.ToString().Replace("{", "").Replace("}", "");
             monerisAdminRequest.ClientIp = clientIp;
             monerisAdminRequest.UserId = currentUser.Identity.Name;
-            return Ok(await _monerisService.Pair(monerisAdminRequest));
+            var result = await _monerisService.Pair(monerisAdminRequest);
+            if (result != null && result.Receipt.Error.Equals("false", StringComparison.InvariantCultureIgnoreCase))
+            {
+                return Ok();
+            }
+            return BadRequest(result?.Receipt?.Message);
         }
 
-        [HttpPost("/UnPair")]
+        [HttpPost("unpair")]
         public async Task<IActionResult> UnPair([FromBody] MonerisAdminRequest monerisAdminRequest)
         {
             System.Security.Claims.ClaimsPrincipal currentUser = User;
             var clientIp = _accessor.HttpContext.Connection.RemoteIpAddress.ToString().Replace("{", "").Replace("}", "");
             monerisAdminRequest.ClientIp = clientIp;
             monerisAdminRequest.UserId = currentUser.Identity.Name;
-            return Ok(await _monerisService.UnPair(monerisAdminRequest));
+            var result = await _monerisService.UnPair(monerisAdminRequest);
+            if (result != null && result.Receipt.Error.Equals("false", StringComparison.InvariantCultureIgnoreCase))
+            {
+                return Ok();
+            }
+            return BadRequest(result?.Receipt?.Message);
         }
 
-        [HttpPost("/Initialize")]
+        [HttpPost("initialize")]
         public async Task<IActionResult> Initialize([FromBody] MonerisAdminRequest monerisAdminRequest)
         {
             System.Security.Claims.ClaimsPrincipal currentUser = User;
             var clientIp = _accessor.HttpContext.Connection.RemoteIpAddress.ToString().Replace("{", "").Replace("}", "");
             monerisAdminRequest.ClientIp = clientIp;
             monerisAdminRequest.UserId = currentUser.Identity.Name;
-            return Ok(await _monerisService.Initialize(monerisAdminRequest));
+            var result = await _monerisService.Initialize(monerisAdminRequest);
+            if (result != null && result.Receipt.Error.Equals("false", StringComparison.InvariantCultureIgnoreCase))
+            {
+                return Ok();
+            }
+            return BadRequest(result.Receipt.Message);
         }
 
-        [HttpPost("/BatchClose")]
+        [HttpPost("batchclose")]
         public async Task<IActionResult> BatchClose([FromBody] MonerisAdminRequest monerisAdminRequest)
         {
             System.Security.Claims.ClaimsPrincipal currentUser = User;
             var clientIp = _accessor.HttpContext.Connection.RemoteIpAddress.ToString().Replace("{", "").Replace("}", "");
             monerisAdminRequest.ClientIp = clientIp;
             monerisAdminRequest.UserId = currentUser.Identity.Name;
-            return Ok(await _monerisService.BatchClose(monerisAdminRequest));
+            var result = await _monerisService.BatchClose(monerisAdminRequest);
+            if (result != null && result.Receipt.Error.Equals("false", StringComparison.InvariantCultureIgnoreCase))
+            {
+                return Ok();
+            }
+            return BadRequest(result?.Receipt?.Message);
         }
 
         [HttpPost]
+        [AllowAnonymous]
         public async Task<IActionResult> Post([FromBody] ValidationResponse validationResponse)
         {
             SaveCallbackLog(validationResponse);

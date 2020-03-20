@@ -10,13 +10,11 @@ using Newtonsoft.Json;
 using Microsoft.ApplicationInsights;
 using EcommerceApi.Models.Moneris;
 using EcommerceApi.ViewModel.Moneris;
-using EcommerceApi.ViewModel.Moneris.EcommerceApi.ViewModel.Moneris;
 
 namespace EcommerceApi.Services.PaymentPlatform
 {
     public class MonerisService : IMonerisService
     {
-        public HttpClient Client { get; }
         private readonly IConfiguration _config;
         private readonly EcommerceContext _context;
         private readonly IHttpClientFactory _clientFactory;
@@ -26,6 +24,7 @@ namespace EcommerceApi.Services.PaymentPlatform
         {
             _telemetryClient = new TelemetryClient();
         }
+
         public MonerisService(IHttpClientFactory clientFactory,
                               IConfiguration config,
                               EcommerceContext context)
@@ -49,14 +48,14 @@ namespace EcommerceApi.Services.PaymentPlatform
                     return null; // log error, and don't return null dude!
                 }
 
-                var monerisRequest = new MonerisRequest
+                var monerisRequest = new
                 {
                     apiToken = _config["Moneris:apiToken"],
                     postbackUrl = _config["Moneris:postbackUrl"],
                     storeId = clientPosSettings.StoreId,
                     terminalId = clientPosSettings.TerminalId,
                     txnType = transactionRequest.TransactionType,
-                    request = new Request
+                    request = new
                     {
                         amount = transactionRequest.Amount.ToString(),
                         orderId = transactionRequest.OrderId.ToString()
@@ -101,7 +100,7 @@ namespace EcommerceApi.Services.PaymentPlatform
             }
         }
 
-        public async Task<object> BatchClose(MonerisAdminRequest monerisAdminRequest)
+        public async Task<ValidationResponse> BatchClose(MonerisAdminRequest monerisAdminRequest)
         {
             try
             {
@@ -109,7 +108,7 @@ namespace EcommerceApi.Services.PaymentPlatform
                 client.DefaultRequestHeaders.Accept.Clear();
                 client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
-                var monerisRequest = new MonerisRequest
+                var monerisRequest = new
                 {
                     apiToken = _config["Moneris:apiToken"],
                     postbackUrl = _config["Moneris:postbackUrl"],
@@ -159,7 +158,7 @@ namespace EcommerceApi.Services.PaymentPlatform
             }
         }
 
-        public async Task<object> UnPair(MonerisAdminRequest monerisAdminRequest)
+        public async Task<ValidationResponse> UnPair(MonerisAdminRequest monerisAdminRequest)
         {
             try
             {
@@ -167,7 +166,7 @@ namespace EcommerceApi.Services.PaymentPlatform
                 client.DefaultRequestHeaders.Accept.Clear();
                 client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
-                var monerisRequest = new MonerisRequest
+                var monerisRequest = new
                 {
                     apiToken = _config["Moneris:apiToken"],
                     postbackUrl = _config["Moneris:postbackUrl"],
@@ -217,7 +216,7 @@ namespace EcommerceApi.Services.PaymentPlatform
             }
         }
 
-        public async Task<object> Pair(MonerisAdminRequest monerisAdminRequest)
+        public async Task<ValidationResponse> Pair(MonerisAdminRequest monerisAdminRequest)
         {
             try
             {
@@ -225,14 +224,14 @@ namespace EcommerceApi.Services.PaymentPlatform
                 client.DefaultRequestHeaders.Accept.Clear();
                 client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
-                var monerisRequest = new MonerisRequest
+                var monerisRequest = new
                 {
                     apiToken = _config["Moneris:apiToken"],
                     postbackUrl = _config["Moneris:postbackUrl"],
                     storeId = monerisAdminRequest.StoreId,
                     terminalId = monerisAdminRequest.TerminalId,
                     txnType = "pair",
-                    request = new Request { 
+                    request = new {
                         pairingToken = monerisAdminRequest.PairingToken
                     }
                 };
@@ -278,7 +277,7 @@ namespace EcommerceApi.Services.PaymentPlatform
             }
         }
 
-        public async Task<object> Initialize(MonerisAdminRequest monerisAdminRequest)
+        public async Task<ValidationResponse> Initialize(MonerisAdminRequest monerisAdminRequest)
         {
             try
             {
@@ -286,7 +285,7 @@ namespace EcommerceApi.Services.PaymentPlatform
                 client.DefaultRequestHeaders.Accept.Clear();
                 client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
-                var monerisRequest = new MonerisRequest
+                var monerisRequest = new
                 {
                     apiToken = _config["Moneris:apiToken"],
                     postbackUrl = _config["Moneris:postbackUrl"],
