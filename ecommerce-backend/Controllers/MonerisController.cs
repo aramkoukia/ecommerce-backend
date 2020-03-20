@@ -4,8 +4,8 @@ using EcommerceApi.Models;
 using EcommerceApi.Models.Moneris;
 using EcommerceApi.Services.PaymentPlatform;
 using EcommerceApi.ViewModel.Moneris;
-using EcommerceApi.ViewModel.Moneris.EcommerceApi.ViewModel.Moneris;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 
@@ -18,36 +18,55 @@ namespace EcommerceApi.Controllers
     {
         private readonly EcommerceContext _context;
         private readonly IMonerisService _monerisService;
+        private readonly IHttpContextAccessor _accessor;
 
         public MonerisController(EcommerceContext context,
-                                 MonerisService monerisService)
+                                 MonerisService monerisService,
+                                 IHttpContextAccessor accessor)
         {
             _context = context;
             _monerisService = monerisService;
+            _accessor = accessor;
         }
 
         [HttpPost("/Pair")]
-        public async Task<IActionResult> Pair([FromBody] PairRequest pairRequest)
+        public async Task<IActionResult> Pair([FromBody] MonerisAdminRequest monerisAdminRequest)
         {
-            return Ok(await _monerisService.Pair(pairRequest));
+            System.Security.Claims.ClaimsPrincipal currentUser = User;
+            var clientIp = _accessor.HttpContext.Connection.RemoteIpAddress.ToString().Replace("{", "").Replace("}", "");
+            monerisAdminRequest.ClientIp = clientIp;
+            monerisAdminRequest.UserId = currentUser.Identity.Name;
+            return Ok(await _monerisService.Pair(monerisAdminRequest));
         }
 
         [HttpPost("/UnPair")]
-        public async Task<IActionResult> UnPair([FromBody] UnPairRequest unPairRequest)
+        public async Task<IActionResult> UnPair([FromBody] MonerisAdminRequest monerisAdminRequest)
         {
-            return Ok(await _monerisService.UnPair(unPairRequest));
+            System.Security.Claims.ClaimsPrincipal currentUser = User;
+            var clientIp = _accessor.HttpContext.Connection.RemoteIpAddress.ToString().Replace("{", "").Replace("}", "");
+            monerisAdminRequest.ClientIp = clientIp;
+            monerisAdminRequest.UserId = currentUser.Identity.Name;
+            return Ok(await _monerisService.UnPair(monerisAdminRequest));
         }
 
         [HttpPost("/Initialize")]
-        public async Task<IActionResult> Initialize([FromBody] InitializeRequest initializeRequest)
+        public async Task<IActionResult> Initialize([FromBody] MonerisAdminRequest monerisAdminRequest)
         {
-            return Ok(await _monerisService.Initialize(initializeRequest));
+            System.Security.Claims.ClaimsPrincipal currentUser = User;
+            var clientIp = _accessor.HttpContext.Connection.RemoteIpAddress.ToString().Replace("{", "").Replace("}", "");
+            monerisAdminRequest.ClientIp = clientIp;
+            monerisAdminRequest.UserId = currentUser.Identity.Name;
+            return Ok(await _monerisService.Initialize(monerisAdminRequest));
         }
 
         [HttpPost("/BatchClose")]
-        public async Task<IActionResult> BatchClose([FromBody] BatchCloseRequest batchCloseRequest)
+        public async Task<IActionResult> BatchClose([FromBody] MonerisAdminRequest monerisAdminRequest)
         {
-            return Ok(await _monerisService.BatchClose(batchCloseRequest));
+            System.Security.Claims.ClaimsPrincipal currentUser = User;
+            var clientIp = _accessor.HttpContext.Connection.RemoteIpAddress.ToString().Replace("{", "").Replace("}", "");
+            monerisAdminRequest.ClientIp = clientIp;
+            monerisAdminRequest.UserId = currentUser.Identity.Name;
+            return Ok(await _monerisService.BatchClose(monerisAdminRequest));
         }
 
         [HttpPost]

@@ -14,6 +14,7 @@
     {
         public string orderId { get; set; }
         public string amount { get; set; }
+        public string pairingToken { get; set; }
     }
 
     public enum TransactionType

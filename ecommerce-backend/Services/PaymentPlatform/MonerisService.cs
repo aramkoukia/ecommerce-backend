@@ -101,24 +101,239 @@ namespace EcommerceApi.Services.PaymentPlatform
             }
         }
 
-        public Task<object> BatchClose(BatchCloseRequest batchCloseRequest)
+        public async Task<object> BatchClose(MonerisAdminRequest monerisAdminRequest)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var client = _clientFactory.CreateClient();
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+                var monerisRequest = new MonerisRequest
+                {
+                    apiToken = _config["Moneris:apiToken"],
+                    postbackUrl = _config["Moneris:postbackUrl"],
+                    storeId = monerisAdminRequest.StoreId,
+                    terminalId = monerisAdminRequest.TerminalId,
+                    txnType = "batchClose"
+                };
+
+                var requestString = JsonConvert.SerializeObject(monerisRequest);
+                var response = await client.PostAsync(
+                    _config["Moneris:baseUrl"],
+                    new StringContent(
+                        requestString,
+                        Encoding.UTF8,
+                        "application/json"));
+
+                var result = await response.Content
+                    .ReadAsAsync<ValidationResponse>();
+
+                var date = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateTime.UtcNow, "Pacific Standard Time");
+
+                var monerisLog = new MonerisTransactionLog
+                {
+                    ClientIp = monerisAdminRequest.ClientIp,
+                    OrderId = null,
+                    Amount = 0,
+                    CreatedDate = date,
+                    Request = requestString,
+                    Response = JsonConvert.SerializeObject(result),
+                    ResponseCode = result.Receipt.ResponseCode,
+                    ResponseMessage = result.Receipt.Message,
+                    StoreId = monerisRequest.storeId,
+                    TerminalId = monerisRequest.terminalId,
+                    TransactionType = monerisRequest.txnType,
+                    UserId = monerisAdminRequest.UserId,
+                };
+
+                await _context.MonerisTransactionLog.AddAsync(monerisLog);
+                await _context.SaveChangesAsync();
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                _telemetryClient.TrackException(ex);
+                return null;
+            }
         }
 
-        public Task<object> UnPair(UnPairRequest unPairRequest)
+        public async Task<object> UnPair(MonerisAdminRequest monerisAdminRequest)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var client = _clientFactory.CreateClient();
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+                var monerisRequest = new MonerisRequest
+                {
+                    apiToken = _config["Moneris:apiToken"],
+                    postbackUrl = _config["Moneris:postbackUrl"],
+                    storeId = monerisAdminRequest.StoreId,
+                    terminalId = monerisAdminRequest.TerminalId,
+                    txnType = "unpair"
+                };
+
+                var requestString = JsonConvert.SerializeObject(monerisRequest);
+                var response = await client.PostAsync(
+                    _config["Moneris:baseUrl"],
+                    new StringContent(
+                        requestString,
+                        Encoding.UTF8,
+                        "application/json"));
+
+                var result = await response.Content
+                    .ReadAsAsync<ValidationResponse>();
+
+                var date = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateTime.UtcNow, "Pacific Standard Time");
+
+                var monerisLog = new MonerisTransactionLog
+                {
+                    ClientIp = monerisAdminRequest.ClientIp,
+                    OrderId = null,
+                    Amount = 0,
+                    CreatedDate = date,
+                    Request = requestString,
+                    Response = JsonConvert.SerializeObject(result),
+                    ResponseCode = result.Receipt.ResponseCode,
+                    ResponseMessage = result.Receipt.Message,
+                    StoreId = monerisRequest.storeId,
+                    TerminalId = monerisRequest.terminalId,
+                    TransactionType = monerisRequest.txnType,
+                    UserId = monerisAdminRequest.UserId,
+                };
+
+                await _context.MonerisTransactionLog.AddAsync(monerisLog);
+                await _context.SaveChangesAsync();
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                _telemetryClient.TrackException(ex);
+                return null;
+            }
         }
 
-        public Task<object> Pair(PairRequest pairRequest)
+        public async Task<object> Pair(MonerisAdminRequest monerisAdminRequest)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var client = _clientFactory.CreateClient();
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+                var monerisRequest = new MonerisRequest
+                {
+                    apiToken = _config["Moneris:apiToken"],
+                    postbackUrl = _config["Moneris:postbackUrl"],
+                    storeId = monerisAdminRequest.StoreId,
+                    terminalId = monerisAdminRequest.TerminalId,
+                    txnType = "pair",
+                    request = new Request { 
+                        pairingToken = monerisAdminRequest.PairingToken
+                    }
+                };
+
+                var requestString = JsonConvert.SerializeObject(monerisRequest);
+                var response = await client.PostAsync(
+                    _config["Moneris:baseUrl"],
+                    new StringContent(
+                        requestString,
+                        Encoding.UTF8,
+                        "application/json"));
+
+                var result = await response.Content
+                    .ReadAsAsync<ValidationResponse>();
+
+                var date = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateTime.UtcNow, "Pacific Standard Time");
+
+                var monerisLog = new MonerisTransactionLog
+                {
+                    ClientIp = monerisAdminRequest.ClientIp,
+                    OrderId = null,
+                    Amount = 0,
+                    CreatedDate = date,
+                    Request = requestString,
+                    Response = JsonConvert.SerializeObject(result),
+                    ResponseCode = result.Receipt.ResponseCode,
+                    ResponseMessage = result.Receipt.Message,
+                    StoreId = monerisRequest.storeId,
+                    TerminalId = monerisRequest.terminalId,
+                    TransactionType = monerisRequest.txnType,
+                    UserId = monerisAdminRequest.UserId,
+                };
+
+                await _context.MonerisTransactionLog.AddAsync(monerisLog);
+                await _context.SaveChangesAsync();
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                _telemetryClient.TrackException(ex);
+                return null;
+            }
         }
 
-        public Task<object> Initialize(InitializeRequest initializeRequest)
+        public async Task<object> Initialize(MonerisAdminRequest monerisAdminRequest)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var client = _clientFactory.CreateClient();
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+                var monerisRequest = new MonerisRequest
+                {
+                    apiToken = _config["Moneris:apiToken"],
+                    postbackUrl = _config["Moneris:postbackUrl"],
+                    storeId = monerisAdminRequest.StoreId,
+                    terminalId = monerisAdminRequest.TerminalId,
+                    txnType = "initialization"
+                };
+
+                var requestString = JsonConvert.SerializeObject(monerisRequest);
+                var response = await client.PostAsync(
+                    _config["Moneris:baseUrl"],
+                    new StringContent(
+                        requestString,
+                        Encoding.UTF8,
+                        "application/json"));
+
+                var result = await response.Content
+                    .ReadAsAsync<ValidationResponse>();
+
+                var date = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateTime.UtcNow, "Pacific Standard Time");
+
+                var monerisLog = new MonerisTransactionLog
+                {
+                    ClientIp = monerisAdminRequest.ClientIp,
+                    OrderId = null,
+                    Amount = 0,
+                    CreatedDate = date,
+                    Request = requestString,
+                    Response = JsonConvert.SerializeObject(result),
+                    ResponseCode = result.Receipt.ResponseCode,
+                    ResponseMessage = result.Receipt.Message,
+                    StoreId = monerisRequest.storeId,
+                    TerminalId = monerisRequest.terminalId,
+                    TransactionType = monerisRequest.txnType,
+                    UserId = monerisAdminRequest.UserId,
+                };
+
+                await _context.MonerisTransactionLog.AddAsync(monerisLog);
+                await _context.SaveChangesAsync();
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                _telemetryClient.TrackException(ex);
+                return null;
+            }
         }
     }
 }
