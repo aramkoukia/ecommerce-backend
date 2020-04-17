@@ -1,17 +1,13 @@
-﻿using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using EcommerceApi.Models;
 using Microsoft.AspNetCore.Authorization;
-using EcommerceApi.Repositories;
-using DinkToPdf.Contracts;
-using EcommerceApi.Services;
 
 namespace EcommerceApi.Controllers
 {
     [Produces("application/json")]
-    [Route("api/Settings")]
+    [Route("api/PortalSettings")]
     [AllowAnonymous]
     public class PortalSettingsController : Controller
     {
@@ -23,11 +19,8 @@ namespace EcommerceApi.Controllers
             _context = context;
         }
 
-        // GET: api/Settings
+        // GET: api/PortalSettings
         [HttpGet]
-        public async Task<Settings> GetPortalSettings()
-        {
-            return await _context.PortalSettings.FirstOrDefaultAsync();
-        }
+        public async Task<PortalSettings> GetPortalSettings() => await _context.PortalSettings.FirstOrDefaultAsync();
     }
 }

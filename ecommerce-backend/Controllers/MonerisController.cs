@@ -89,16 +89,30 @@ namespace EcommerceApi.Controllers
             return BadRequest(result?.Receipt?.Message);
         }
 
-        [HttpPost]
+        [HttpPost("pairingcallback")]
         [AllowAnonymous]
-        public async Task<IActionResult> Post([FromBody] ValidationResponse validationResponse)
+        public IActionResult PostPairing(ValidationResponse validationResponse)
         {
-            SaveCallbackLog(validationResponse);
-            await _context.SaveChangesAsync();
-            if (validationResponse.Receipt.TxnName.Equals(TransactionType.purchase.ToString(), StringComparison.InvariantCultureIgnoreCase)) {
-                UpdateOrderAuthCode(validationResponse);
-            }
-            return Ok(validationResponse);
+            // SaveCallbackLog(validationResponse);
+            //await _context.SaveChangesAsync();
+            //if (validationResponse.Receipt.TxnName.Equals(TransactionType.purchase.ToString(), StringComparison.InvariantCultureIgnoreCase)) {
+            //    UpdateOrderAuthCode(validationResponse);
+            //}
+            // return Ok(validationResponse);
+            return Created("pairingcallback", "PostPairingDone");
+        }
+
+        [HttpGet("pairingcallback")]
+        [AllowAnonymous]
+        public IActionResult GetPairing([FromQuery] ValidationResponse validationResponse)
+        {
+            // SaveCallbackLog(validationResponse);
+            //await _context.SaveChangesAsync();
+            //if (validationResponse.Receipt.TxnName.Equals(TransactionType.purchase.ToString(), StringComparison.InvariantCultureIgnoreCase)) {
+            //    UpdateOrderAuthCode(validationResponse);
+            //}
+            // return Ok(validationResponse);
+            return Ok();
         }
 
         private void UpdateOrderAuthCode(ValidationResponse validationResponse)
