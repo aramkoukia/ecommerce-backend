@@ -25,6 +25,7 @@ namespace EcommerceApi.Models
         public virtual DbSet<Purchase> Purchase { get; set; }
         public virtual DbSet<PurchaseDetail> PurchaseDetail { get; set; }
         public virtual DbSet<Settings> Settings { get; set; }
+        public virtual DbSet<PortalSettings> PortalSettings { get; set; }
         public virtual DbSet<MonerisTransactionLog> MonerisTransactionLog { get; set; }
         public virtual DbSet<MonerisCallbackLog> MonerisCallbackLog { get; set; }
         public virtual DbSet<ClientPosSettings> ClientPosSettings { get; set; }
