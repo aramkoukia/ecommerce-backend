@@ -22,10 +22,7 @@ namespace EcommerceApi.Controllers
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
-        private readonly IOptions<IdentityOptions> _identityOptions;
         private readonly JwtOptions _jwtOptions;
-        private readonly IEmailSender _emailSender;
-        private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly ILogger _logger;
         private readonly EcommerceContext _context;
         private readonly IHttpContextAccessor _accessor;
@@ -33,10 +30,7 @@ namespace EcommerceApi.Controllers
         public AuthController(
             UserManager<ApplicationUser> userManager,
             RoleManager<IdentityRole> roleManager,
-            IOptions<IdentityOptions> identityOptions,
             IOptions<JwtOptions> jwtOptions,
-            IEmailSender emailSender,
-            SignInManager<ApplicationUser> signInManager,
             ILoggerFactory loggerFactory,
             EcommerceContext context,
             IHttpContextAccessor accessor)
@@ -44,10 +38,7 @@ namespace EcommerceApi.Controllers
             _context = context;
             _userManager = userManager;
             _roleManager = roleManager;
-            _identityOptions = identityOptions;
             _jwtOptions = jwtOptions.Value;
-            _emailSender = emailSender;
-            _signInManager = signInManager;
             _accessor = accessor;
             _logger = loggerFactory.CreateLogger<AuthController>();
         }
