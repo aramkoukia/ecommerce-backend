@@ -33,7 +33,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Public\" />
     <Folder Include="wwwroot\" />
   </ItemGroup>
 
