@@ -22,6 +22,7 @@ using System;
 using Polly;
 using EcommerceApi.Services.PaymentPlatform;
 using Microsoft.Extensions.FileProviders;
+using Microsoft.OpenApi.Models;
 
 namespace EcommerceApi
 {
@@ -54,6 +55,11 @@ namespace EcommerceApi
             {
                 // cannot load this locally, catching and ignoring it for now
             }
+
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "Wholesales Ecommerce API", Version = "v1" });
+            });
 
             services.AddEntityFrameworkSqlServer().AddDbContext<EcommerceContext>(options =>
             {
@@ -116,7 +122,12 @@ namespace EcommerceApi
                 app.UseDeveloperExceptionPage();
                 app.UseDatabaseErrorPage();
             }
-
+            app.UseSwagger();
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "Wholesales Ecommerce API");
+                c.RoutePrefix = string.Empty;
+            });
             app.UseDefaultFiles();
             app.UseStaticFiles();
 
