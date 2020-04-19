@@ -7,3 +7,5 @@ obj
 bin
 packages
 PublishProfiles
+.config
+.csproj.user
