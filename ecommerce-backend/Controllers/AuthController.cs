@@ -117,7 +117,18 @@ namespace EcommerceApi.Controllers
                 new {
                     token = new JwtSecurityTokenHandler().WriteToken(token),
                     permissions = permissions.Distinct(),
+                    locations = GetUserLocations(user.Id)
                 });
+        }
+
+        private async Task<List<Location>> GetUserLocations(string userId)
+        {
+            var userLocations = await _context.UserLocation.Where(l => l.UserId == userId).ToListAsync();
+            if (userLocations == null || !userLocations.Any())
+            {
+                return new List<Location>();
+            }
+            return await _context.Location.Where(loc => userLocations.Select(l => l.LocationId).Contains(loc.LocationId)).ToListAsync();
         }
 
         private bool UserLocationIsAuthorized(string clientIp)
@@ -132,61 +143,5 @@ namespace EcommerceApi.Controllers
 
             return ipList.Contains(clientIp);
         }
-
-        //    [AllowAnonymous]
-        //    [HttpPost("~/api/auth/register")]
-        //    public async Task<IActionResult> Register(NewUser model)
-        //    {
-        //        if (!ModelState.IsValid)
-        //        {
-        //            return BadRequest(ModelState);
-        //        }
-
-        //        var user = new ApplicationUser { UserName = model.username, Email = model.username };
-        //        var result = await _userManager.CreateAsync(user, model.password);
-        //        if (result.Succeeded)
-        //        {
-        //            _logger.LogInformation($"New user registered (id: {user.Id})");
-
-        //            if (!user.EmailConfirmed)
-        //            {
-        //                // Send email confirmation email
-        //                var confirmToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-        //                var emailConfirmUrl = Url.RouteUrl("ConfirmEmail", new { uid = user.Id, token = confirmToken }, this.Request.Scheme);
-        //                _emailSender.SendEmailAsync(model.username, "Please confirm your account",
-        //$"Please confirm your account by clicking this <a href=\"{emailConfirmUrl}\">link</a>."
-        //                );
-
-        //                _logger.LogInformation($"Sent email confirmation email (id: {user.Id})");
-        //            }
-
-        //            // Create a new authentication ticket.
-        //            //var ticket = await CreateTicket(user);
-
-        //            _logger.LogInformation($"User logged in (id: {user.Id})");
-
-        //            return Ok();
-        //        }
-        //        else
-        //        {
-        //            return BadRequest(new { general = result.Errors.Select(x => x.Description) });
-        //        }
-        //    }
-
-        //    [AllowAnonymous]
-        //    [HttpGet("~/api/auth/confirm", Name = "ConfirmEmail")]
-        //    public async Task<IActionResult> Confirm(string uid, string token)
-        //    {
-        //        var user = await _userManager.FindByIdAsync(uid);
-        //        var confirmResult = await _userManager.ConfirmEmailAsync(user, token);
-        //        if (confirmResult.Succeeded)
-        //        {
-        //            return Redirect("/?confirmed=1");
-        //        }
-        //        else
-        //        {
-        //            return Redirect("/error/email-confirm");
-        //        }
-        //    }
     }
 }
