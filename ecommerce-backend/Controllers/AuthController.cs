@@ -114,10 +114,11 @@ namespace EcommerceApi.Controllers
               signingCredentials: creds);
 
             return Ok(
-                new {
+                new
+                {
                     token = new JwtSecurityTokenHandler().WriteToken(token),
                     permissions = permissions.Distinct(),
-                    locations = GetUserLocations(user.Id)
+                    locations = await GetUserLocations(user.Id)
                 });
         }
 
@@ -128,7 +129,7 @@ namespace EcommerceApi.Controllers
             {
                 return new List<Location>();
             }
-            return await _context.Location.Where(loc => userLocations.Select(l => l.LocationId).Contains(loc.LocationId)).ToListAsync();
+            return _context.Location.Where(loc => userLocations.Select(l => l.LocationId).Contains(loc.LocationId)).ToList();
         }
 
         private bool UserLocationIsAuthorized(string clientIp)
