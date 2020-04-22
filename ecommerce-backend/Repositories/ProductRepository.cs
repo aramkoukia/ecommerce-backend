@@ -163,6 +163,61 @@ SELECT * FROM ProductPackage;
             }
         }
 
+        public async Task<IEnumerable<ProductViewModelV2>> GetAvailableProductsV2(int locationId)
+        {
+            using (IDbConnection conn = Connection)
+            {
+                string query = $@"
+SELECT Product.ProductId, 
+        ProductCode, 
+	    ProductName, 
+	    ChargeTaxes, 
+	    AllowOutOfStockPurchase, 
+	    SalesPrice, 
+	    PurchasePrice, 
+	    Product.ModifiedDate, 
+	    Product.ProductTypeId, 
+	    ProductType.ProductTypeName,
+	    ISNULL(Loc1.Balance,0) As Balance,
+        ISNULL(Loc1.BinCode,0) As BinCode,
+		ISNULL(OnHoldItems.OnHoldAmount, 0) AS OnHoldAmount
+FROM Product
+LEFT JOIN ProductType
+ON Product.ProductTypeId = ProductType.ProductTypeId
+LEFT JOIN (
+    SELECT * FROM ProductInventory
+    WHERE LocationId = @locationId
+) Loc1
+ON Loc1.ProductId = Product.ProductId
+LEFT JOIN (
+  SELECT ProductId, SUM(Amount) As OnHoldAmount
+  FROM [Order]
+  INNER JOIN OrderDetail
+	ON [Order].OrderId = OrderDetail.OrderId
+  WHERE [Order].Status = 'OnHold'
+  GROUP BY ProductId
+) AS OnHoldItems
+  ON OnHoldItems.ProductId = Product.ProductId
+WHERE Disabled = 0 ; 
+
+SELECT * FROM ProductPackage;
+";
+                conn.Open();
+                var result = await conn.QueryMultipleAsync(query, new { locationId });
+
+                var products = result.Read<ProductViewModelV2>().ToList();
+                var packages = result.Read<ProductPackage>().ToList(); //(Location will have that extra CourseId on it for the next part)
+                var distinctProductIdsWithPackage = packages.Select(d => d.ProductId).Distinct();
+                foreach (var productId in distinctProductIdsWithPackage)
+                {
+                    products.FirstOrDefault(p => p.ProductId == productId)
+                        ?.ProductPackages.AddRange(packages.Where(p => p.ProductId == productId));
+                }
+
+                return products;
+            }
+        }
+
         public async Task<ProductViewModel> GetProduct(int productId)
         {
             using (IDbConnection conn = Connection)
