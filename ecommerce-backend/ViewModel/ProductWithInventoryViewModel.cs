@@ -17,12 +17,8 @@ namespace EcommerceApi.ViewModel
         public bool AllowOutOfStockPurchase { get; set; }
         public decimal SalesPrice { get; set; }
         public decimal? PurchasePrice { get; set; }
-        public DateTime ModifiedDate { get; set; }
-        public int LocationId { get; set; }
-        public string LocationName { get; set; }
         public decimal Balance { get; set; }
         public string BinCode { get; set; }
-        public int ProductTypeId { get; set; }
         public string ProductTypeName { get; set; }
         public decimal OnHoldAmount { get; set; }
         public string Disabled { get; set; }

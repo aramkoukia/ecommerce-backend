@@ -346,6 +346,7 @@ SELECT Product.ProductId,
 	    Product.ModifiedDate, 
 	    Product.ProductTypeId, 
 	    ProductType.ProductTypeName,
+        Product.Disabled,
 	    ISNULL(Loc1.Balance,0) As Balance,
         ISNULL(Loc1.BinCode,0) As BinCode,
 		ISNULL(OnHoldItems.OnHoldAmount, 0) AS OnHoldAmount
