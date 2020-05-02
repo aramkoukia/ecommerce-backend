@@ -233,56 +233,66 @@ SELECT Product.ProductId,
 	    Product.ModifiedDate, 
 	    Product.ProductTypeId, 
 	    ProductType.ProductTypeName,
-	    ISNULL(Loc1.Balance,0) As VancouverBalance,
-	    ISNULL(Loc2.Balance,0) As AbbotsfordBalance,
-        ISNULL(Loc1.BinCode,'') AS VancouverBinCode,
-        ISNULL(Loc2.BinCode,'') AS AbbotsfordBinCode,
-	    ISNULL(Loc1OnHold.OnHold,0) As VancouverOnHold,
-	    ISNULL(Loc2OnHold.OnHold,0) As AbbotsfordOnHold,
+	    ISNULL(ProductInventory.Balance,0) As Balance,
+	    ISNULL(OnHold.OnHold,0) As OnHold,
         Product.Disabled
 FROM Product
 INNER JOIN ProductType
 ON Product.ProductTypeId = ProductType.ProductTypeId
 LEFT JOIN (
-    SELECT * 
+    SELECT ProductId, SUM(ISNULL(Balance, 0)) AS Balance
 	FROM ProductInventory
     WHERE ProductId = @ProductId 
-	      AND LocationId = 1
-) Loc1
-ON Loc1.ProductId = Product.ProductId
-LEFT JOIN (
-    SELECT * 
-	FROM ProductInventory
-    WHERE ProductId = @ProductId 
-	      AND LocationId = 2
-) Loc2 
-ON Loc2.ProductId = Product.ProductId
+	GROUP BY ProductId
+) ProductInventory
+ON ProductInventory.ProductId = Product.ProductId
 LEFT JOIN ( 
 	SELECT SUM(OrderDetail.Amount) AS OnHold, ProductId
 	FROM [Order]
 	INNER JOIN OrderDetail
 		ON OrderDetail.OrderId = [Order].OrderId
-	WHERE [Order].LocationId = 1
-           AND ProductId = @ProductId
-           AND [Order].Status = 'OnHold'
+	WHERE ProductId = @ProductId
+          AND [Order].Status = 'OnHold'
 	GROUP BY ProductId
-) Loc1OnHold
-ON Loc1OnHold.ProductId = Product.ProductId
+) OnHold
+ON OnHold.ProductId = Product.ProductId
+
+SELECT Product.ProductId, 
+       ProductInventory.LocationId,
+	   LocationName, 
+       ISNULL(Balance,0) As Balance,
+       ISNULL(BinCode,0) As BinCode,
+	   ISNULL(OnHoldAmount, 0) AS OnHoldAmount
+FROM Product
+LEFT JOIN ProductType
+ON Product.ProductTypeId = ProductType.ProductTypeId
+LEFT JOIN ProductInventory
+  ON ProductInventory.ProductId = Product.ProductId
+INNER JOIN [Location]
+  ON [Location].LocationId = ProductInventory.LocationId
 LEFT JOIN (
-	SELECT SUM(OrderDetail.Amount) AS OnHold, ProductId
-	FROM [Order]
-	INNER JOIN OrderDetail
-		ON OrderDetail.OrderId = [Order].OrderId
-	WHERE [Order].LocationId = 2
-            AND [Order].Status = 'OnHold'
-			AND ProductId = @ProductId
-	GROUP BY ProductId
-) Loc2OnHold
-ON Loc2OnHold.ProductId = Product.ProductId
-WHERE Product.ProductId = @ProductId
+  SELECT ProductId, LocationId, SUM(Amount) As OnHoldAmount
+  FROM [Order]
+  INNER JOIN OrderDetail
+	ON [Order].OrderId = OrderDetail.OrderId
+  WHERE OrderDetail.ProductId = @productId
+        AND [Order].Status = 'OnHold'
+  GROUP BY ProductId, LocationId
+) AS OnHoldItems
+  ON OnHoldItems.ProductId = ProductInventory.ProductId
+     AND OnHoldItems.LocationId = ProductInventory.LocationId
+  WHERE Product.ProductId = @productId
 ";
                 conn.Open();
-                return await conn.QueryFirstAsync<ProductViewModel>(query, new { ProductId = productId });
+                var result = await conn.QueryMultipleAsync(query, new { ProductId = productId });
+                var products = result.Read<ProductViewModel>().ToList();
+                var inventory = result.Read<ProductWithInventoryDetail>().ToList();
+                foreach (var product in products)
+                {
+                    product.Inventory.AddRange(inventory.Where(p => p.ProductId == product.ProductId));
+                }
+
+                return products.FirstOrDefault();
             }
         }
 

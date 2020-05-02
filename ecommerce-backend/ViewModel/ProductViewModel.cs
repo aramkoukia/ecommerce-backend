@@ -9,6 +9,7 @@ namespace EcommerceApi.ViewModel
         public ProductViewModel()
         {
             ProductPackages = new List<ProductPackage>();
+            Inventory = new List<ProductWithInventoryDetail>();
         }
 
         public int ProductId { get; set; }
@@ -31,5 +32,6 @@ namespace EcommerceApi.ViewModel
         public string Disabled { get; set; }
         public string AvgPurchasePrice { get; set; }
         public List<ProductPackage> ProductPackages { get; set; }
+        public List<ProductWithInventoryDetail> Inventory { get; set; }
     }
 }
