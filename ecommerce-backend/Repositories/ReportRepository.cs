@@ -1075,25 +1075,17 @@ SELECT Product.ProductId,
 	    Product.ModifiedDate, 
 	    Product.ProductTypeId, 
 	    ProductType.ProductTypeName,
-	    ISNULL(Loc1.Balance,0) As VancouverBalance,
-	    ISNULL(Loc2.Balance,0) As AbbotsfordBalance,
+	    ISNULL(Balance,0) As Balance,
 		ISNULL(OnHoldItems.OnHoldAmount, 0) AS OnHoldAmount,
-        FORMAT(ISNULL(Loc1.Balance,0) * PurchasePrice, 'N2') AS VancouverValue,
-        FORMAT(ISNULL(Loc2.Balance,0) * PurchasePrice, 'N2') AS AbbotsfordValue,
-        FORMAT((ISNULL(Loc1.Balance,0) + ISNULL(Loc2.Balance,0)) * ISNULL(PurchasePrice, 0), 'N2') AS TotalValue
+        FORMAT(ISNULL(Balance,0) * ISNULL(PurchasePrice, 0), 'N2') AS TotalValue
 FROM Product
 LEFT JOIN ProductType
 ON Product.ProductTypeId = ProductType.ProductTypeId
-LEFT JOIN (
-    SELECT * FROM ProductInventory
-    WHERE LocationId = 1
-) Loc1
-ON Loc1.ProductId = Product.ProductId
-LEFT JOIN (
-    SELECT * FROM ProductInventory
-    WHERE LocationId = 2
-) Loc2 
-ON Loc2.ProductId = Product.ProductId
+LEFT JOIN 
+(SELECT ProductId, Sum(ISNULL(Balance,0)) AS Balance
+ FROM ProductInventory
+ GROUP BY ProductId) ProductInventory
+  ON ProductInventory.ProductId = Product.ProductId
 LEFT JOIN (
   SELECT ProductId, SUM(Amount) As OnHoldAmount
   FROM [Order]
