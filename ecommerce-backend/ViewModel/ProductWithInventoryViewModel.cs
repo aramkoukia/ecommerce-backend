@@ -4,13 +4,12 @@ using System.Collections.Generic;
 
 namespace EcommerceApi.ViewModel
 {
-    public class ProductViewModelV2
+    public class ProductWithInventoryViewModel
     {
-        public ProductViewModelV2()
+        public ProductWithInventoryViewModel()
         {
-            ProductPackages = new List<ProductPackage>();
+            Inventory = new List<ProductWithInventoryDetail>();
         }
-
         public int ProductId { get; set; }
         public string ProductCode { get; set; }
         public string ProductName { get; set; }
@@ -27,7 +26,16 @@ namespace EcommerceApi.ViewModel
         public string ProductTypeName { get; set; }
         public decimal OnHoldAmount { get; set; }
         public string Disabled { get; set; }
-        public string AvgPurchasePrice { get; set; }
-        public List<ProductPackage> ProductPackages { get; set; }
+        public List<ProductWithInventoryDetail> Inventory { get; set; }
+    }
+
+    public class ProductWithInventoryDetail
+    {
+        public int ProductId { get; set; }
+        public int LocationId { get; set; }
+        public string LocationName { get; set; }
+        public decimal Balance { get; set; }
+        public string BinCode { get; set; }
+        public decimal OnHoldAmount { get; set; }
     }
 }
