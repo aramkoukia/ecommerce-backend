@@ -344,7 +344,7 @@ SELECT Product.ProductId,
 	    SalesPrice, 
 	    PurchasePrice, 
 	    Product.ModifiedDate, 
-	    Product.ProductTypeId, 
+	    Product.ProductTypeId,
 	    ProductType.ProductTypeName,
         Product.Disabled,
 	    ISNULL(Loc1.Balance,0) As Balance,
@@ -370,7 +370,7 @@ LEFT JOIN (
   ON OnHoldItems.ProductId = Product.ProductId
 
 SELECT Product.ProductId, 
-       ProductInventory.LocationId
+       ProductInventory.LocationId,
 	   LocationName, 
        ISNULL(Balance,0) As Balance,
        ISNULL(BinCode,0) As BinCode,
@@ -380,6 +380,8 @@ LEFT JOIN ProductType
 ON Product.ProductTypeId = ProductType.ProductTypeId
 LEFT JOIN ProductInventory
   ON ProductInventory.ProductId = Product.ProductId
+INNER JOIN [Location]
+  ON [Location].LocationId = ProductInventory.LocationId
 LEFT JOIN (
   SELECT ProductId, LocationId, SUM(Amount) As OnHoldAmount
   FROM [Order]
