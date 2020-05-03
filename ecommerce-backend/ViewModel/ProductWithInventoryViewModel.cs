@@ -18,7 +18,6 @@ namespace EcommerceApi.ViewModel
         public decimal SalesPrice { get; set; }
         public decimal? PurchasePrice { get; set; }
         public decimal Balance { get; set; }
-        public string BinCode { get; set; }
         public int ProductTypeId { get; set; }
         public string ProductTypeName { get; set; }
         public decimal OnHoldAmount { get; set; }

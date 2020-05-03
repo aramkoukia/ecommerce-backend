@@ -256,6 +256,7 @@ LEFT JOIN (
 	GROUP BY ProductId
 ) OnHold
 ON OnHold.ProductId = Product.ProductId
+WHERE Product.ProductId = @productId
 
 SELECT Product.ProductId, 
        ProductInventory.LocationId,
@@ -341,7 +342,7 @@ WHERE UserId = @userId";
             }
         }
 
-        public async Task<IEnumerable<ProductWithInventoryViewModel>> GetProductsWithInventory(int locationId)
+        public async Task<IEnumerable<ProductWithInventoryViewModel>> GetProductsWithInventory()
         {
             using (IDbConnection conn = Connection)
             {
@@ -357,24 +358,23 @@ SELECT Product.ProductId,
 	    Product.ProductTypeId,
 	    ProductType.ProductTypeName,
         Product.Disabled,
-	    ISNULL(Loc1.Balance,0) As Balance,
-        ISNULL(Loc1.BinCode,0) As BinCode,
+	    ISNULL(ProductInventory.Balance,0) As Balance,
 		ISNULL(OnHoldItems.OnHoldAmount, 0) AS OnHoldAmount
 FROM Product
 LEFT JOIN ProductType
 ON Product.ProductTypeId = ProductType.ProductTypeId
 LEFT JOIN (
-    SELECT * FROM ProductInventory
-    WHERE LocationId = @locationId
-) Loc1
-ON Loc1.ProductId = Product.ProductId
+    SELECT ProductId, Sum(Balance) AS Balance 
+    FROM ProductInventory
+    GROUP BY ProductId
+) ProductInventory
+ON ProductInventory.ProductId = Product.ProductId
 LEFT JOIN (
   SELECT ProductId, SUM(Amount) As OnHoldAmount
   FROM [Order]
   INNER JOIN OrderDetail
 	ON [Order].OrderId = OrderDetail.OrderId
   WHERE [Order].Status = 'OnHold'
-        AND [Order].LocationId = @locationId
   GROUP BY ProductId
 ) AS OnHoldItems
   ON OnHoldItems.ProductId = Product.ProductId
@@ -404,7 +404,7 @@ LEFT JOIN (
      AND OnHoldItems.LocationId = ProductInventory.LocationId
 ";
                 conn.Open();
-                var result = await conn.QueryMultipleAsync(query, new { locationId });
+                var result = await conn.QueryMultipleAsync(query);
 
                 var products = result.Read<ProductWithInventoryViewModel>().ToList();
                 var inventory = result.Read<ProductWithInventoryDetail>().ToList();

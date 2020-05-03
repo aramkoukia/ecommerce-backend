@@ -40,8 +40,8 @@ namespace EcommerceApi.Controllers
 
         // GET: api/Products/WithInventory
         [HttpGet("WithInventory")]
-        public async Task<IEnumerable<ProductWithInventoryViewModel>> GetProductsWithInventory(int locationId) 
-            => await _productRepository.GetProductsWithInventory(locationId);
+        public async Task<IEnumerable<ProductWithInventoryViewModel>> GetProductsWithInventory() 
+            => await _productRepository.GetProductsWithInventory();
 
         // GET: api/Products/Available
         [HttpGet("Available")]
