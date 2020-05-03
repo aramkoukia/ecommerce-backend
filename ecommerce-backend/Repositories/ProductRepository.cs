@@ -234,7 +234,7 @@ SELECT Product.ProductId,
 	    Product.ProductTypeId, 
 	    ProductType.ProductTypeName,
 	    ISNULL(ProductInventory.Balance,0) As Balance,
-	    ISNULL(OnHold.OnHold,0) As OnHold,
+	    ISNULL(OnHold.OnHold,0) As OnHoldAmount,
         Product.Disabled
 FROM Product
 INNER JOIN ProductType
