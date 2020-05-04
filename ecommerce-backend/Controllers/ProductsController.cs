@@ -12,7 +12,7 @@ using Microsoft.AspNetCore.Identity;
 
 namespace EcommerceApi.Controllers
 {
-    [Authorize]
+    // [Authorize]
     [Produces("application/json")]
     [Route("api/Products")]
     public class ProductsController : Controller

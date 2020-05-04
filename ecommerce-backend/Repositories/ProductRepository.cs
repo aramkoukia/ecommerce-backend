@@ -114,24 +114,10 @@ SELECT Product.ProductId,
 	    Product.ModifiedDate, 
 	    Product.ProductTypeId, 
 	    ProductType.ProductTypeName,
-	    ISNULL(Loc1.Balance,0) As VancouverBalance,
-	    ISNULL(Loc2.Balance,0) As AbbotsfordBalance,
-        ISNULL(Loc1.BinCode,'') AS VancouverBinCode,
-        ISNULL(Loc2.BinCode,'') AS AbbotsfordBinCode,
 		ISNULL(OnHoldItems.OnHoldAmount, 0) AS OnHoldAmount
 FROM Product
 LEFT JOIN ProductType
 ON Product.ProductTypeId = ProductType.ProductTypeId
-LEFT JOIN (
-    SELECT * FROM ProductInventory
-    WHERE LocationId = 1
-) Loc1
-ON Loc1.ProductId = Product.ProductId
-LEFT JOIN (
-    SELECT * FROM ProductInventory
-    WHERE LocationId = 2
-) Loc2 
-ON Loc2.ProductId = Product.ProductId
 LEFT JOIN (
   SELECT ProductId, SUM(Amount) As OnHoldAmount
   FROM [Order]
@@ -141,9 +127,35 @@ LEFT JOIN (
   GROUP BY ProductId
 ) AS OnHoldItems
   ON OnHoldItems.ProductId = Product.ProductId
-WHERE Disabled = 0 ; 
+WHERE Disabled = 0;
 
 SELECT * FROM ProductPackage;
+
+SELECT Product.ProductId, 
+       ProductInventory.LocationId,
+	   LocationName, 
+       ISNULL(Balance,0) As Balance,
+       ISNULL(BinCode,0) As BinCode,
+	   ISNULL(OnHoldAmount, 0) AS OnHoldAmount
+FROM Product
+LEFT JOIN ProductType
+ON Product.ProductTypeId = ProductType.ProductTypeId
+INNER JOIN ProductInventory
+  ON ProductInventory.ProductId = Product.ProductId
+INNER JOIN [Location]
+  ON [Location].LocationId = ProductInventory.LocationId
+LEFT JOIN (
+  SELECT ProductId, LocationId, SUM(Amount) As OnHoldAmount
+  FROM [Order]
+  INNER JOIN OrderDetail
+	ON [Order].OrderId = OrderDetail.OrderId
+  WHERE [Order].Status = 'OnHold'
+  GROUP BY ProductId, LocationId
+) AS OnHoldItems
+  ON OnHoldItems.ProductId = Product.ProductId
+     AND OnHoldItems.LocationId = ProductInventory.LocationId
+WHERE Product.Disabled = 0
+      AND ProductInventory.Balance <> 0;
 ";
 
                 // WHERE SalesPrice > 0";
@@ -151,7 +163,14 @@ SELECT * FROM ProductPackage;
                 var result = await conn.QueryMultipleAsync(query);
 
                 var products = result.Read<ProductViewModel>().ToList();
-                var packages = result.Read<ProductPackage>().ToList(); //(Location will have that extra CourseId on it for the next part)
+                var packages = result.Read<ProductPackage>().ToList();
+                var inventory = result.Read<ProductWithInventoryDetail>().ToList();
+
+                foreach (var product in products)
+                {
+                    product.Inventory.AddRange(inventory.Where(p => p.ProductId == product.ProductId));
+                }
+
                 var distinctProductIdsWithPackage = packages.Select(d => d.ProductId).Distinct();
                 foreach (var productId in distinctProductIdsWithPackage)
                 {
