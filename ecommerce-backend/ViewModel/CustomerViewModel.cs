@@ -23,6 +23,8 @@
         public decimal StoreCredit { get; set; }
         public string PstExempt => string.IsNullOrEmpty(PstNumber) ? "No" : "Yes";
         public bool Disabled { get; set; }
+        public bool CreditCardOnFile { get; set; }
         public string IsDisabled => Disabled ? "Yes" : "No";
+        public string IsCreditCardOnFile => CreditCardOnFile ? "Yes" : "No";
     }
 }

@@ -25,6 +25,7 @@ namespace EcommerceApi.Models
         public string Segment { get; set; }
         public decimal StoreCredit { get; set; }
         public bool Disabled { get; set; }
+        public bool CreditCardOnFile { get; set; }
         public int? MergeToCustomerId { get; set; }
 
         [NotMapped]
