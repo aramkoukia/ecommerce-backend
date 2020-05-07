@@ -26,5 +26,6 @@
         public bool CreditCardOnFile { get; set; }
         public string IsDisabled => Disabled ? "Yes" : "No";
         public string IsCreditCardOnFile => CreditCardOnFile ? "Yes" : "No";
+        public string ChargePreference { get; set; }
     }
 }

@@ -30,6 +30,6 @@ namespace EcommerceApi.Models
 
         [NotMapped]
         public decimal AccountBalance { get; set; }
-
+        public string ChargePreference { get; set; }
     }
 }
