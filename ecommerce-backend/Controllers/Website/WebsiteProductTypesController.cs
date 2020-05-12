@@ -5,7 +5,7 @@ using EcommerceApi.Models;
 namespace EcommerceApi.Controllers
 {
     [Produces("application/json")]
-    [Route("api/Website/ProductTypes")]
+    [Route("api/Website")]
     public class WebsiteProductTypesController : Controller
     {
         private readonly EcommerceContext _context;
@@ -13,8 +13,8 @@ namespace EcommerceApi.Controllers
         public WebsiteProductTypesController(EcommerceContext context) => _context = context;
 
         // GET: api/ProductTypes
-        [HttpGet]
-        public IEnumerable<ProductType> GetProductTypes() => _context.ProductType;
+        [HttpGet("ProductTypes")]
+        public IEnumerable<ProductType> Get() => _context.ProductType;
 
     }
 }

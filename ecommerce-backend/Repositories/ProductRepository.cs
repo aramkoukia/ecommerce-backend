@@ -127,7 +127,7 @@ LEFT JOIN (
   GROUP BY ProductId
 ) AS OnHoldItems
   ON OnHoldItems.ProductId = Product.ProductId
-WHERE Disabled = 0;
+WHERE Product.Disabled = 0;
 
 SELECT * FROM ProductPackage;
 
@@ -217,7 +217,7 @@ LEFT JOIN (
   GROUP BY ProductId
 ) AS OnHoldItems
   ON OnHoldItems.ProductId = Product.ProductId
-WHERE Disabled = 0 ; 
+WHERE Product.Disabled = 0 ; 
 
 SELECT * FROM ProductPackage;
 ";
