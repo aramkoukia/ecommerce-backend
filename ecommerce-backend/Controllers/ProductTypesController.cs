@@ -71,11 +71,16 @@ namespace EcommerceApi.Controllers
             {
                 return BadRequest();
             }
-            productType.ModifiedDate = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateTime.UtcNow, "Pacific Standard Time");
-            productType.SlugsUrl = SlugGenerator.ToSlug(productType.ProductTypeName);
 
-            _context.Entry(productType).State = EntityState.Modified;
-
+            var exisintgProductType = await _context.ProductType.FirstOrDefaultAsync(m => m.ProductTypeId == id);
+            if (exisintgProductType == null)
+            {
+                return BadRequest($"ProductTypeId {id} not found.");
+            }
+            exisintgProductType.ShowOnWebsite = productType.ShowOnWebsite;
+            exisintgProductType.ProductTypeName = productType.ProductTypeName;
+            exisintgProductType.ModifiedDate = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateTime.UtcNow, "Pacific Standard Time");
+            exisintgProductType.SlugsUrl = SlugGenerator.ToSlug(productType.ProductTypeName);
             try
             {
                 await _context.SaveChangesAsync();
@@ -92,6 +97,45 @@ namespace EcommerceApi.Controllers
                 }
             }
 
+            return NoContent();
+        }
+
+        // PUT: api/ProductTypes/5/Description
+        [HttpPut("{id}/Description")]
+        public async Task<IActionResult> PutProductTypeDescription([FromRoute] int id, [FromBody] ProductType productType)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            if (id != productType.ProductTypeId)
+            {
+                return BadRequest();
+            }
+
+            var exisintgProductType = await _context.ProductType.FirstOrDefaultAsync(m => m.ProductTypeId == id);
+            if (exisintgProductType == null)
+            {
+                return BadRequest($"ProductTypeId {id} not found.");
+            }
+            exisintgProductType.Description = productType.Description;
+            exisintgProductType.ModifiedDate = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateTime.UtcNow, "Pacific Standard Time");
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!ProductTypeExists(id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
             return NoContent();
         }
 
