@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using EcommerceApi.Models;
 using Microsoft.AspNetCore.Authorization;
 using System;
+using EcommerceApi.Untilities;
 
 namespace EcommerceApi.Controllers
 {
@@ -62,6 +63,8 @@ namespace EcommerceApi.Controllers
                 return BadRequest();
             }
             productType.ModifiedDate = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateTime.UtcNow, "Pacific Standard Time");
+            productType.SlugsUrl = SlugGenerator.ToSlug(productType.ProductTypeName);
+
             _context.Entry(productType).State = EntityState.Modified;
 
             try
@@ -93,6 +96,7 @@ namespace EcommerceApi.Controllers
             }
 
             productType.ProductTypeId = _context.ProductType.Max(l => l.ProductTypeId) + 1;
+            productType.SlugsUrl = SlugGenerator.ToSlug(productType.ProductTypeName);
             _context.ProductType.Add(productType);
             try
             {

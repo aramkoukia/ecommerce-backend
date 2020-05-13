@@ -14,5 +14,6 @@ namespace EcommerceApi.Models
         public string ThumbnailImagePath { get; set; }
         public string HeaderImagePath { get; set; }
         public string Description { get; set; }
+        public string SlugsUrl { get; set; }
     }
 }
