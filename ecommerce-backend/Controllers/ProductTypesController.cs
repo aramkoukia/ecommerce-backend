@@ -10,7 +10,8 @@ using System;
 using EcommerceApi.Untilities;
 using Microsoft.Extensions.Configuration;
 using Microsoft.WindowsAzure.Storage;
-using Microsoft.WindowsAzure.Storage.Blob;
+using EcommerceApi.Repositories;
+using EcommerceApi.ViewModel;
 
 namespace EcommerceApi.Controllers
 {
@@ -21,21 +22,22 @@ namespace EcommerceApi.Controllers
     {
         private readonly EcommerceContext _context;
         private readonly IConfiguration _config;
+        private readonly IProductTypeRepository _productTypeRepository;
         private const string ContentContainerName = "content";
 
         public ProductTypesController(EcommerceContext context,
+                                      IProductTypeRepository productTypeRepository,
                                       IConfiguration config)
         {
             _context = context;
             _config = config;
+            _productTypeRepository = productTypeRepository;
         }
 
         // GET: api/ProductTypes
         [HttpGet]
-        public IEnumerable<ProductType> GetProductTypes()
-        {
-            return _context.ProductType;
-        }
+        public async Task<IEnumerable<ProductTypeViewModel>> GetProductTypes()
+            => await _productTypeRepository.GetProductTypes();
 
         // GET: api/ProductTypes/5
         [HttpGet("{id}")]

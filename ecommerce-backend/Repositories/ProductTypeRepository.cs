@@ -60,5 +60,36 @@ WHERE ProductType.Disabled = 0
                 return await conn.QueryAsync<WebsiteProductTypeViewModel>(query);
             }
         }
+
+        public async Task<IEnumerable<ProductTypeViewModel>> GetProductTypes()
+        {
+            using (IDbConnection conn = Connection)
+            {
+                string query = $@"
+SELECT ProductType.*, ProductCount, RANK() OVER (ORDER BY Sales.Total DESC) AS Rank  
+FROM ProductType
+LEFT JOIN (
+  SELECT ProductTypeId, COUNT(*) AS ProductCount
+  FROM Product
+  WHERE Product.Disabled = 0
+  GROUP BY ProductTypeId
+) Product
+ON Product.ProductTypeId = ProductType.ProductTypeId
+LEFT JOIN (
+	SELECT ProductTypeId, SUM(OrderDetail.Total) AS Total
+	FROM OrderDetail
+	INNER JOIN [Order]
+	  ON [Order].OrderId = OrderDetail.OrderId
+	INNER JOIN Product
+	  ON OrderDetail.ProductId = Product.ProductId
+	WHERE [Order].OrderDate >= DATEADD(MONTH, -6, GETDATE())
+	GROUP BY ProductTypeId
+) Sales
+ON Product.ProductTypeId = Sales.ProductTypeId
+";
+                conn.Open();
+                return await conn.QueryAsync<ProductTypeViewModel>(query);
+            }
+        }
     }
 }

@@ -1,9 +1,9 @@
 ﻿using EcommerceApi.Untilities;
 using System;
 
-namespace EcommerceApi.ViewModel.Website
+namespace EcommerceApi.ViewModel
 {
-    public class WebsiteProductTypeViewModel
+    public class ProductTypeViewModel
     {
         public int ProductTypeId { get; set; }
         public string ProductTypeName { get; set; }
