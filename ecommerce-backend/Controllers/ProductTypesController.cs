@@ -8,6 +8,9 @@ using EcommerceApi.Models;
 using Microsoft.AspNetCore.Authorization;
 using System;
 using EcommerceApi.Untilities;
+using Microsoft.Extensions.Configuration;
+using Microsoft.WindowsAzure.Storage;
+using Microsoft.WindowsAzure.Storage.Blob;
 
 namespace EcommerceApi.Controllers
 {
@@ -17,10 +20,14 @@ namespace EcommerceApi.Controllers
     public class ProductTypesController : Controller
     {
         private readonly EcommerceContext _context;
+        private readonly IConfiguration _config;
+        private const string ContentContainerName = "content";
 
-        public ProductTypesController(EcommerceContext context)
+        public ProductTypesController(EcommerceContext context,
+                                      IConfiguration config)
         {
             _context = context;
+            _config = config;
         }
 
         // GET: api/ProductTypes
@@ -136,6 +143,30 @@ namespace EcommerceApi.Controllers
             await _context.SaveChangesAsync();
 
             return Ok(productType);
+        }
+
+        [HttpPost]
+        [Route("Upload")]
+        public async Task<IActionResult> UploadAsync(IFormFile file)
+        {
+            var storageConnectionString = _config.GetConnectionString("AzureStorageConnectionString");
+
+            if (!CloudStorageAccount.TryParse(storageConnectionString, out CloudStorageAccount storageAccount))
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            }
+            var blobClient = storageAccount.CreateCloudBlobClient();
+
+            var container = blobClient.GetContainerReference(ContentContainerName);
+
+            await container.CreateIfNotExistsAsync();
+
+            //MS: Don't rely on or trust the FileName property without validation. The FileName property should only be used for display purposes.
+            var picBlob = container.GetBlockBlobReference(Guid.NewGuid().ToString() + "-" + file.FileName);
+
+            await picBlob.UploadFromStreamAsync(file.OpenReadStream());
+
+            return Ok(picBlob.Uri);
         }
 
         private bool ProductTypeExists(int id)
