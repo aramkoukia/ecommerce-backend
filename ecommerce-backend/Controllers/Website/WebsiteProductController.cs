@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
 using EcommerceApi.Repositories;
-using EcommerceApi.ViewModel.Website;
 using System.Threading.Tasks;
+using EcommerceApi.ViewModel.Website;
 
 namespace EcommerceApi.Controllers
 {
@@ -17,8 +17,8 @@ namespace EcommerceApi.Controllers
 
         // GET: api/ProductTypes/{id}/Products
         [HttpGet("ProductTypes/{id}/Products")]
-        public async Task<IEnumerable<WebsiteProductTypeViewModel>> GetAsync() =>
-          await _productTypeRepository.GetWebsiteProductTypes();
+        public async Task<IEnumerable<WebsiteProductsInCategoryViewModel>> GetAsync(string id) =>
+          await _productTypeRepository.GetWebsiteProductsByProductType(id);
 
     }
 }

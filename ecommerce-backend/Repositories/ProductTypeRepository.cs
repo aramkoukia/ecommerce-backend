@@ -91,5 +91,50 @@ ON Product.ProductTypeId = Sales.ProductTypeId
                 return await conn.QueryAsync<ProductTypeViewModel>(query);
             }
         }
+
+        public async Task<IEnumerable<WebsiteProductsInCategoryViewModel>> GetWebsiteProductsByProductType(string slugsUrl)
+        {
+            using (IDbConnection conn = Connection)
+            {
+                string query = $@"
+SELECT Product.ProductId, ProductCode, ProductName, ProductTypeName, Product.ProductDescription, RANK() OVER (ORDER BY Sales.Total DESC) AS Rank, Images.ImagePath, ProductWebsite.SlugsUrl,
+       CASE WHEN ProductInventory.Balance > 0 THEN 'In Scock' ELSE 'Out Of Stock' END AS Balance
+FROM Product
+INNER JOIN ProductType
+ON Product.ProductTypeId = ProductType.ProductTypeId
+LEFT JOIN (
+	SELECT Product.ProductId, SUM(OrderDetail.Total) AS Total
+	FROM OrderDetail
+	INNER JOIN [Order]
+	  ON [Order].OrderId = OrderDetail.OrderId
+	INNER JOIN Product
+	  ON OrderDetail.ProductId = Product.ProductId
+	WHERE [Order].OrderDate >= DATEADD(MONTH, -6, GETDATE())
+	GROUP BY Product.ProductId
+) Sales
+ON Product.ProductId = Sales.ProductId
+LEFT JOIN (
+	SELECT  ProductId, ImagePath
+	FROM (
+		  SELECT  ProductId, ImagePath, ROW_NUMBER() OVER (PARTITION BY ProductId ORDER BY ProductId) AS rownumber
+		  FROM    ProductWebsiteImage
+		  ) Images
+	WHERE rownumber = 1
+) Images
+ON Images.ProductId = Product.ProductId
+LEFT JOIN ProductWebsite
+ON ProductWebsite.ProductId = Product.ProductId
+LEFT JOIN (
+	SELECT ProductId, SUM(Balance) AS Balance from ProductInventory
+	GROUP BY ProductId
+) AS ProductInventory
+ON ProductInventory.ProductId = Product.ProductId
+WHERE Product.Disabled = 0
+      AND ProductType.SlugsUrl = @slugsUrl
+";
+                conn.Open();
+                return await conn.QueryAsync<WebsiteProductsInCategoryViewModel>(query, new { slugsUrl });
+            }
+        }
     }
 }
