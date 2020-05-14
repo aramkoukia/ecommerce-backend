@@ -1,6 +1,6 @@
 ﻿namespace EcommerceApi.ViewModel.Website
 {
-    public class WebsiteProductViewModel
+    public class WebsiteProductsInCategoryViewModel
     {
         public int ProductId { get; set; }
         public string ProductCode { get; set; }
@@ -9,8 +9,7 @@
         public string Balance { get; set; }
         public string ImagePath { get; set; }
         public string ProductDescription { get; set; }
-        public string Description { get; set; }
-        public string Detail { get; set; }
+        public int Rank { get; set; }
         public string SlugsUrl { get; set; }
     }
 }

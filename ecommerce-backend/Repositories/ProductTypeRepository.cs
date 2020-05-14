@@ -1,11 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
-using System.Linq;
 using System.Threading.Tasks;
 using Dapper;
-using EcommerceApi.Models;
 using EcommerceApi.ViewModel;
 using EcommerceApi.ViewModel.Website;
 using Microsoft.Extensions.Configuration;
@@ -134,6 +131,77 @@ WHERE Product.Disabled = 0
 ";
                 conn.Open();
                 return await conn.QueryAsync<WebsiteProductsInCategoryViewModel>(query, new { slugsUrl });
+            }
+        }
+
+        public async Task<IEnumerable<string>> GetWebsiteProductSlugs()
+        {
+            using (IDbConnection conn = Connection)
+            {
+                string query = $@"
+SELECT distinct ProductWebsite.SlugsUrl
+FROM Product
+LEFT JOIN ProductWebsite
+ON ProductWebsite.ProductId = Product.ProductId
+WHERE Product.Disabled = 0
+";
+                conn.Open();
+                return await conn.QueryAsync<string>(query);
+            }
+        }
+
+        public async Task<WebsiteProductViewModel> GetWebsiteProduct(string slugsUrl)
+        {
+            using (IDbConnection conn = Connection)
+            {
+                string query = $@"
+SELECT TOP 1 Product.ProductId, 
+       ProductCode, 
+       ProductName, 
+	   ProductTypeName, Product.ProductDescription, 
+	   RANK() OVER (ORDER BY Sales.Total DESC) AS Rank, Images.ImagePath, ProductWebsite.SlugsUrl,
+	   ProductWebsite.Description,
+	   ProductWebsite.Detail,
+	   ProductWebsite.SlugsUrl,
+	   ProductWebsite.UserManualPath,
+	   ProductWebsite.WarrantyInformation,
+	   ProductWebsite.AdditionalInformation,
+       CASE WHEN ProductInventory.Balance > 0 THEN 'In Stock' ELSE 'Out Of Stock' END AS Balance
+FROM Product
+INNER JOIN ProductType
+ON Product.ProductTypeId = ProductType.ProductTypeId
+LEFT JOIN (
+	SELECT Product.ProductId, SUM(OrderDetail.Total) AS Total
+	FROM OrderDetail
+	INNER JOIN [Order]
+	  ON [Order].OrderId = OrderDetail.OrderId
+	INNER JOIN Product
+	  ON OrderDetail.ProductId = Product.ProductId
+	WHERE [Order].OrderDate >= DATEADD(MONTH, -6, GETDATE())
+	GROUP BY Product.ProductId
+) Sales
+ON Product.ProductId = Sales.ProductId
+LEFT JOIN (
+	SELECT  ProductId, ImagePath
+	FROM (
+		  SELECT  ProductId, ImagePath, ROW_NUMBER() OVER (PARTITION BY ProductId ORDER BY ProductId) AS rownumber
+		  FROM    ProductWebsiteImage
+		  ) Images
+	WHERE rownumber = 1
+) Images
+ON Images.ProductId = Product.ProductId
+LEFT JOIN ProductWebsite
+ON ProductWebsite.ProductId = Product.ProductId
+LEFT JOIN (
+	SELECT ProductId, SUM(Balance) AS Balance from ProductInventory
+	GROUP BY ProductId
+) AS ProductInventory
+ON ProductInventory.ProductId = Product.ProductId
+WHERE Product.Disabled = 0
+      AND ProductWebsite.SlugsUrl = '0-5w-15-led-g4-bulb-4000k-natural-white'
+";
+                conn.Open();
+                return await conn.QueryFirstAsync<WebsiteProductViewModel>(query, new { slugsUrl });
             }
         }
     }
