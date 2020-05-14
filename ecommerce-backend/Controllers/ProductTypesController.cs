@@ -192,9 +192,16 @@ namespace EcommerceApi.Controllers
         }
 
         [HttpPost]
-        [Route("Upload")]
-        public async Task<IActionResult> UploadAsync(IFormFile file)
+        [Route("{id}/Upload")]
+        [AllowAnonymous]
+        public async Task<IActionResult> UploadAsync([FromRoute] int id, IFormFile file)
         {
+            var exisintgProductType = await _context.ProductType.FirstOrDefaultAsync(m => m.ProductTypeId == id);
+            if (exisintgProductType == null)
+            {
+                return BadRequest($"ProductTypeId {id} not found.");
+            }
+
             var storageConnectionString = _config.GetConnectionString("AzureStorageConnectionString");
 
             if (!CloudStorageAccount.TryParse(storageConnectionString, out CloudStorageAccount storageAccount))
@@ -212,7 +219,9 @@ namespace EcommerceApi.Controllers
 
             await picBlob.UploadFromStreamAsync(file.OpenReadStream());
 
-            return Ok(picBlob.Uri);
+            exisintgProductType.ThumbnailImagePath = picBlob.Uri.AbsoluteUri;
+            await _context.SaveChangesAsync();
+            return Ok(exisintgProductType);
         }
 
         private bool ProductTypeExists(int id)
