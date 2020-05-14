@@ -1,5 +1,4 @@
-﻿using EcommerceApi.Untilities;
-using System;
+﻿using System;
 
 namespace EcommerceApi.ViewModel.Website
 {
@@ -17,6 +16,6 @@ namespace EcommerceApi.ViewModel.Website
         public int? ParentProductTypeId { get; set; }
         public int ProductCount { get; set; }
         public int Rank { get; set; }
-        public string SlugUrl => SlugGenerator.ToSlug(ProductTypeName);
+        public string SlugsUrl { get; set; }
     }
 }

@@ -39,6 +39,40 @@ namespace EcommerceApi.Controllers
         public async Task<IEnumerable<ProductTypeViewModel>> GetProductTypes()
             => await _productTypeRepository.GetProductTypes();
 
+        [HttpGet("updateslugs")]
+        [AllowAnonymous]
+        public async Task<IActionResult> UpdateSlugs()
+        {
+            var productTypes = _context.ProductType;
+            foreach (var item in productTypes)
+            {
+                item.SlugsUrl = SlugGenerator.ToSlug(item.ProductTypeName);
+            }
+            _context.SaveChanges();
+
+            var products = _context.Product;
+            foreach (var item in products)
+            {
+                var slugsUrl = SlugGenerator.ToSlug(item.ProductName);
+                var productWebsite = await _context.ProductWebsite.FirstOrDefaultAsync(m => m.ProductId == item.ProductId && m.SlugsUrl == slugsUrl);
+                if (productWebsite == null)
+                {
+                    var newProductWebsite = new ProductWebsite
+                    {
+                        ProductId = item.ProductId,
+                        SlugsUrl = slugsUrl
+                    };
+                    _context.ProductWebsite.Add(newProductWebsite);
+                }
+                else 
+                {
+                    productWebsite.SlugsUrl = slugsUrl;
+                }
+                _context.SaveChanges();
+            }
+            return Ok();
+        }
+
         // GET: api/ProductTypes/5
         [HttpGet("{id}")]
         public async Task<IActionResult> GetProductType([FromRoute] int id)

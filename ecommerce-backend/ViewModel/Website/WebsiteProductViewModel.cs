@@ -1,8 +1,4 @@
-﻿using EcommerceApi.Untilities;
-using System;
-using System.Collections.Generic;
-
-namespace EcommerceApi.ViewModel.Website
+﻿namespace EcommerceApi.ViewModel.Website
 {
     public class WebsiteProductsInCategoryViewModel
     {
