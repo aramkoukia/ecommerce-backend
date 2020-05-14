@@ -98,7 +98,7 @@ ON Product.ProductTypeId = Sales.ProductTypeId
             {
                 string query = $@"
 SELECT Product.ProductId, ProductCode, ProductName, ProductTypeName, Product.ProductDescription, RANK() OVER (ORDER BY Sales.Total DESC) AS Rank, Images.ImagePath, ProductWebsite.SlugsUrl,
-       CASE WHEN ProductInventory.Balance > 0 THEN 'In Scock' ELSE 'Out Of Stock' END AS Balance
+       CASE WHEN ProductInventory.Balance > 0 THEN 'In Stock' ELSE 'Out Of Stock' END AS Balance
 FROM Product
 INNER JOIN ProductType
 ON Product.ProductTypeId = ProductType.ProductTypeId
