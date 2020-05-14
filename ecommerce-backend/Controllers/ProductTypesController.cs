@@ -40,7 +40,7 @@ namespace EcommerceApi.Controllers
             => await _productTypeRepository.GetProductTypes();
 
         [HttpGet("updateslugs")]
-        [AllowAnonymous]
+        // [AllowAnonymous]
         public async Task<IActionResult> UpdateSlugs()
         {
             var productTypes = _context.ProductType;
