@@ -198,7 +198,6 @@ LEFT JOIN (
 ) AS ProductInventory
 ON ProductInventory.ProductId = Product.ProductId
 WHERE Product.Disabled = 0
-      AND ProductWebsite.SlugsUrl = '0-5w-15-led-g4-bulb-4000k-natural-white'
 ";
                 conn.Open();
                 return await conn.QueryFirstAsync<WebsiteProductViewModel>(query, new { slugsUrl });
