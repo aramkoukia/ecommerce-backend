@@ -198,6 +198,7 @@ LEFT JOIN (
 ) AS ProductInventory
 ON ProductInventory.ProductId = Product.ProductId
 WHERE Product.Disabled = 0
+AND ProductWebsite.SlugsUrl = @slugsUrl
 ";
                 conn.Open();
                 return await conn.QueryFirstAsync<WebsiteProductViewModel>(query, new { slugsUrl });
