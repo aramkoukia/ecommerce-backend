@@ -12,6 +12,10 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.WindowsAzure.Storage;
 using EcommerceApi.Repositories;
 using EcommerceApi.ViewModel;
+using System.IO;
+using Newtonsoft.Json;
+using EcommerceApi.ViewModel.Website;
+using System.Net;
 
 namespace EcommerceApi.Controllers
 {
@@ -70,6 +74,59 @@ namespace EcommerceApi.Controllers
                 }
                 _context.SaveChanges();
             }
+            return Ok();
+        }
+
+        [HttpGet("updateimages")]
+        // [AllowAnonymous]
+        public async Task<IActionResult> UpdateImages()
+        {
+            var storageConnectionString = _config.GetConnectionString("AzureStorageConnectionString");
+            if (!CloudStorageAccount.TryParse(storageConnectionString, out CloudStorageAccount storageAccount))
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            }
+            var blobClient = storageAccount.CreateCloudBlobClient();
+            var container = blobClient.GetContainerReference(ContentContainerName);
+            await container.CreateIfNotExistsAsync();
+
+
+            using (StreamReader file = System.IO.File.OpenText(@"c:\products.json"))
+            {
+                JsonSerializer serializer = new JsonSerializer();
+                var products = (OldWebsiteproductImage[])serializer.Deserialize(file, typeof(OldWebsiteproductImage[]));
+                foreach (var p in products)
+                {
+                    var product = _context.Product.FirstOrDefault(m => m.ProductCode == p.code);
+                    if (product != null)
+                    {
+                        foreach (var image in p.image)
+                        {
+                            try
+                            {
+                                HttpWebRequest request = (HttpWebRequest)WebRequest.Create(image);
+                                HttpWebResponse response = (HttpWebResponse)request.GetResponse();
+                                Stream inputStream = response.GetResponseStream();
+                                var picBlob = container.GetBlockBlobReference(Guid.NewGuid().ToString() + "-" + Path.GetFileName(image));
+                                await picBlob.UploadFromStreamAsync(inputStream);
+
+                                var productImage = new ProductWebsiteImage
+                                {
+                                    ProductId = product.ProductId,
+                                    ImagePath = picBlob.Uri.AbsoluteUri
+                                };
+                                _context.ProductWebsiteImage.Add(productImage);
+                                await _context.SaveChangesAsync();
+                            }
+                            catch (Exception ex)
+                            {
+                                Console.WriteLine(ex.Message);
+                            }
+                        }
+                    }
+                }
+            }
+
             return Ok();
         }
 
