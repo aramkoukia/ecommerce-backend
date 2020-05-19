@@ -21,6 +21,7 @@ namespace EcommerceApi.ViewModel
         public int ProductTypeId { get; set; }
         public string ProductTypeName { get; set; }
         public decimal OnHoldAmount { get; set; }
+        public string AvgPurchasePrice { get; set; }
         public string Disabled { get; set; }
         public List<ProductWithInventoryDetail> Inventory { get; set; }
     }
