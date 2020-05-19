@@ -12,5 +12,6 @@
         public string Description { get; set; }
         public string Detail { get; set; }
         public string SlugsUrl { get; set; }
+        public string[] ImagePaths { get; set; }
     }
 }

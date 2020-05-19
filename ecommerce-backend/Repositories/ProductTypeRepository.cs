@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
+using System.Linq;
 using System.Threading.Tasks;
 using Dapper;
 using EcommerceApi.ViewModel;
@@ -182,12 +183,11 @@ LEFT JOIN (
 ) Sales
 ON Product.ProductId = Sales.ProductId
 LEFT JOIN (
-	SELECT  ProductId, ImagePath
-	FROM (
-		  SELECT  ProductId, ImagePath, ROW_NUMBER() OVER (PARTITION BY ProductId ORDER BY ProductId) AS rownumber
-		  FROM    ProductWebsiteImage
-		  ) Images
-	WHERE rownumber = 1
+    SELECT TOP 1 ProductWebsiteImage.ProductId, ImagePath
+    FROM ProductWebsiteImage
+    INNER JOIN ProductWebsite
+	    ON ProductWebsiteImage.ProductId = ProductWebsite.ProductId
+    AND ProductWebsite.SlugsUrl = @slugsUrl
 ) Images
 ON Images.ProductId = Product.ProductId
 LEFT JOIN ProductWebsite
@@ -198,10 +198,20 @@ LEFT JOIN (
 ) AS ProductInventory
 ON ProductInventory.ProductId = Product.ProductId
 WHERE Product.Disabled = 0
+AND ProductWebsite.SlugsUrl = @slugsUrl;
+
+SELECT DISTINCT ImagePath
+FROM ProductWebsiteImage
+INNER JOIN ProductWebsite
+	ON ProductWebsiteImage.ProductId = ProductWebsite.ProductId
 AND ProductWebsite.SlugsUrl = @slugsUrl
 ";
                 conn.Open();
-                return await conn.QueryFirstAsync<WebsiteProductViewModel>(query, new { slugsUrl });
+                var result = await conn.QueryMultipleAsync(query, new { slugsUrl });
+                var product = result.Read<WebsiteProductViewModel>().ToList().FirstOrDefault();
+                var images = result.Read<string>().ToList();
+                product.ImagePaths = images.ToArray();
+                return product;
             }
         }
     }
