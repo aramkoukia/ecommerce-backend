@@ -378,7 +378,8 @@ SELECT Product.ProductId,
 	    ProductType.ProductTypeName,
         Product.Disabled,
 	    ISNULL(ProductInventory.Balance,0) As Balance,
-		ISNULL(OnHoldItems.OnHoldAmount, 0) AS OnHoldAmount
+		ISNULL(OnHoldItems.OnHoldAmount, 0) AS OnHoldAmount,
+        FORMAT(ISNULL(Purchase.AvgPurchasePrice, 0), 'N2') AS AvgPurchasePrice
 FROM Product
 LEFT JOIN ProductType
 ON Product.ProductTypeId = ProductType.ProductTypeId
@@ -397,6 +398,13 @@ LEFT JOIN (
   GROUP BY ProductId
 ) AS OnHoldItems
   ON OnHoldItems.ProductId = Product.ProductId
+LEFT JOIN (
+	SELECT ProductId,  
+		   Avg(UnitPrice) AS AvgPurchasePrice 
+	FROM purchasedetail
+	GROUP BY ProductId 
+) Purchase
+ON Purchase.ProductId = Product.ProductId
 
 SELECT Product.ProductId, 
        ProductInventory.LocationId,
