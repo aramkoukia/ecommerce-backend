@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using EcommerceApi.Models;
 using Microsoft.AspNetCore.Authorization;
+using System.Linq;
 
 namespace EcommerceApi.Controllers
 {
@@ -19,14 +20,14 @@ namespace EcommerceApi.Controllers
             _context = context;
         }
 
-        // GET: api/Locations
+        // GET: api/custom-applications
         [HttpGet]
-        public IEnumerable<Location> Get()
+        public IEnumerable<ApplicationStep> Get()
         {
-            return _context.Location;
+            return _context.ApplicationStep;
         }
 
-        // GET: api/Locations/5
+        // GET: api/custom-applications/5/steps
         [HttpGet("{id}/steps")]
         public async Task<IActionResult> GetSteps([FromRoute] int id)
         {
@@ -34,15 +35,8 @@ namespace EcommerceApi.Controllers
             {
                 return BadRequest(ModelState);
             }
-
-            var location = await _context.Location.SingleOrDefaultAsync(m => m.LocationId == id);
-
-            if (location == null)
-            {
-                return NotFound();
-            }
-
-            return Ok(location);
+            var stepDetails = await _context.ApplicationStepDetail.Where(m => m.StepId == id).ToListAsync();
+            return Ok(stepDetails);
         }
     }
 }
