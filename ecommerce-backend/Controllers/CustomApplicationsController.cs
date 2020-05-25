@@ -12,7 +12,7 @@ namespace EcommerceApi.Controllers
 {
     [Produces("application/json")]
     [Route("api/custom-applications")]
-    // [Authorize]
+    [Authorize]
     public class CustomApplicationsController : Controller
     {
         private readonly EcommerceContext _context;
