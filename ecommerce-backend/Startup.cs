@@ -74,6 +74,7 @@ namespace EcommerceApi
             // Repositories
             services.AddTransient<IProductRepository, ProductRepository>();
             services.AddTransient<IProductTypeRepository, ProductTypeRepository>();
+            services.AddTransient<ICustomApplicationRepository, CustomApplicationRepository>();
             services.AddTransient<IOrderRepository, OrderRepository>();
             services.AddTransient<IPurchaseRepository, PurchaseRepository>();
             services.AddTransient<ICustomerRepository, CustomerRepository>();
