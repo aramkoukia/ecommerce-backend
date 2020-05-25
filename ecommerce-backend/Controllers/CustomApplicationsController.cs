@@ -35,7 +35,7 @@ namespace EcommerceApi.Controllers
             {
                 return BadRequest(ModelState);
             }
-            var stepDetails = await _context.ApplicationStepDetail.Where(m => m.StepId == id).ToListAsync();
+            var stepDetails = await _context.ApplicationStepDetail.Where(m => m.ApplicationStepId == id).ToListAsync();
             return Ok(stepDetails);
         }
     }

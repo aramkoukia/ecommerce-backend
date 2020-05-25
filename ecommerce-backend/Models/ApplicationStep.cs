@@ -2,7 +2,7 @@
 {
     public class ApplicationStep
     {
-        public int StepId { get; set; }
+        public int ApplicationStepId { get; set; }
         public string StepTitle { get; set; }
         public string StepDescription { get; set; }
         public bool IsRangeValue { get; set; }
