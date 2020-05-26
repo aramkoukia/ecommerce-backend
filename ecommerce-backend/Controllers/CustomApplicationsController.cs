@@ -46,7 +46,7 @@ namespace EcommerceApi.Controllers
 
         // PUT: api/custom-applications/5/step
         [HttpPut("{id}/step")]
-        public async Task<IActionResult> PutApplication([FromRoute] int id, [FromBody] ApplicationStep step)
+        public async Task<IActionResult> PutStep([FromRoute] int id, [FromBody] ApplicationStep step)
         {
             if (!ModelState.IsValid)
             {
@@ -99,5 +99,35 @@ namespace EcommerceApi.Controllers
 
             return CreatedAtAction("GetApplciation", new { id = step.ApplicationStepId }, step);
         }
+
+        // PUT: api/custom-applications/5/step-detail
+        [HttpPut("{id}/step-detail")]
+        public async Task<IActionResult> PutStepDetail([FromRoute] int id, [FromBody] ApplicationStepDetail stepDetail)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            if (id != stepDetail.ApplicationStepDetailId)
+            {
+                return BadRequest();
+            }
+
+            var existingStepDetail = await _context.ApplicationStepDetail.FirstOrDefaultAsync(a => a.ApplicationStepDetailId == id);
+            existingStepDetail.StepDetailDescription = stepDetail.StepDetailDescription;
+            existingStepDetail.SortOrder = stepDetail.SortOrder;
+            existingStepDetail.StepDetailTitle = stepDetail.StepDetailTitle;
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                throw;
+            }
+            return Ok(stepDetail);
+        }
+
     }
 }
