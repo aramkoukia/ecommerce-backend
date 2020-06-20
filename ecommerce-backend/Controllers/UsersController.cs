@@ -16,10 +16,12 @@ namespace EcommerceApi.Controllers
     [Route("api/Users")]
     public class UsersController : Controller
     {
+
         private readonly EcommerceContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly IEmailSender _emailSender;
+        private readonly EcommerceContext _testcontext;
 
         public UsersController(
             EcommerceContext context,
