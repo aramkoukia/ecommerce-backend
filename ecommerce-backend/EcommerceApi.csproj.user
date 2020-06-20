@@ -11,7 +11,7 @@
     <WebStackScaffolding_LayoutPageFile />
     <WebStackScaffolding_DbContextTypeFullName>EcommerceApi.Models.EcommerceContext</WebStackScaffolding_DbContextTypeFullName>
     <WebStackScaffolding_IsAsyncSelected>False</WebStackScaffolding_IsAsyncSelected>
-    <ShowAllFiles>false</ShowAllFiles>
-    <NameOfLastUsedPublishProfile>lightsandpartsapi - Web Deploy1</NameOfLastUsedPublishProfile>
+    <ShowAllFiles>true</ShowAllFiles>
+    <NameOfLastUsedPublishProfile>lightsandpartsapi - Web Deploy4</NameOfLastUsedPublishProfile>
   </PropertyGroup>
 </Project>
