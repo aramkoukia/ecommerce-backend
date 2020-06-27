@@ -37,5 +37,13 @@ namespace DataSyncFunctions
             log.Info($"Sending Customer Invoices: {DateTime.Now}");
             client.GetAsync("https://lightsandpartsapi.azurewebsites.net/api/orders/customerinvoices");
         }
+
+        [FunctionName("SendInventoryValueReport")]
+        // 7:00 a.m. every 1st of everymonth
+        public static void RunSendInventoryValueReport([TimerTrigger("0 7 1 * * *")]TimerInfo myTimer, TraceWriter log)
+        {
+            log.Info($"Sending Inventory Value Report: {DateTime.Now}");
+            client.GetAsync("https://lightsandpartsapi.azurewebsites.net/api/reports/MonthlyInventoryValue");
+        }
     }
 }
