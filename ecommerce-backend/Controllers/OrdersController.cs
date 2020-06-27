@@ -802,7 +802,7 @@ www.lightsandparts.com | {user.Email}
             orderToUpdateEmail.Email = email;
             await _context.SaveChangesAsync();
 
-            _emailSender.SendEmailAsync(email, subject, message, attachment, attachmentName, true);
+            _emailSender.SendEmailAsync(email, subject, message, new[] { attachment }, new[] { attachmentName }, true);
             return Ok();
         }
 

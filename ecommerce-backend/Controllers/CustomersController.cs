@@ -189,7 +189,7 @@ www.lightsandparts.com | sina@lightsandparts.com
                 customer.Email = "aramkoukia@gmail.com";
             }
 
-            _emailSender.SendEmailAsync(customer.Email, subject, message, attachment, attachmentName, true);
+            _emailSender.SendEmailAsync(customer.Email, subject, message, new[] { attachment }, new[] { attachmentName }, true);
             return Ok();
         }
 

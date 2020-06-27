@@ -17,7 +17,13 @@ namespace EcommerceApi.Services
             _context = context;
         }
 
-        public async Task SendEmailAsync(string toEmail, string subject, string textMessage, Stream attachment = null, string attachmentName = null, bool ccAdmins = false)
+        public async Task SendEmailAsync(
+            string toEmail,
+            string subject,
+            string textMessage,
+            Stream[] attachments = null,
+            string[] attachmentNames = null,
+            bool ccAdmins = false)
         {
             try
             {
@@ -25,7 +31,6 @@ namespace EcommerceApi.Services
 
                 if (string.IsNullOrEmpty(toEmail))
                     toEmail = settings.ReportEmail;
-
 
                 int port = settings.SmtpPort;
                 string host = settings.SmtpHost;
@@ -52,9 +57,12 @@ namespace EcommerceApi.Services
                     TextBody = textMessage
                 };
 
-                if (!string.IsNullOrEmpty(attachmentName))
+                if (attachments != null && attachments.Length > 0)
                 {
-                    builder.Attachments.Add(attachmentName, attachment);
+                    for(int i = 0; i < attachments.Length; i++)
+                    {
+                        builder.Attachments.Add(attachmentNames[i], attachments[i]);
+                    }
                 }
 
                 message.Body = builder.ToMessageBody();

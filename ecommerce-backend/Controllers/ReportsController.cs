@@ -7,6 +7,9 @@ using EcommerceApi.ViewModel;
 using EcommerceApi.Repositories;
 using System;
 using Microsoft.AspNetCore.Identity;
+using EcommerceApi.Services;
+using CsvHelper;
+using System.IO;
 
 namespace EcommerceApi.Controllers
 {
@@ -17,13 +20,16 @@ namespace EcommerceApi.Controllers
     {
         private readonly EcommerceContext _context;
         private readonly IReportRepository _reportRepository;
+        private readonly IEmailSender _emailSender;
         private readonly UserManager<ApplicationUser> _userManager;
         public ReportsController(
             EcommerceContext context, 
             IReportRepository reportRepository,
+            IEmailSender emailSender,
             UserManager<ApplicationUser> userManager)
         {
             _context = context;
+            _emailSender = emailSender;
             _reportRepository = reportRepository;
             _userManager = userManager;
         }
@@ -321,6 +327,78 @@ namespace EcommerceApi.Controllers
         public async Task<IEnumerable<InventoryValueTotalByCategoryReportViewModel>> GetInventoryValueTotalByCategory()
         {
             return await _reportRepository.GetInventoryValueTotalByCategory();
+        }
+
+        [HttpGet("MonthlyInventoryValue")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetMonthlyInventoryValue()
+        {
+            var date = DateTime.Now;
+            var result1 = await _reportRepository.GetInventoryValueTotal();
+            var result2 = await _reportRepository.GetInventoryValueTotalByCategory();
+            var result3 = await _reportRepository.GetInventoryValue(); ;
+            MemoryStream attachment1;
+            MemoryStream attachment2;
+            MemoryStream attachment3;
+            var attachmentName1 = "TotalInventoryValue";
+            var attachmentName2 = "Inventory Value By Category";
+            var attachmentName3 = "Inventory Value By Product";
+            using (var mem = new MemoryStream())
+            using (var writer = new StreamWriter(mem))
+            using (var csvWriter = new CsvWriter(writer, new System.Globalization.CultureInfo("en-US")))
+            {
+                csvWriter.Configuration.Delimiter = ";";
+                csvWriter.Configuration.HasHeaderRecord = true;
+                csvWriter.Configuration.AutoMap<InventoryValueTotalReportViewModel>();
+
+                csvWriter.WriteHeader<InventoryValueTotalReportViewModel>();
+                csvWriter.WriteRecords(result1);
+
+                writer.Flush();
+                attachment1 = new MemoryStream(mem.ToArray());
+            }
+
+            using (var mem = new MemoryStream())
+            using (var writer = new StreamWriter(mem))
+            using (var csvWriter = new CsvWriter(writer, new System.Globalization.CultureInfo("en-US")))
+            {
+                csvWriter.Configuration.Delimiter = ";";
+                csvWriter.Configuration.HasHeaderRecord = true;
+                csvWriter.Configuration.AutoMap<InventoryValueTotalByCategoryReportViewModel>();
+
+                csvWriter.WriteHeader<InventoryValueTotalByCategoryReportViewModel>();
+                csvWriter.WriteRecords(result2);
+
+                writer.Flush();
+                attachment2 = new MemoryStream(mem.ToArray());
+            }
+
+            using (var mem = new MemoryStream())
+            using (var writer = new StreamWriter(mem))
+            using (var csvWriter = new CsvWriter(writer, new System.Globalization.CultureInfo("en-US")))
+            {
+                csvWriter.Configuration.Delimiter = ";";
+                csvWriter.Configuration.HasHeaderRecord = true;
+                csvWriter.Configuration.AutoMap<InventoryValueReportViewModel>();
+
+                csvWriter.WriteHeader<InventoryValueReportViewModel>();
+                csvWriter.WriteRecords(result3);
+
+                writer.Flush();
+                attachment3 = new MemoryStream(mem.ToArray());
+            }
+
+            var subject = $"LED Lights and Parts - Monthly Inventory Value {date.ToString("MMMM")} {date.Year}";
+            var message = $"Monthly Inventory Value Report {date.ToString("MMMM")} {date.Year}";
+
+            _emailSender.SendEmailAsync(
+                "aramkoukia@gmail.com",
+                subject,
+                message,
+                new[] { attachment1, attachment2, attachment3 },
+                new[] { attachmentName1, attachmentName2, attachmentName3 },
+                true);
+            return Ok();
         }
     }
 }
