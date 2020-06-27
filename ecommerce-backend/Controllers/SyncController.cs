@@ -35,15 +35,18 @@ namespace EcommerceApi.Controllers
             var errorList = new List<string>();
             var productsCreated = 0;
             var productsUpdated = 0;
+            var portal = _context.PortalSettings.FirstOrDefault();
             try
             {
+                var setting = _context.Settings.FirstOrDefault();
+                _db.Connection.ConnectionString = setting.WebsiteConnectionString;
                 if (_db.Connection.State == System.Data.ConnectionState.Closed)
                 {
                     await _db.Connection.OpenAsync();
                 }
 
                 var query = new ProductQueries(_db);
-                var products = await query.GetAllProducts();
+                var products = await query.GetAllProducts(setting.WebsiteProductsSyncQuery);
                 foreach (var product in products)
                 {
                     try
@@ -77,31 +80,18 @@ namespace EcommerceApi.Controllers
                             newProduct.ProductType = null;
 
                             await _context.Product.AddAsync(newProduct);
-                            await _context.ProductInventory.AddAsync(new ProductInventory 
+                            var locations = _context.Location.ToList();
+                            foreach (var location in locations)
                             {
-                                Balance = 0,
-                                BinCode = "",
-                                LocationId = 1,
-                                ModifiedDate = newProduct.ModifiedDate,
-                                ProductId = newProduct.ProductId,
-                            });
-                            await _context.ProductInventory.AddAsync(new ProductInventory
-                            {
-                                Balance = 0,
-                                BinCode = "",
-                                LocationId = 2,
-                                ModifiedDate = newProduct.ModifiedDate,
-                                ProductId = newProduct.ProductId,
-                            });
-                            await _context.ProductInventory.AddAsync(new ProductInventory
-                            {
-                                Balance = 0,
-                                BinCode = "",
-                                LocationId = 3,
-                                ModifiedDate = newProduct.ModifiedDate,
-                                ProductId = newProduct.ProductId,
-                            });
-
+                                await _context.ProductInventory.AddAsync(new ProductInventory
+                                {
+                                    Balance = 0,
+                                    BinCode = "",
+                                    LocationId = location.LocationId,
+                                    ModifiedDate = newProduct.ModifiedDate,
+                                    ProductId = newProduct.ProductId,
+                                });
+                            }
                             await _context.SaveChangesAsync();
                         }
                         else
@@ -130,9 +120,9 @@ namespace EcommerceApi.Controllers
                 errorList.Add("products error:" + ex.ToString());
             }
             stopWatch.Stop();
-            var timeTook = $"Products Sync Took: {TimeSpan.FromMilliseconds(stopWatch.ElapsedMilliseconds).Minutes} minutes.";
+            var timeTook = $"{portal.PortalTitle} Products Sync Took: {TimeSpan.FromMilliseconds(stopWatch.ElapsedMilliseconds).Minutes} minutes.";
             var message = $"Products Sync Finished. \n Products Created: {productsCreated}. \n Products Updated: {productsUpdated}. {timeTook}\n Errors: {string.Join(",", errorList)}";
-            _emailSender.SendEmailAsync("aramkoukia@gmail.com", "Sync Finished: Products", message, null, null, true);
+            _emailSender.SendEmailAsync("aramkoukia@gmail.com", $"{portal.PortalTitle} Sync Finished: Products", message, null, null, true);
             
             return Ok(message);
         }
@@ -277,6 +267,9 @@ namespace EcommerceApi.Controllers
             var errorList = new List<string>();
             try
             {
+                var setting = _context.Settings.FirstOrDefault();
+                _db.Connection.ConnectionString = setting.WebsiteConnectionString;
+
                 if (_db.Connection.State == System.Data.ConnectionState.Closed)
                 {
                     await _db.Connection.OpenAsync();
@@ -361,6 +354,8 @@ namespace EcommerceApi.Controllers
             var errorList = new List<string>();
             try
             {
+                var setting = _context.Settings.FirstOrDefault();
+                _db.Connection.ConnectionString = setting.WebsiteConnectionString;
                 if (_db.Connection.State == System.Data.ConnectionState.Closed)
                 {
                     await _db.Connection.OpenAsync();

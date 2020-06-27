@@ -79,7 +79,7 @@ namespace EcommerceApi
             services.AddTransient<IPurchaseRepository, PurchaseRepository>();
             services.AddTransient<ICustomerRepository, CustomerRepository>();
             services.AddTransient<IReportRepository, ReportRepository>();
-            services.AddTransient(_ => new AppDb(Configuration.GetConnectionString("mysqlConnection")));
+            services.AddTransient(_ => new AppDb("mysqlConnection"));
 
             services.AddTransient<IEmailSender, EmailSender>();
             services.AddTransient<IMonerisService, MonerisService>();

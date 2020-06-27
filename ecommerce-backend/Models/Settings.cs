@@ -14,5 +14,7 @@
         public bool BlockInSufficientStockOnOrder { get; set; }
         public string AllowedIPAddresses { get; set; }
         public bool EnablePosIntegration { get; set; }
+        public string WebsiteConnectionString { get; set; }
+        public string WebsiteProductsSyncQuery { get; set; }
     }
 }

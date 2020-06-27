@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Data.Common;
 using System.Threading.Tasks;
-using MySql.Data.MySqlClient;
 
 namespace EcommerceApi.Repositories
 {
@@ -16,18 +14,10 @@ namespace EcommerceApi.Repositories
             Db = db;
         }
 
-        public async Task<List<MySqlProduct>> GetAllProducts()
+        public async Task<List<MySqlProduct>> GetAllProducts(string query)
         {
             var cmd = Db.Connection.CreateCommand();
-            cmd.CommandText = @"
-SELECT p.id, p.post_title,
-    (select meta_value from wp_postmeta where post_id = p.id and meta_key = '_price' limit 1) as _price,
-	(select meta_value from wp_postmeta where post_id = p.id and meta_key = '_sku' limit 1) as _sku,
-	(select meta_value from wp_postmeta where post_id = p.id and meta_key = '_yoast_wpseo_primary_product_cat' limit 1) as _cat_id,
-	(SELECT name FROM wp_terms WHERE term_id = (select meta_value from wp_postmeta where post_id = p.id and meta_key = '_yoast_wpseo_primary_product_cat' limit 1) limit 1) as _category
-	FROM wp_posts p 
-where p.post_type IN ( 'product', 'product_variation') order by p.id desc
-";
+            cmd.CommandText = query;
             return await ReadAllProductsAsync(await cmd.ExecuteReaderAsync());
         }
 
