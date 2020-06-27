@@ -338,9 +338,9 @@ namespace EcommerceApi.Controllers
             MemoryStream attachment1;
             MemoryStream attachment2;
             MemoryStream attachment3;
-            var attachmentName1 = "Total Inventory Value.csv";
-            var attachmentName2 = "Inventory Value By Category.csv";
-            var attachmentName3 = "Inventory Value By Product.csv";
+            var attachmentName1 = $"Total Inventory Value - {date.ToString("MMMM")} {date.Year}.csv";
+            var attachmentName2 = $"Inventory Value By Category - {date.ToString("MMMM")} {date.Year}.csv";
+            var attachmentName3 = $"Inventory Value By Product - {date.ToString("MMMM")} {date.Year}.csv";
 
             using (var mem = new MemoryStream())
             using (var writer = new StreamWriter(mem))
