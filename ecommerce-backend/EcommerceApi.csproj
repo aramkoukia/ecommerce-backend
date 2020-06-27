@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <TargetFramework>netcoreapp2.2</TargetFramework>
     <UserSecretsId>cb856a2c-3470-476a-baa2-7707690f1ef3</UserSecretsId>
     <ApplicationInsightsResourceId>/subscriptions/9057c309-3427-4108-b5da-b4ed0faa2873/resourcegroups/ecommerce/providers/microsoft.insights/components/lightsandparts</ApplicationInsightsResourceId>
     <ApplicationInsightsAnnotationResourceId>/subscriptions/9057c309-3427-4108-b5da-b4ed0faa2873/resourcegroups/ecommerce/providers/microsoft.insights/components/lightsandparts</ApplicationInsightsAnnotationResourceId>
@@ -61,7 +61,7 @@
     <PackageReference Include="DinkToPdf" Version="1.0.8" />
     <PackageReference Include="MailKit" Version="2.1.5.1" />
     <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.1.1" />
-    <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.9" />
+    <PackageReference Include="Microsoft.AspNetCore.All" Version="2.2.8" />
     <PackageReference Include="Microsoft.Extensions.Http" Version="2.2.0" />
     <PackageReference Include="Microsoft.Extensions.Http.Polly" Version="2.2.0" />
     <PackageReference Include="Microsoft.Net.Http" Version="2.2.29" />

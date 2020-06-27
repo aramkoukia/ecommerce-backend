@@ -12,6 +12,6 @@
     <WebStackScaffolding_DbContextTypeFullName>EcommerceApi.Models.EcommerceContext</WebStackScaffolding_DbContextTypeFullName>
     <WebStackScaffolding_IsAsyncSelected>False</WebStackScaffolding_IsAsyncSelected>
     <ShowAllFiles>true</ShowAllFiles>
-    <NameOfLastUsedPublishProfile>lightsandpartsapi - Web Deploy4</NameOfLastUsedPublishProfile>
+    <NameOfLastUsedPublishProfile>veroboard-api - Web Deploy1</NameOfLastUsedPublishProfile>
   </PropertyGroup>
 </Project>
