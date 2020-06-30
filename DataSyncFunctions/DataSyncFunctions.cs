@@ -9,12 +9,12 @@ namespace DataSyncFunctions
     {
         static HttpClient client = new HttpClient();
 
-        [FunctionName("SyncProducts")]
-        public static void RunSyncProducts([TimerTrigger("0 0 1,23,21,19,17 * * *")]TimerInfo myTimer, TraceWriter log)
-        {
-            log.Info($"SyncProducts: {DateTime.Now}");
-            client.GetAsync("https://lightsandpartsapi.azurewebsites.net/api/sync/products");
-        }
+        //[FunctionName("SyncProducts")]
+        //public static void RunSyncProducts([TimerTrigger("0 0 1,23,21,19,17 * * *")]TimerInfo myTimer, TraceWriter log)
+        //{
+        //    log.Info($"SyncProducts: {DateTime.Now}");
+        //    client.GetAsync("https://lightsandpartsapi.azurewebsites.net/api/sync/products");
+        //}
 
         [FunctionName("MakeOnHoldOrdersAsDraft")]
         public static void RunMakeOnHoldOrdersAsDraft([TimerTrigger("0 0 1 * * *")]TimerInfo myTimer, TraceWriter log)
@@ -40,7 +40,7 @@ namespace DataSyncFunctions
 
         [FunctionName("SendInventoryValueReport")]
         // 7:00 a.m. every 1st of everymonth
-        public static void RunSendInventoryValueReport([TimerTrigger("0 7 1 * * *")]TimerInfo myTimer, TraceWriter log)
+        public static void RunSendInventoryValueReport([TimerTrigger("0 0 15 1 * *")]TimerInfo myTimer, TraceWriter log)
         {
             log.Info($"Sending Inventory Value Report: {DateTime.Now}");
             client.GetAsync("https://lightsandpartsapi.azurewebsites.net/api/reports/MonthlyInventoryValue");
