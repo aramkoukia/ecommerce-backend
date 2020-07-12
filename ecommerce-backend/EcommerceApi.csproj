@@ -17,6 +17,7 @@
     <None Remove="Public\sidebar-2.jpg" />
     <None Remove="Public\sidebar-3.jpg" />
     <None Remove="Public\sidebar-4.jpg" />
+    <None Remove="Public\veroboard.png" />
   </ItemGroup>
 
   <ItemGroup>
@@ -48,6 +49,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Public\sidebar-4.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Public\veroboard.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

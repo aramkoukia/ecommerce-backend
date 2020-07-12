@@ -6,5 +6,6 @@
         public string PortalTitle { get; set; }
         public string SidebarImageUrl { get; set; }
         public string LogoImageUrl { get; set; }
+        public bool ShowTitleOnSideBar { get; set; }
     }
 }
