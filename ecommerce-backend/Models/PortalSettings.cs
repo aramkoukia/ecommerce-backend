@@ -7,5 +7,10 @@
         public string SidebarImageUrl { get; set; }
         public string LogoImageUrl { get; set; }
         public bool ShowTitleOnSideBar { get; set; }
+        public string LegalName { get; set; }
+        public string GstNumber { get; set; }
+        public string InvoicePhone { get; set; }
+        public string InvoiceLogoImage { get; set; }
+        public string InvoiceWebsite { get; set; }
     }
 }

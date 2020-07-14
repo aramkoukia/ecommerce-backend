@@ -32,6 +32,7 @@ namespace EcommerceApi.Controllers
         private readonly IEmailSender _emailSender;
         private readonly IMonerisService _monerisService;
         private readonly IHttpContextAccessor _accessor;
+        private readonly IOrderTemplateGenerator _orderTemplateGenerator;
 
         public OrdersController(EcommerceContext context,
                                 UserManager<ApplicationUser> userManager,
@@ -40,6 +41,7 @@ namespace EcommerceApi.Controllers
                                 IConverter converter,
                                 IEmailSender emailSender,
                                 IMonerisService monerisService,
+                                IOrderTemplateGenerator orderTemplateGenerator,
                                 IHttpContextAccessor accessor)
         {
             _context = context;
@@ -50,6 +52,7 @@ namespace EcommerceApi.Controllers
             _emailSender = emailSender;
             _monerisService = monerisService;
             _accessor = accessor;
+            _orderTemplateGenerator = orderTemplateGenerator;
         }
 
         // GET: api/Orders
@@ -177,7 +180,7 @@ namespace EcommerceApi.Controllers
                 order.IsAccountReturn = true;
             }
 
-            order.OrderId = _context.Order.Max(o => o.OrderId) + 1;
+            order.OrderId = _context.Order.DefaultIfEmpty().Max(o => o.OrderId) + 1;
             foreach (var detail in order.OrderDetail)
             {
                 if (order.Status == OrderStatus.Return.ToString() && detail.Amount > 0)
@@ -742,11 +745,10 @@ namespace EcommerceApi.Controllers
 
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == order.CreatedByUserId);
             order.CreatedByUserName = user.UserName;
-
             var objectSettings = new ObjectSettings
             {
                 PagesCount = true,
-                HtmlContent = OrderTemplateGenerator.GetHtmlString(order, false),
+                HtmlContent = _orderTemplateGenerator.GetHtmlString(order, false),
                 WebSettings = { DefaultEncoding = "utf-8", UserStyleSheet = Path.Combine(Directory.GetCurrentDirectory(), "assets", "invoice.css") },
             };
 
@@ -846,7 +848,7 @@ www.lightsandparts.com | {user.Email}
             var objectSettings = new ObjectSettings
             {
                 PagesCount = true,
-                HtmlContent = OrderTemplateGenerator.GetHtmlString(order, includeMerchantCopy),
+                HtmlContent = _orderTemplateGenerator.GetHtmlString(order, includeMerchantCopy),
                 WebSettings = { DefaultEncoding = "utf-8", UserStyleSheet = Path.Combine(Directory.GetCurrentDirectory(), "assets", "invoice.css") },
             };
 

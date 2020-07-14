@@ -12,7 +12,7 @@
     <None Remove="libwkhtmltox.dll" />
     <None Remove="libwkhtmltox.dylib" />
     <None Remove="libwkhtmltox.so" />
-    <None Remove="Public\logo.png" />
+    <None Remove="Public\lightsandparts.png" />
     <None Remove="Public\sidebar-1.jpg" />
     <None Remove="Public\sidebar-2.jpg" />
     <None Remove="Public\sidebar-3.jpg" />
@@ -36,7 +36,7 @@
     <Content Include="libwkhtmltox.so">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Public\logo.png">
+    <Content Include="Public\lightsandparts.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Public\sidebar-1.jpg">
