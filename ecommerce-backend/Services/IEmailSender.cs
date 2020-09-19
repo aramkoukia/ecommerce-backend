@@ -10,7 +10,8 @@ namespace EcommerceApi.Services
                             string textMessage = null,
                             Stream[] attachment = null,
                             string[] attachmentName = null,
-                            bool ccAdmins = false);
+                            bool ccAdmins = false,
+                            string cc = null);
         Task SendAdminReportAsync(string subject, string textMessage);
     }
 }

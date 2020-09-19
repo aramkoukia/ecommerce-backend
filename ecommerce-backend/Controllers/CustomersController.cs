@@ -189,13 +189,18 @@ www.lightsandparts.com | sina@lightsandparts.com
             var attachment = new MemoryStream(file);
             var attachmentName = $"Monthly Statement {toDate.ToString("MMMM")} {toDate.Year}.pdf";
             var subject = $"Pixel Print Ltd (LED Lights and Parts) Monthly Statement {toDate.ToString("MMMM")} {toDate.Year}";
-
+            var ccEmail = "sina@lightsandparts.com";
             if (string.IsNullOrEmpty(customer.Email))
             {
-              customer.Email = "aramkoukia@gmail.com";
+                customer.Email = ccEmail;
+                subject = "MISSING CUSTOMER EMAIL - " + subject;
             }
 
-            _emailSender.SendEmailAsync(customer.Email, subject, message, new[] { attachment }, new[] { attachmentName }, true);
+            if (customer.Email.Contains(",")) {
+                customer.Email = customer.Email.Split(",")[0].Trim();
+            }
+
+            _emailSender.SendEmailAsync(customer.Email, subject, message, new[] { attachment }, new[] { attachmentName }, true, ccEmail);
         }
 
         // GET: api/Customers/SendInvoices

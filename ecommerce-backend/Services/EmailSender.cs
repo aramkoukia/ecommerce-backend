@@ -23,7 +23,8 @@ namespace EcommerceApi.Services
             string textMessage,
             Stream[] attachments = null,
             string[] attachmentNames = null,
-            bool ccAdmins = false)
+            bool ccAdmins = false,
+            string cc = null)
         {
             try
             {
@@ -49,6 +50,11 @@ namespace EcommerceApi.Services
                     {
                         message.Bcc.Add(new MailboxAddress(item));
                     }
+                }
+
+                if (!string.IsNullOrEmpty(cc))
+                {
+                    message.Bcc.Add(new MailboxAddress(cc));
                 }
 
                 message.Subject = subject;
