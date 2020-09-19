@@ -30,7 +30,7 @@ namespace EcommerceApi.Controllers
         [HttpGet]
         public IEnumerable<Location> GetLocation()
         {
-            return _context.Location;
+            return _context.Location.Where(l => l.Disabled == false);
         }
 
         // GET: api/Locations/ForUser
@@ -45,7 +45,7 @@ namespace EcommerceApi.Controllers
                 return new List<Location>();
             }
 
-            return _context.Location.Where(loc => userLocations.Select(l => l.LocationId).Contains(loc.LocationId));
+            return _context.Location.Where(loc => userLocations.Select(l => l.LocationId).Contains(loc.LocationId) && loc.Disabled == false);
         }
 
         // GET: api/Locations/5
@@ -146,8 +146,7 @@ namespace EcommerceApi.Controllers
             {
                 return NotFound();
             }
-
-            _context.Location.Remove(location);
+            location.Disabled = true;
             await _context.SaveChangesAsync();
 
             return Ok(location);
