@@ -158,6 +158,12 @@ namespace EcommerceApi.Controllers
         [HttpGet("{id}/EmailStatement")]
         public async Task<IActionResult> EmailCustomerStatement(int id, DateTime fromDate, DateTime toDate)
         {
+            await EmailStatement(id, fromDate, toDate);
+            return Ok();
+        }
+
+        private async Task EmailStatement(int id, DateTime fromDate, DateTime toDate)
+        {
             var customer = await _customerRepository.GetCustomer(id);
             var file = await GenerateStatementPdf(customer, fromDate, toDate);
             var message = $@"
@@ -186,10 +192,31 @@ www.lightsandparts.com | sina@lightsandparts.com
 
             if (string.IsNullOrEmpty(customer.Email))
             {
-                customer.Email = "aramkoukia@gmail.com";
+              customer.Email = "aramkoukia@gmail.com";
             }
 
             _emailSender.SendEmailAsync(customer.Email, subject, message, new[] { attachment }, new[] { attachmentName }, true);
+        }
+
+        // GET: api/Customers/SendInvoices
+        [AllowAnonymous]
+        [HttpGet("SendInvoices")]
+        public async Task<IActionResult> EmailAllCustomerStatements()
+        {
+            var customers = await _customerRepository.GetCustomersWithBalance(false);
+            var nonZeroBalance = customers.Where(c => c.AccountBalance > 0);
+            var fromDate = DateTime.Now.AddMonths(-6);
+            var toDate = DateTime.Now;
+            foreach (var customer in nonZeroBalance)
+            {
+                try
+                {
+                    await EmailStatement(customer.CustomerId, fromDate, toDate);
+                }
+                catch (Exception)
+                {
+                }
+            }
             return Ok();
         }
 
