@@ -53,7 +53,7 @@ namespace EcommerceApi.Untilities
                                 <div class='center'>
                                   {imageSrc}
                                 </div>
-                                <div class='center xsmall-font'>{posSetting.LegalName}</div>
+                                <div class='center xsmall-font'>{posSetting.LegalName} GST: {posSetting.GstNumber}</div>
                                 <div class='center xsmall-font'>{posSetting.InvoicePhone}</div>
                                 <div class='center xsmall-font spaceafter-10'>{posSetting.InvoiceWebsite}</div>
                                
