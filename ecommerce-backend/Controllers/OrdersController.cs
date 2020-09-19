@@ -140,14 +140,14 @@ namespace EcommerceApi.Controllers
                        && o.OrderDate < DateTime.Now.AddDays(-14));
             var updateOrderStatus = new UpdateOrderStatus
             {
-                OrderStatus = OrderStatus.Draft.ToString()
+                OrderStatus = OrderStatus.Quote.ToString()
             };
 
             foreach (var order in orders)
             {
                 var done = await AddToInventory(order, updateOrderStatus);
-                order.Status = OrderStatus.Draft.ToString();
-                order.Notes = $"{order.Notes} - Marked as Draft from OnHold after 14 days by system.";
+                order.Status = OrderStatus.Quote.ToString();
+                order.Notes = $"{order.Notes} - Marked as Quote from OnHold after 14 days by system.";
                 _emailSender.SendAdminReportAsync("OnHold Order Cancelled", $"OnHold Order Cancelled. \n Order Id: {order.OrderId}");
             }
             await _context.SaveChangesAsync();
@@ -320,7 +320,7 @@ namespace EcommerceApi.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutOrder([FromRoute] int id, [FromBody] Order order)
         {
-            // only supports draft orders
+            // only supports Quote orders
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
@@ -468,9 +468,9 @@ namespace EcommerceApi.Controllers
                 }
             }
 
-            // When order is marked as Draft from OnHold we should add them to inventory
+            // When order is marked as Quote from OnHold we should add them to inventory
             if (order.Status == OrderStatus.OnHold.ToString() 
-                && updateOrderStatus.OrderStatus == OrderStatus.Draft.ToString())
+                && updateOrderStatus.OrderStatus == OrderStatus.Quote.ToString())
             {
                 var done = await AddToInventory(order, updateOrderStatus);
             }
@@ -771,7 +771,7 @@ If you requested to hold on products, the invoice will be marked as HOLD.
 
 If you already paid, the invoice will be marked as PAID and no further action is required. 
 
-If you requested the quote, the invoice will be marked as DRAFT. 
+If you requested the quote, the invoice will be marked as QUOTE. 
 
 If you returned or exchanged the invoice will be marked as Return/Exchange or Credit. 
 
@@ -827,7 +827,7 @@ www.lightsandparts.com | {user.Email}
             order.CreatedByUserName = user?.UserName;
 
             var includeMerchantCopy = false;
-            if (order.Status == OrderStatus.Draft.ToString() || order.Status == OrderStatus.OnHold.ToString())
+            if (order.Status == OrderStatus.Quote.ToString() || order.Status == OrderStatus.OnHold.ToString())
             {
                 includeMerchantCopy = false;
             }
@@ -952,7 +952,7 @@ www.lightsandparts.com | {user.Email}
 
         private async Task<bool> NewOrderUpdateInventory(Order order)
         {
-            if (order.Status == OrderStatus.Draft.ToString())
+            if (order.Status == OrderStatus.Quote.ToString())
             {
                 return true;
             }
@@ -1002,7 +1002,7 @@ www.lightsandparts.com | {user.Email}
 
         private async Task<bool> ExistingOrderUpdateInventory(Order order, UpdateOrderStatus updateOrderStatus)
         {
-            if (updateOrderStatus.OrderStatus == OrderStatus.Draft.ToString())
+            if (updateOrderStatus.OrderStatus == OrderStatus.Quote.ToString())
             {
                 return true;
             }
@@ -1053,7 +1053,7 @@ www.lightsandparts.com | {user.Email}
 
         private async Task<bool> TransferOrderInventory(Order order, int locationId)
         {
-            if (order.Status == OrderStatus.Draft.ToString())
+            if (order.Status == OrderStatus.Quote.ToString())
             {
                 return true;
             }
@@ -1143,7 +1143,7 @@ www.lightsandparts.com | {user.Email}
 
         private async Task<bool> AddToInventory(Order order, UpdateOrderStatus updateOrderStatus)
         {
-            if (updateOrderStatus.OrderStatus != OrderStatus.Draft.ToString())
+            if (updateOrderStatus.OrderStatus != OrderStatus.Quote.ToString())
             {
                 return true;
             }

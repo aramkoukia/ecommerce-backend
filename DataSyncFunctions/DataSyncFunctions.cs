@@ -16,10 +16,10 @@ namespace DataSyncFunctions
         //    client.GetAsync("https://lightsandpartsapi.azurewebsites.net/api/sync/products");
         //}
 
-        [FunctionName("MakeOnHoldOrdersAsDraft")]
-        public static void RunMakeOnHoldOrdersAsDraft([TimerTrigger("0 0 1 * * *")]TimerInfo myTimer, TraceWriter log)
+        [FunctionName("MakeOnHoldOrdersAsQuote")]
+        public static void RunMakeOnHoldOrdersAsQuote([TimerTrigger("0 0 1 * * *")]TimerInfo myTimer, TraceWriter log)
         {
-            log.Info($"MakeOnHoldOrdersAsDraft: {DateTime.Now}");
+            log.Info($"MakeOnHoldOrdersAsQuote: {DateTime.Now}");
             client.GetAsync("https://lightsandpartsapi.azurewebsites.net/api/orders/cancelonholdorders");
         }
 
