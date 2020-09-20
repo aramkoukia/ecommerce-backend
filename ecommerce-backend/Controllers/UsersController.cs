@@ -16,7 +16,6 @@ namespace EcommerceApi.Controllers
     [Route("api/Users")]
     public class UsersController : Controller
     {
-
         private readonly EcommerceContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
@@ -38,7 +37,7 @@ namespace EcommerceApi.Controllers
         [HttpGet]
         public async Task<IEnumerable<ApplicationUser>> Get()
         {
-            var users = await _userManager.Users.ToListAsync();
+            var users = await _userManager.Users.Where(u => !u.Disabled).ToListAsync();
             foreach (var user in users)
             {
                 var locations = _context.UserLocation.AsNoTracking().Include(l => l.Location).Where(u => u.UserId == user.Id).Select(l => l.Location.LocationName);
@@ -210,6 +209,15 @@ namespace EcommerceApi.Controllers
                 user.Email, "Passcode Reset", $"Your passcode is reset. <br> Your new passcode is: {passcodeResetInfo.NewPasscode}");
 
             return Ok( new { Succeeded = true });
+        }
+
+        [HttpDelete("{userName}")]
+        public async Task<IActionResult> DeleteUser(string userName)
+        {
+            ApplicationUser user = await _userManager.FindByNameAsync(userName);
+            user.Disabled = true;
+            await _userManager.UpdateAsync(user);
+            return Ok(new { Succeeded = true });
         }
     }
 }

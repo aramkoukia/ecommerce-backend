@@ -57,8 +57,19 @@ namespace EcommerceApi.Controllers
                     error_description = $"You are not allowed to access the system from this location. IP: {clientIp}"
                 });
             }
+
             // Ensure the username and password is valid.
             var user = await _userManager.FindByNameAsync(username);
+
+            if (user != null && user.Disabled)
+            {
+                return BadRequest(new
+                {
+                    error = "", //OpenIdConnectConstants.Errors.InvalidGrant,
+                    error_description = "Your user account is disabled."
+                });
+            }
+
             if (user == null || !await _userManager.CheckPasswordAsync(user, password))
             {
                 return BadRequest(new

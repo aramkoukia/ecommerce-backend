@@ -1055,7 +1055,62 @@ LEFT JOIN (SELECT ProductId, SUM(OrderDetail.UnitPrice * OrderDetail.Amount) AS 
                  AND [Order].Status IN ('Return', 'Paid', 'Account')
 		   GROUP BY ProductId) Sales
 ON Product.ProductId = Sales.ProductId
-ORDER BY ISNULL(TotalSales - (SalesAmount * AvgTotalCost), 0) DESC
+-- ORDER BY ISNULL(TotalSales - (SalesAmount * AvgTotalCost), 0) DESC
+
+UNION
+
+SELECT ' Total ' AS ProductName,
+       '' AS ProductCode,
+	   '' AS ProductTypeName , 
+       FORMAT(SUM(PurchaseAmount), 'N2') AS PurchaseAmount, 
+       '' AS AvgPurchasePrice,
+       '' AS AvgOverheadCost,
+	   '' AS AvgTotalCost,
+	   '' AS SalesAmount,
+	   FORMAT(SUM(TotalSalesByPurchasePrice), 'N2') AS TotalSalesByPurchasePrice,
+	   FORMAT(SUM(TotalSales), 'N2') AS TotalSales,
+	   '' AS AvgSalesPrice,
+	   FORMAT(SUM(TotalCost), 'N2') AS TotalCost,
+	   '' AS AvgProfitPerItem,
+	   '' AS TotalProfitByAvgCost,
+	   FORMAT(SUM(TotalProfitByPurchasePrice), 'N2') AS TotalProfitByPurchasePrice
+FROM (
+SELECT ProductName, 
+       ProductCode, 
+       ProductTypeName,
+	   ISNULL(PurchaseAmount, 0) AS PurchaseAmount, 
+	   ISNULL(AvgPurchasePrice, 0) AS AvgPurchasePrice, 
+	   ISNULL(AvgOverheadCost, 0) AS AvgOverheadCost, 
+	   ISNULL(AvgTotalCost, 0) AS AvgTotalCost, 
+	   ISNULL(SalesAmount, 0) AS SalesAmount, 
+       ISNULL(SalesAmount,0) * ISNULL(PurchasePrice,0) AS TotalSalesByPurchasePrice, 
+	   ISNULL(TotalSales, 0) AS TotalSales, 
+	   ISNULL(AvgSalesPrice, 0) AS AvgSalesPrice, 
+	   ISNULL(SalesAmount * AvgTotalCost, 0) AS TotalCost,
+	   ISNULL(AvgSalesPrice - AvgTotalCost, 0) AS AvgProfitPerItem,
+	   ISNULL(TotalSales - (SalesAmount * AvgTotalCost), 0) AS TotalProfitByAvgCost,
+       ISNULL(TotalSales - (SalesAmount * ISNULL(PurchasePrice,0)), 0) AS TotalProfitByPurchasePrice
+FROM Product
+INNER JOIN ProductType
+	ON ProductType.ProductTypeId = Product.ProductTypeId
+INNER JOIN (
+SELECT ProductId, 
+       SUM(Amount) AS PurchaseAmount, 
+	   Avg(UnitPrice) AS AvgPurchasePrice, 
+	   Avg(ISNULL(OverheadCost, 0)/ Amount) AS AvgOverheadCost,
+	   Avg(UnitPrice + (ISNULL(OverheadCost, 0)/ Amount)) AS AvgTotalCost  
+FROM purchasedetail
+WHERE PaidDate BETWEEN @purchaseFromDate AND @purchaseToDate
+GROUP BY ProductId) Purchase
+	ON Purchase.ProductId = Product.ProductId
+LEFT JOIN (SELECT ProductId, SUM(OrderDetail.UnitPrice * OrderDetail.Amount) AS TotalSales, SUM(OrderDetail.Amount) AS SalesAmount, AVG(OrderDetail.UnitPrice) AS AvgSalesPrice
+		   FROM [Order]
+		   INNER JOIN OrderDetail
+			 ON OrderDetail.OrderId = [Order].OrderId
+		   WHERE OrderDate BETWEEN @salesFromDate AND @salesToDate
+                 AND [Order].Status IN ('Return', 'Paid', 'Account')
+		   GROUP BY ProductId) Sales
+ON Product.ProductId = Sales.ProductId) t
 ";
                 conn.Open();
                 return await conn.QueryAsync<ProductProfitReportViewModel>(query, new { salesFromDate, salesToDate, purchaseFromDate, purchaseToDate });
