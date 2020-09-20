@@ -773,7 +773,7 @@ GROUP BY PaymentTypeName, [Order].Status, Location.LocationName
             using (IDbConnection conn = Connection)
             {
                 string query = $@"
-SELECT Product.ProductCode,
+SELECT CASE Product.ProductCode WHEN '' THEN '_' ELSE Product.ProductCode END AS ProductCode ,
        Product.ProductName, 
        FORMAT(PlannedPurchase.Amount, 'N2') AS PlannedAmount, 
 	   FORMAT(PlannedPurchase.TotalPrice, 'N2') AS PlannedTotalPrice,
@@ -785,6 +785,57 @@ SELECT Product.ProductCode,
 	   FORMAT(CustomClearancePurchase.TotalPrice, 'N2') AS CustomClearanceTotalPrice,
        FORMAT(ArrivedPurchase.Amount, 'N2') AS ArrivedAmount, 
 	   FORMAT(ArrivedPurchase.TotalPrice, 'N2') AS ArrivedTotalPrice
+FROM (
+	SELECT ProductId, SUM(Amount) AS Amount, SUM(ToTalPrice) AS TotalPrice
+	FROM PurchaseDetail
+	WHERE Status = 'Plan'
+		  AND CreatedDate BETWEEN @FromDate AND @ToDate 
+    GROUP BY ProductId) PlannedPurchase
+LEFT JOIN (
+	SELECT ProductId, SUM(Amount) AS Amount, SUM(ToTalPrice) AS TotalPrice
+	FROM PurchaseDetail
+	WHERE Status = 'Paid'
+		  AND CreatedDate BETWEEN @FromDate AND @ToDate 
+    GROUP BY ProductId) PaidPurchase
+ON PlannedPurchase.ProductId = PaidPurchase.ProductId
+LEFT JOIN (
+	SELECT ProductId, SUM(Amount) AS Amount, SUM(ToTalPrice) AS TotalPrice
+	FROM PurchaseDetail
+	WHERE Status = 'OnDelivery'
+		  AND CreatedDate BETWEEN @FromDate AND @ToDate 
+    GROUP BY ProductId) OnDeliveryPurchase
+ON PlannedPurchase.ProductId = OnDeliveryPurchase.ProductId
+LEFT JOIN (
+	SELECT ProductId, SUM(Amount) AS Amount, SUM(ToTalPrice) AS TotalPrice
+	FROM PurchaseDetail
+	WHERE Status = 'CustomClearance'
+		  AND CreatedDate BETWEEN @FromDate AND @ToDate 
+    GROUP BY ProductId) CustomClearancePurchase
+ON PlannedPurchase.ProductId = CustomClearancePurchase.ProductId
+LEFT JOIN (
+	SELECT ProductId, SUM(Amount) AS Amount, SUM(ToTalPrice) AS TotalPrice
+	FROM PurchaseDetail
+	WHERE Status = 'Arrived'
+		  AND CreatedDate BETWEEN @FromDate AND @ToDate 
+    GROUP BY ProductId) ArrivedPurchase
+ON PlannedPurchase.ProductId = ArrivedPurchase.ProductId
+INNER JOIN Product
+	ON PlannedPurchase.ProductId = Product.ProductId
+
+UNION 
+
+SELECT ' Total ' AS ProductCode,
+       ''  AS ProductName, 
+       '' AS PlannedAmount, 
+	   FORMAT(SUM(PlannedPurchase.TotalPrice), 'N2') AS PlannedTotalPrice,
+       '' AS PaidAmount, 
+	   FORMAT(SUM(PaidPurchase.TotalPrice), 'N2') AS PaidTotalPrice,
+       '' AS OnDeliveryAmount, 
+	   FORMAT(SUM(OnDeliveryPurchase.TotalPrice), 'N2') AS OnDeliveryTotalPrice,
+       '' AS CustomClearanceAmount, 
+	   FORMAT(SUM(CustomClearancePurchase.TotalPrice), 'N2') AS CustomClearanceTotalPrice,
+       '' AS ArrivedAmount, 
+	   FORMAT(SUM(ArrivedPurchase.TotalPrice), 'N2') AS ArrivedTotalPrice
 FROM (
 	SELECT ProductId, SUM(Amount) AS Amount, SUM(ToTalPrice) AS TotalPrice
 	FROM PurchaseDetail
