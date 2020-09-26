@@ -96,6 +96,18 @@ namespace EcommerceApi.Controllers
             return await _orderRepository.GetOrdersByCustomer(customerId);
         }
 
+        // GET: api/Orders/Customer/{customerId}
+        [HttpGet("customer/{customerId}/bydate")]
+        public async Task<IEnumerable<OrderViewModel>> GetCustomerOrdersByDate([FromRoute] int customerId, DateTime fromDate, DateTime toDate)
+        {
+            if (fromDate == DateTime.MinValue)
+                fromDate = DateTime.Now.AddYears(-10);
+            if (toDate == DateTime.MinValue)
+                toDate = DateTime.Now;
+
+            return await _orderRepository.GetCustomerOrdersByDate(customerId, fromDate, toDate);
+        }
+
         // GET: api/Orders/5
         [HttpGet("{id}")]
         public async Task<IActionResult> GetOrder([FromRoute] int id)

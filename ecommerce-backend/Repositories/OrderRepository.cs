@@ -170,6 +170,84 @@ WHERE OrderDate BETWEEN @fromDate AND @toDate
             }
         }
 
+        public async Task<IEnumerable<OrderViewModel>> GetCustomerOrdersByDate(int customerId, DateTime fromDate, DateTime toDate)
+        {
+            using (IDbConnection conn = Connection)
+            {
+                string query = $@"
+SELECT * FROM (
+SELECT   [Order].[OrderId]
+        ,CAST([CustomerId] AS NVARCHAR(100)) AS CustomerId
+        ,[Order].[LocationId]
+        ,FORMAT ([OrderDate], 'dd/MM/yyyy hh:mm tt') AS OrderDate
+        ,[Total]
+        ,[SubTotal]
+        ,[TotalDiscount]
+        ,[PstNumber]
+        ,[Notes]
+        ,[PoNumber]
+        ,[Status]
+        ,Users.GivenName
+	    ,ISNULL(OrderPayment.PaidAmount, 0) AS PaidAmount,
+	    Location.LocationName,
+        PaymentTypeName
+FROM [Order]
+INNER JOIN Location
+	ON Location.LocationId = [Order].LocationId
+Left JOIN Users
+	ON Users.Id = [Order].CreatedByUserId
+LEFT JOIN 
+	( 
+        SELECT OrderId, SUM(PaymentAmount) AS PaidAmount , STRING_AGG(PaymentTypeName, ', ') AS PaymentTypeName  
+        FROM OrderPayment
+        INNER JOIN PaymentType
+	        ON PaymentType.PaymentTypeId = OrderPayment.PaymentTypeId 
+        GROUP BY OrderId
+    ) AS OrderPayment
+	ON OrderPayment.OrderId = [Order].OrderId
+WHERE [Order].CustomerId = @CustomerId
+      And OrderDate Between @FromDate AND @ToDate
+
+UNION 
+
+SELECT 0 AS OrderId
+        ,' Total ' AS CustomerId
+        ,'' AS LocationId
+        ,'' AS OrderDate
+        ,SUM([Total]) AS Total
+        ,SUM([SubTotal]) AS SubTotal 
+        ,SUM([TotalDiscount]) AS SubTotal
+        ,'' AS [PstNumber]
+        ,'' AS [Notes]
+        ,'' AS [PoNumber]
+        ,[Status]
+        ,'' AS GivenName
+	    ,SUM(ISNULL(OrderPayment.PaidAmount, 0)) AS PaidAmount
+		,' Total ' AS LocationName
+        , '' AS PaymentTypeName
+FROM [Order]
+INNER JOIN Location
+	ON Location.LocationId = [Order].LocationId
+Left JOIN Users
+	ON Users.Id = [Order].CreatedByUserId
+LEFT JOIN 
+	( 
+        SELECT OrderId, SUM(PaymentAmount) AS PaidAmount , STRING_AGG(PaymentTypeName, ', ') AS PaymentTypeName  
+        FROM OrderPayment
+        INNER JOIN PaymentType
+	        ON PaymentType.PaymentTypeId = OrderPayment.PaymentTypeId 
+        GROUP BY OrderId
+    ) AS OrderPayment
+	ON OrderPayment.OrderId = [Order].OrderId
+WHERE [Order].CustomerId = @CustomerId
+      And OrderDate Between @FromDate AND @ToDate
+GROUP BY Status) t
+Order By OrderId desc";
+                conn.Open();
+                return await conn.QueryAsync<OrderViewModel>(query, new { customerId , fromDate, toDate });
+            }
+        }
+
         public async Task<InventoryViewModel> GetProductInventoryForValidation(int productId, int locationId)
         {
             using (IDbConnection conn = Connection)
