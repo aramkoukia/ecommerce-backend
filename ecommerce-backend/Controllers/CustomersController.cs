@@ -72,6 +72,24 @@ namespace EcommerceApi.Controllers
             return Ok(customer);
         }
 
+        // GET: api/Customers/5
+        [HttpGet("{id}/OrderSummary")]
+        public async Task<IActionResult> GetCustomerOrderSummary([FromRoute] int id)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var customer = await _customerRepository.GetCustomerOrderSummary(id);
+            if (customer == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(customer);
+        }
+
         // PUT: api/Customers/5
         [HttpPut("{id}")]
         public async Task<IActionResult> PutCustomer([FromRoute] int id, [FromBody] Customer customer)

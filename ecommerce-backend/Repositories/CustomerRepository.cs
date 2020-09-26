@@ -120,5 +120,24 @@ namespace EcommerceApi.Repositories
                 return await conn.QueryFirstAsync<CustomerViewModel>(query, new { CustomerId = customerId });
             }
         }
+
+
+        public async Task<IEnumerable<CustomerOrderSummaryViewModel>> GetCustomerOrderSummary(int customerId)
+        {
+            using (IDbConnection conn = Connection)
+            {
+                string query = $@"
+select [Status], 
+       CustomerId, 
+       FORMAT(Count(OrderId), 'N0') AS OrderCount, 
+	   FORMAT(SUM(Total), 'N0') AS OrderTotal,
+	   FORMAT(SUM(Subtotal), 'N0') AS OrderSubTotal
+from [order]
+WHERE CustomerId = @customerId
+Group BY status, CustomerId";
+                conn.Open();
+                return await conn.QueryAsync<CustomerOrderSummaryViewModel>(query, new { customerId });
+            }
+        }
     }
 }
