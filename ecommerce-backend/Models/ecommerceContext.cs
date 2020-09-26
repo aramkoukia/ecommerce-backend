@@ -34,6 +34,7 @@ namespace EcommerceApi.Models
         public virtual DbSet<MonerisCallbackLog> MonerisCallbackLog { get; set; }
         public virtual DbSet<ClientPosSettings> ClientPosSettings { get; set; }
         public virtual DbSet<Tag> Tags { get; set; }
+        public virtual DbSet<CustomerStatementSetting> CustomerStatementSetting { get; set; }
 
         public EcommerceContext(DbContextOptions<EcommerceContext> options) : base(options)
         {

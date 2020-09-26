@@ -166,30 +166,20 @@ namespace EcommerceApi.Controllers
         {
             var customer = await _customerRepository.GetCustomer(id);
             var file = await GenerateStatementPdf(customer, fromDate, toDate);
-            var message = $@"
-Dear Customer,
+            var statementSetting = await _context.CustomerStatementSetting.FirstOrDefaultAsync();
+            var body = statementSetting.EmailBody
+                .Replace("@Month", toDate.ToString("MMMM"))
+                .Replace("@Year", toDate.Year.ToString());
 
-
-Thank you for choosing LED Lights and Parts. Your e-statement for the month, {toDate.ToString("MMMM")} {toDate.Year} is attached in the email. For any specific invoice information, get back to us to receive a copy. Please contact us at +1(604) 559-5000 for any other queries. 
-
-Regards
-
-Sina Shanaey
-
-3695 East 1st Ave Vancouver, BC V5M 1C2
-
-Tel:(604) 559-5000
-
-Cel:(778) 838-8070
-
-Fax:(604) 559-5008
-
-www.lightsandparts.com | sina@lightsandparts.com
-            ";
             var attachment = new MemoryStream(file);
-            var attachmentName = $"Monthly Statement {toDate.ToString("MMMM")} {toDate.Year}.pdf";
-            var subject = $"Pixel Print Ltd (LED Lights and Parts) Monthly Statement {toDate.ToString("MMMM")} {toDate.Year}";
-            var ccEmail = "sina@lightsandparts.com";
+            var attachmentName = statementSetting.EmailAttachmentFileName
+                .Replace("@Month", toDate.ToString("MMMM"))
+                .Replace("@Year", toDate.Year.ToString());
+
+            var subject = statementSetting.EmailSubject
+                .Replace("@Month", toDate.ToString("MMMM"))
+                .Replace("@Year", toDate.Year.ToString());
+            var ccEmail = statementSetting.CCEmailAddress;
             if (string.IsNullOrEmpty(customer.Email))
             {
                 customer.Email = ccEmail;
@@ -200,7 +190,7 @@ www.lightsandparts.com | sina@lightsandparts.com
                 customer.Email = customer.Email.Split(",")[0].Trim();
             }
 
-            _emailSender.SendEmailAsync(customer.Email, subject, message, new[] { attachment }, new[] { attachmentName }, true, ccEmail);
+            _emailSender.SendEmailAsync(customer.Email, subject, body, new[] { attachment }, new[] { attachmentName }, true, ccEmail);
         }
 
         // GET: api/Customers/SendInvoices
