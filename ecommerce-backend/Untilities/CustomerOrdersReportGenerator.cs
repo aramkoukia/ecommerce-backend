@@ -5,16 +5,14 @@ using System.Text;
 
 namespace EcommerceApi.Untilities
 {
-    public static class PaymentsReportGenerator
+    public static class CustomerOrdersReportGenerator
     {
 
         public static string GetHtmlString(
-            IEnumerable<PaymentsTotalViewModel> data1,
+            IEnumerable<CustomerPaidOrdersViewModel> data1,
             string title1,
-            IEnumerable<PaymentsByPaymentTypeViewModel> data2,
+            IEnumerable<CustomerUnPaidOrdersViewModel> data2,
             string title2,
-            IEnumerable<PaymentsReportViewModel> data3,
-            string title3,
             DateTime fromDate,
             DateTime toDate)
         {
@@ -34,17 +32,27 @@ namespace EcommerceApi.Untilities
 
                                 <table  style='border-collapse: collapse;width:100%'>
                                 <tr>
-                                   <td style='padding: 5px; border: 1px solid black;'><b>Location</b></td>
-                                   <td style='padding: 5px; border: 1px solid black;'><b>Payment Type</b></td>
-                                   <td style='padding: 5px; border: 1px solid black;'><b>Amount ($)</b></td>
+                                   <td style='padding: 5px; border: 1px solid black;'><b>Invoice Id</b></td>
+                                   <td style='padding: 5px; border: 1px solid black;'><b>PO Number</b></td>
+                                   <td style='padding: 5px; border: 1px solid black;'><b>Total Sale ($)</b></td>
+                                   <td style='padding: 5px; border: 1px solid black;'><b>Satus</b></td>
+                                   <td style='padding: 5px; border: 1px solid black;'><b>Date</b></td>
+                                   <td style='padding: 5px; border: 1px solid black;'><b>Payment Amount ($)</b></td>
+                                   <td style='padding: 5px; border: 1px solid black;'><b>Paid By</b></td>
+                                   <td style='padding: 5px; border: 1px solid black;'><b>Company Name</b></td>
                               </tr>");
 
             foreach (var item in data1)
             {
                 sb.AppendFormat($@"<tr>
-                                   <td style='padding: 5px; border: 1px solid black;'>{item.LocationName}</td>
+                                   <td style='padding: 5px; border: 1px solid black;'>{item.OrderId}</td>
+                                   <td style='padding: 5px; border: 1px solid black;'>{item.PoNumber}</td>
+                                   <td style='padding: 5px; border: 1px solid black; text-align:right'>{item.Total}</td>
+                                   <td style='padding: 5px; border: 1px solid black;'>{item.Status}</td>
+                                   <td style='padding: 5px; border: 1px solid black;'>{item.OrderDate.ToShortDateString()}</td>
+                                   <td style='padding: 5px; border: 1px solid black;text-align:right'>{item.PaymentAmount}</td>
                                    <td style='padding: 5px; border: 1px solid black;'>{item.PaymentTypeName}</td>
-                                   <td style='padding: 5px; border: 1px solid black; text-align:right'>{item.PaymentAmount}</td>
+                                   <td style='padding: 5px; border: 1px solid black;'>{item.CompanyName}</td>
                                    </tr>");
             }
             sb.Append($"</table>");
@@ -53,44 +61,24 @@ namespace EcommerceApi.Untilities
 
             sb.Append($"<h4>{title2}</h4>");
             sb.AppendFormat($@"<table><tr>
-                                   <td style='padding: 5px; border: 1px solid black;'>Location</td>
-                                   <td style='padding: 5px; border: 1px solid black;'>Payment Type</td>
-                                   <td style='padding: 5px; border: 1px solid black; text-align:right'>Amount ($)</td>
-                                   <td style='padding: 5px; border: 1px solid black; text-align:right'>Status</td>
+                                   <td style='padding: 5px; border: 1px solid black;'><b>Invoice Id</b></td>
+                                   <td style='padding: 5px; border: 1px solid black;'><b>PO Number</b></td>
+                                   <td style='padding: 5px; border: 1px solid black;'><b>Total Sale ($)</b></td>
+                                   <td style='padding: 5px; border: 1px solid black;'><b>Satus</b></td>
+                                   <td style='padding: 5px; border: 1px solid black;'><b>Date</b></td>
+                                   <td style='padding: 5px; border: 1px solid black;'><b>Due Date</b></td>
+                                   <td style='padding: 5px; border: 1px solid black;'><b>Company Name</b></td>
                                    </tr>");
             foreach (var item in data2)
             {
                 sb.AppendFormat($@"<tr>
-                                   <td style='padding: 5px; border: 1px solid black;'>{item.LocationName}</td>
-                                   <td style='padding: 5px; border: 1px solid black;'>{item.PaymentTypeName}</td>
-                                   <td style='padding: 5px; border: 1px solid black; text-align:right'>{item.PaymentAmount}</td>
+                                   <td style='padding: 5px; border: 1px solid black;'>{item.OrderId}</td>
+                                   <td style='padding: 5px; border: 1px solid black;'>{item.PoNumber}</td>
+                                   <td style='padding: 5px; border: 1px solid black; text-align:right'>{item.Total}</td>
                                    <td style='padding: 5px; border: 1px solid black;'>{item.Status}</td>
-                                   </tr>");
-            }
-            sb.Append($"</table>");
-
-            sb.Append($"<p style='page-break-before: always'>");
-
-            sb.Append($"<h4>{title3}</h4>");
-            sb.AppendFormat($@"<table><tr>
-                                   <td style='padding: 5px; border: 1px solid black;'>Location</td>
-                                   <td style='padding: 5px; border: 1px solid black;'>User</td>
-                                   <td style='padding: 5px; border: 1px solid black;'>Payment Type</td>
-                                   <td style='padding: 5px; border: 1px solid black;'>Amount ($)</td>
-                                   <td style='padding: 5px; border: 1px solid black;'>Customer</td>
-                                   <td style='padding: 5px; border: 1px solid black;'>Order Number</td>
-                                   <td style='padding: 5px; border: 1px solid black;'>Status</td>
-                                   </tr>");
-            foreach (var item in data3)
-            {
-                sb.AppendFormat($@"<tr>
-                                   <td style='padding: 5px; border: 1px solid black;'>{item.LocationName}</td>
-                                   <td style='padding: 5px; border: 1px solid black;'>{item.GivenName}</td>
-                                   <td style='padding: 5px; border: 1px solid black; text-align:right'>{item.PaymentTypeName}</td>
-                                   <td style='padding: 5px; border: 1px solid black; text-align:right'>{item.PaymentAmount}</td>
+                                   <td style='padding: 5px; border: 1px solid black;'>{item.OrderDate.ToShortDateString()}</td>
+                                   <td style='padding: 5px; border: 1px solid black;'>{item.DueDate.ToShortDateString()}</td>
                                    <td style='padding: 5px; border: 1px solid black;'>{item.CompanyName}</td>
-                                   <td style='padding: 5px; border: 1px solid black; text-align:right'>{item.OrderId}</td>
-                                   <td style='padding: 5px; border: 1px solid black; text-align:right'>{item.Status}</td>
                                    </tr>");
             }
             sb.Append($"</table>");

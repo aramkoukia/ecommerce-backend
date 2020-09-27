@@ -372,6 +372,45 @@ namespace EcommerceApi.Controllers
             return await GetCustomerPaidReportData(fromDate, toDate);
         }
 
+        [HttpGet("CustomerOrdersPdf")]
+        public async Task<FileResult> GetCustomerOrdersPdf(DateTime fromDate, DateTime toDate)
+        {
+            var data1 = await GetCustomerPaidReportData(fromDate, toDate);
+            var title1 = "Customer Paid Invoices";
+            var data2 = await GetCustomerUnpaidReportData(fromDate, toDate);
+            var title2 = "Customer Awaiting Payment Invoices";
+
+            var globalSettings = new GlobalSettings
+            {
+                ColorMode = ColorMode.Color,
+                Orientation = Orientation.Landscape,
+                PaperSize = PaperKind.A4,
+                Margins = new MarginSettings { Top = 10 },
+                DocumentTitle = $"Customer Invoices From Date:{fromDate.Date.ToShortDateString()} To Date:{toDate.Date.ToShortDateString()}",
+            };
+
+            var objectSettings = new ObjectSettings
+            {
+                PagesCount = true,
+                HtmlContent = CustomerOrdersReportGenerator.GetHtmlString(data1, title1, data2, title2, fromDate, toDate),
+                WebSettings = { DefaultEncoding = "utf-8", UserStyleSheet = Path.Combine(Directory.GetCurrentDirectory(), "assets", "invoice.css") },
+            };
+
+            var pdf = new HtmlToPdfDocument()
+            {
+                GlobalSettings = globalSettings,
+                Objects = { objectSettings }
+            };
+
+            var file = _converter.Convert(pdf);
+
+            var result = new FileContentResult(file, "application/pdf")
+            {
+                FileDownloadName = $"Customer Orders-From-{fromDate.Date.ToShortDateString().Replace('/', '-')}-To-{toDate.Date.ToShortDateString().Replace('/', '-')}.pdf"
+            };
+            return result;
+        }
+
         private async Task<IEnumerable<CustomerPaidOrdersViewModel>> GetCustomerPaidReportData(DateTime fromDate, DateTime toDate)
         {
             if (fromDate == DateTime.MinValue)
