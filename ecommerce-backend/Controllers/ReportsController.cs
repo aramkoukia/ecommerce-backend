@@ -74,11 +74,51 @@ namespace EcommerceApi.Controllers
         [HttpGet("ProductSales")]
         public async Task<IEnumerable<ProductSalesReportViewModel>> GetProductSalesReport(DateTime fromDate, DateTime toDate)
         {
+            return await GetProductSalesReportData(fromDate, toDate);
+        }
+
+        [HttpGet("ProductSalesPdf")]
+        public async Task<FileResult> GetProductSalesReportPdf(DateTime fromDate, DateTime toDate)
+        {
+            var data = await GetProductSalesReportData(fromDate, toDate);
+            var globalSettings = new GlobalSettings
+            {
+                ColorMode = ColorMode.Color,
+                Orientation = Orientation.Landscape,
+                PaperSize = PaperKind.A4,
+                Margins = new MarginSettings { Top = 10 },
+                DocumentTitle = $"Product Sales Report From Date:{fromDate.Date.ToShortDateString()} To Date:{toDate.Date.ToShortDateString()}",
+            };
+
+            var objectSettings = new ObjectSettings
+            {
+                PagesCount = true,
+                HtmlContent = ProductSalesReportGenerator.GetHtmlString(data, "Product Sales Report", fromDate, toDate),
+                WebSettings = { DefaultEncoding = "utf-8", UserStyleSheet = Path.Combine(Directory.GetCurrentDirectory(), "assets", "invoice.css") },
+            };
+
+            var pdf = new HtmlToPdfDocument()
+            {
+                GlobalSettings = globalSettings,
+                Objects = { objectSettings }
+            };
+
+            var file = _converter.Convert(pdf);
+
+            var result = new FileContentResult(file, "application/pdf")
+            {
+                FileDownloadName = $"Product Sales Report-From-{fromDate.Date.ToShortDateString().Replace('/', '-')}-To-{toDate.Date.ToShortDateString().Replace('/', '-')}.pdf"
+            };
+            return result;
+        }
+
+        private async Task<IEnumerable<ProductSalesReportViewModel>> GetProductSalesReportData(DateTime fromDate, DateTime toDate)
+        {
             if (fromDate == DateTime.MinValue)
                 fromDate = DateTime.Now;
             if (toDate == DateTime.MinValue)
                 toDate = DateTime.Now;
-            else 
+            else
                 toDate = toDate.AddDays(1).AddTicks(-1);
 
             System.Security.Claims.ClaimsPrincipal currentUser = this.User;
@@ -89,6 +129,11 @@ namespace EcommerceApi.Controllers
 
         [HttpGet("ProductSalesDetail")]
         public async Task<IEnumerable<ProductSalesDetailReportViewModel>> GetProductSalesDetailReport(DateTime fromDate, DateTime toDate)
+        {
+            return await GetProductSalesDetailReportData(fromDate, toDate);
+        }
+
+        private async Task<IEnumerable<ProductSalesDetailReportViewModel>> GetProductSalesDetailReportData(DateTime fromDate, DateTime toDate)
         {
             if (fromDate == DateTime.MinValue)
                 fromDate = DateTime.Now;
@@ -183,6 +228,11 @@ namespace EcommerceApi.Controllers
         [HttpGet("PaymentsByPaymentType")]
         public async Task<IEnumerable<PaymentsByPaymentTypeViewModel>> GetPaymentsByPaymentTypeReport(DateTime fromDate, DateTime toDate)
         {
+            return await GetPaymentsByPaymentTypeData(fromDate, toDate);
+        }
+
+        private async Task<IEnumerable<PaymentsByPaymentTypeViewModel>> GetPaymentsByPaymentTypeData(DateTime fromDate, DateTime toDate)
+        {
             if (fromDate == DateTime.MinValue)
                 fromDate = DateTime.Now;
             if (toDate == DateTime.MinValue)
@@ -198,6 +248,11 @@ namespace EcommerceApi.Controllers
 
         [HttpGet("PaymentsTotal")]
         public async Task<IEnumerable<PaymentsTotalViewModel>> GetPaymentsTotalReport(DateTime fromDate, DateTime toDate)
+        {
+            return await GetPaymentsTotalData(fromDate, toDate);
+        }
+
+        private async Task<IEnumerable<PaymentsTotalViewModel>> GetPaymentsTotalData(DateTime fromDate, DateTime toDate)
         {
             if (fromDate == DateTime.MinValue)
                 fromDate = DateTime.Now;
@@ -215,6 +270,52 @@ namespace EcommerceApi.Controllers
         [HttpGet("Payments")]
         public async Task<IEnumerable<PaymentsReportViewModel>> GetPaymentsReport(DateTime fromDate, DateTime toDate)
         {
+            return await GetPaymentReportData(fromDate, toDate);
+        }
+
+        [HttpGet("PaymentsPdf")]
+        public async Task<FileResult> GetPaymentsReportPdf(DateTime fromDate, DateTime toDate)
+        {
+            var data3 = await GetPaymentReportData(fromDate, toDate);
+            var data1 = await GetPaymentsTotalReport(fromDate, toDate);
+            var data2 = await GetPaymentsByPaymentTypeData(fromDate, toDate);
+            var globalSettings = new GlobalSettings
+            {
+                ColorMode = ColorMode.Color,
+                Orientation = Orientation.Landscape,
+                PaperSize = PaperKind.A4,
+                Margins = new MarginSettings { Top = 10 },
+                DocumentTitle = $"Sales Report From Date:{fromDate.Date.ToShortDateString()} To Date:{toDate.Date.ToShortDateString()}",
+            };
+
+            var objectSettings = new ObjectSettings
+            {
+                PagesCount = true,
+                HtmlContent = PaymentsReportGenerator.GetHtmlString(
+                    data1, "Payment Summary",
+                    data2, "Payment By Order Status",
+                    data3, "Payment Details",
+                    fromDate, toDate),
+                WebSettings = { DefaultEncoding = "utf-8", UserStyleSheet = Path.Combine(Directory.GetCurrentDirectory(), "assets", "invoice.css") },
+            };
+
+            var pdf = new HtmlToPdfDocument()
+            {
+                GlobalSettings = globalSettings,
+                Objects = { objectSettings }
+            };
+
+            var file = _converter.Convert(pdf);
+
+            var result = new FileContentResult(file, "application/pdf")
+            {
+                FileDownloadName = $"Payment Report-From-{fromDate.Date.ToShortDateString().Replace('/', '-')}-To-{toDate.Date.ToShortDateString().Replace('/', '-')}.pdf"
+            };
+            return result;
+        }
+
+        private async Task<IEnumerable<PaymentsReportViewModel>> GetPaymentReportData(DateTime fromDate, DateTime toDate)
+        {
             if (fromDate == DateTime.MinValue)
                 fromDate = DateTime.Now;
             if (toDate == DateTime.MinValue)
@@ -230,6 +331,11 @@ namespace EcommerceApi.Controllers
 
         [HttpGet("PurchaseSummary")]
         public async Task<IEnumerable<PurchasesReportViewModel>> GetPurchaseReport(DateTime fromDate, DateTime toDate)
+        {
+            return await GetPurchaseReportData(fromDate, toDate);
+        }
+
+        private async Task<IEnumerable<PurchasesReportViewModel>> GetPurchaseReportData(DateTime fromDate, DateTime toDate)
         {
             if (fromDate == DateTime.MinValue)
                 fromDate = DateTime.Now;
@@ -263,21 +369,10 @@ namespace EcommerceApi.Controllers
         [HttpGet("CustomerPaid")]
         public async Task<IEnumerable<CustomerPaidOrdersViewModel>> GetCustomerPaidReport(DateTime fromDate, DateTime toDate)
         {
-            if (fromDate == DateTime.MinValue)
-                fromDate = DateTime.Now;
-            if (toDate == DateTime.MinValue)
-                toDate = DateTime.Now;
-            else
-                toDate = toDate.AddDays(1).AddTicks(-1);
-
-            System.Security.Claims.ClaimsPrincipal currentUser = this.User;
-            var userId = _userManager.GetUserId(User);
-
-            return await _reportRepository.GetCustomerPaidReport(fromDate, toDate);
+            return await GetCustomerPaidReportData(fromDate, toDate);
         }
 
-        [HttpGet("CustomerUnPaid")]
-        public async Task<IEnumerable<CustomerUnPaidOrdersViewModel>> GetCustomerUnPaidReport(DateTime fromDate, DateTime toDate)
+        private async Task<IEnumerable<CustomerPaidOrdersViewModel>> GetCustomerPaidReportData(DateTime fromDate, DateTime toDate)
         {
             if (fromDate == DateTime.MinValue)
                 fromDate = DateTime.Now;
@@ -286,8 +381,24 @@ namespace EcommerceApi.Controllers
             else
                 toDate = toDate.AddDays(1).AddTicks(-1);
 
-            System.Security.Claims.ClaimsPrincipal currentUser = this.User;
-            var userId = _userManager.GetUserId(User);
+            return await _reportRepository.GetCustomerPaidReport(fromDate, toDate);
+        }
+
+        [HttpGet("CustomerUnPaid")]
+        public async Task<IEnumerable<CustomerUnPaidOrdersViewModel>> GetCustomerUnPaidReport(DateTime fromDate, DateTime toDate)
+        {
+            return await GetCustomerUnpaidReportData(fromDate, toDate);
+        }
+
+        private async Task<IEnumerable<CustomerUnPaidOrdersViewModel>> GetCustomerUnpaidReportData(DateTime fromDate, DateTime toDate)
+        {
+            if (fromDate == DateTime.MinValue)
+                fromDate = DateTime.Now;
+            if (toDate == DateTime.MinValue)
+                toDate = DateTime.Now;
+            else
+                toDate = toDate.AddDays(1).AddTicks(-1);
+
             return await _reportRepository.GetCustomerUnPaidReport(fromDate, toDate);
         }
 
