@@ -329,6 +329,45 @@ namespace EcommerceApi.Controllers
             return await _reportRepository.GetPaymentsReport(fromDate, toDate, user.Id);
         }
 
+        [HttpGet("PurchaseReportPdf")]
+        public async Task<FileResult> GetPurchaseReportPdf(DateTime fromDate, DateTime toDate)
+        {
+            var data1 = await GetPurchaseReportData(fromDate, toDate);
+            var title1 = "Purchase Summary";
+            var data2 = await GetPurchaseDetailReportData(fromDate, toDate);
+            var title2 = "Purchase Details";
+
+            var globalSettings = new GlobalSettings
+            {
+                ColorMode = ColorMode.Color,
+                Orientation = Orientation.Landscape,
+                PaperSize = PaperKind.A4,
+                Margins = new MarginSettings { Top = 10 },
+                DocumentTitle = $"Purchases From Date:{fromDate.Date.ToShortDateString()} To Date:{toDate.Date.ToShortDateString()}",
+            };
+
+            var objectSettings = new ObjectSettings
+            {
+                PagesCount = true,
+                HtmlContent = PurchaseReportGenerator.GetHtmlString(data1, title1, data2, title2, fromDate, toDate),
+                WebSettings = { DefaultEncoding = "utf-8", UserStyleSheet = Path.Combine(Directory.GetCurrentDirectory(), "assets", "invoice.css") },
+            };
+
+            var pdf = new HtmlToPdfDocument()
+            {
+                GlobalSettings = globalSettings,
+                Objects = { objectSettings }
+            };
+
+            var file = _converter.Convert(pdf);
+
+            var result = new FileContentResult(file, "application/pdf")
+            {
+                FileDownloadName = $"Purchases-From-{fromDate.Date.ToShortDateString().Replace('/', '-')}-To-{toDate.Date.ToShortDateString().Replace('/', '-')}.pdf"
+            };
+            return result;
+        }
+
         [HttpGet("PurchaseSummary")]
         public async Task<IEnumerable<PurchasesReportViewModel>> GetPurchaseReport(DateTime fromDate, DateTime toDate)
         {
@@ -352,6 +391,11 @@ namespace EcommerceApi.Controllers
 
         [HttpGet("PurchaseDetail")]
         public async Task<IEnumerable<PurchasesDetailReportViewModel>> GetPurchasesDetailReport(DateTime fromDate, DateTime toDate)
+        {
+            return await GetPurchaseDetailReportData(fromDate, toDate);
+        }
+
+        private async Task<IEnumerable<PurchasesDetailReportViewModel>> GetPurchaseDetailReportData(DateTime fromDate, DateTime toDate)
         {
             if (fromDate == DateTime.MinValue)
                 fromDate = DateTime.Now;
@@ -459,6 +503,49 @@ namespace EcommerceApi.Controllers
                                                                                             DateTime toSalesDate,
                                                                                             DateTime fromPurchaseDate,
                                                                                             DateTime toPurchaseDate)
+        {
+            return await GetProductProfitReportData(fromSalesDate, toSalesDate, fromPurchaseDate, toPurchaseDate);
+        }
+
+        [HttpGet("PurchaseProfitPdf")]
+        public async Task<FileResult> GetProductProfitReportPdf(DateTime fromSalesDate,
+                                                                DateTime toSalesDate,
+                                                                DateTime fromPurchaseDate,
+                                                                DateTime toPurchaseDate)
+        {
+            var data = await GetProductProfitReportData(fromSalesDate, toSalesDate, fromPurchaseDate, toPurchaseDate);
+            var globalSettings = new GlobalSettings
+            {
+                ColorMode = ColorMode.Color,
+                Orientation = Orientation.Landscape,
+                PaperSize = PaperKind.A4,
+                Margins = new MarginSettings { Top = 10 },
+                DocumentTitle = $"Product Profit Report From Date:{fromSalesDate.Date.ToShortDateString()} To Date:{toSalesDate.Date.ToShortDateString()}",
+            };
+
+            var objectSettings = new ObjectSettings
+            {
+                PagesCount = true,
+                HtmlContent = ProductProfitReportGenerator.GetHtmlString(data, "Product Profit Report", fromSalesDate, toSalesDate, fromPurchaseDate, toPurchaseDate),
+                WebSettings = { DefaultEncoding = "utf-8", UserStyleSheet = Path.Combine(Directory.GetCurrentDirectory(), "assets", "invoice.css") },
+            };
+
+            var pdf = new HtmlToPdfDocument()
+            {
+                GlobalSettings = globalSettings,
+                Objects = { objectSettings }
+            };
+
+            var file = _converter.Convert(pdf);
+
+            var result = new FileContentResult(file, "application/pdf")
+            {
+                FileDownloadName = $"Product Profit Report-From-{fromSalesDate.Date.ToShortDateString().Replace('/', '-')}-To-{toSalesDate.Date.ToShortDateString().Replace('/', '-')}.pdf"
+            };
+            return result;
+        }
+
+        private async Task<IEnumerable<ProductProfitReportViewModel>> GetProductProfitReportData(DateTime fromSalesDate, DateTime toSalesDate, DateTime fromPurchaseDate, DateTime toPurchaseDate)
         {
             if (fromSalesDate == DateTime.MinValue)
                 fromSalesDate = DateTime.Now.AddYears(-1);
