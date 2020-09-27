@@ -11,6 +11,9 @@ using EcommerceApi.Services;
 using CsvHelper;
 using System.IO;
 using System.Globalization;
+using DinkToPdf;
+using DinkToPdf.Contracts;
+using EcommerceApi.Untilities;
 
 namespace EcommerceApi.Controllers
 {
@@ -21,15 +24,18 @@ namespace EcommerceApi.Controllers
     {
         private readonly IReportRepository _reportRepository;
         private readonly IEmailSender _emailSender;
+        private readonly IConverter _converter;
         private readonly UserManager<ApplicationUser> _userManager;
         public ReportsController(
             IReportRepository reportRepository,
             IEmailSender emailSender,
+            IConverter converter,
             UserManager<ApplicationUser> userManager)
         {
             _emailSender = emailSender;
             _reportRepository = reportRepository;
             _userManager = userManager;
+            _converter = converter;
         }
 
         // GET: api/Reports/MonthlySummary
@@ -114,19 +120,64 @@ namespace EcommerceApi.Controllers
         }
 
         [HttpGet("Sales")]
-        public async Task<IEnumerable<SalesReportViewModel>> GetSalesReport(DateTime fromDate, DateTime toDate)
+        public async Task<IEnumerable<SalesReportViewModel>> GetSalesReport(DateTime fromDate, DateTime toDate) =>
+            await GetSalesReportData(fromDate, toDate);
+
+        private async Task<IEnumerable<SalesReportViewModel>> GetSalesReportData(DateTime fromDate, DateTime toDate)
         {
             if (fromDate == DateTime.MinValue)
+            {
                 fromDate = DateTime.Now;
+            }
+
             if (toDate == DateTime.MinValue)
+            {
                 toDate = DateTime.Now;
+            }
             else
+            {
                 toDate = toDate.AddDays(1).AddTicks(-1);
+            }
 
             System.Security.Claims.ClaimsPrincipal currentUser = this.User;
             var user = await _userManager.FindByEmailAsync(currentUser.Identity.Name);
 
             return await _reportRepository.GetSalesReport(fromDate, toDate, user.Id);
+        }
+
+        [HttpGet("SalesPdf")]
+        public async Task<FileResult> GetSalesReportPdf(DateTime fromDate, DateTime toDate)
+        {
+            var data = await GetSalesReportData(fromDate, toDate);
+            var globalSettings = new GlobalSettings
+            {
+                ColorMode = ColorMode.Color,
+                Orientation = Orientation.Landscape,
+                PaperSize = PaperKind.A4,
+                Margins = new MarginSettings { Top = 10 },
+                DocumentTitle = $"Sales Report From Date:{fromDate.Date.ToShortDateString()} To Date:{toDate.Date.ToShortDateString()}",
+            };
+
+            var objectSettings = new ObjectSettings
+            {
+                PagesCount = true,
+                HtmlContent = SalesReportGenerator.GetHtmlString(data, "Sales Report", fromDate, toDate),
+                WebSettings = { DefaultEncoding = "utf-8", UserStyleSheet = Path.Combine(Directory.GetCurrentDirectory(), "assets", "invoice.css") },
+            };
+
+            var pdf = new HtmlToPdfDocument()
+            {
+                GlobalSettings = globalSettings,
+                Objects = { objectSettings }
+            };
+
+            var file = _converter.Convert(pdf);
+
+            var result = new FileContentResult(file, "application/pdf")
+            {
+                FileDownloadName = $"Sales Report-From-{fromDate.Date.ToShortDateString().Replace('/', '-')}-To-{toDate.Date.ToShortDateString().Replace('/', '-')}.pdf"
+            };
+            return result;
         }
 
         [HttpGet("PaymentsByPaymentType")]
