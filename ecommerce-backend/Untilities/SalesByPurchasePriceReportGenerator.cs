@@ -5,13 +5,12 @@ using System.Text;
 
 namespace EcommerceApi.Untilities
 {
-    public static class CustomerOrdersReportGenerator
+    public static class SalesByPurchasePriceReportGenerator
     {
-
         public static string GetHtmlString(
-            IEnumerable<CustomerPaidOrdersViewModel> data1,
+            IEnumerable<SalesByPurchasePriceReportViewModel> data1,
             string title1,
-            IEnumerable<CustomerUnPaidOrdersViewModel> data2,
+            IEnumerable<SalesByPurchasePriceDetailReportViewModel> data2,
             string title2,
             DateTime fromDate,
             DateTime toDate)
@@ -32,27 +31,21 @@ namespace EcommerceApi.Untilities
 
                                 <table  style='border-collapse: collapse;width:100%'>
                                 <tr>
-                                   <td style='padding: 5px; border: 1px solid black;'><b>Invoice Id</b></td>
-                                   <td style='padding: 5px; border: 1px solid black;'><b>PO Number</b></td>
-                                   <td style='padding: 5px; border: 1px solid black;'><b>Total Sale ($)</b></td>
-                                   <td style='padding: 5px; border: 1px solid black;'><b>Satus</b></td>
-                                   <td style='padding: 5px; border: 1px solid black;'><b>Date</b></td>
-                                   <td style='padding: 5px; border: 1px solid black;'><b>Payment Amount ($)</b></td>
-                                   <td style='padding: 5px; border: 1px solid black;'><b>Paid By</b></td>
-                                   <td style='padding: 5px; border: 1px solid black;'><b>Company Name</b></td>
+                                   <td style='padding: 5px; border: 1px solid black;'><b>Location</b></td>
+                                   <td style='padding: 5px; border: 1px solid black;'><b>Status</b></td>
+                                   <td style='padding: 5px; border: 1px solid black;'><b>Total By Sales Price ($)</b></td>
+                                   <td style='padding: 5px; border: 1px solid black;'><b>Total By Purchase Price ($)</b></td>
+                                   <td style='padding: 5px; border: 1px solid black;'><b>Transactions</b></td>
                               </tr>");
 
             foreach (var item in data1)
             {
                 sb.AppendFormat($@"<tr>
-                                   <td style='padding: 5px; border: 1px solid black;'>{item.OrderId}</td>
-                                   <td style='padding: 5px; border: 1px solid black;'>{item.PoNumber}</td>
-                                   <td style='padding: 5px; border: 1px solid black; text-align:right'>{item.Total}</td>
+                                   <td style='padding: 5px; border: 1px solid black;'>{item.LocationName}</td>
                                    <td style='padding: 5px; border: 1px solid black;'>{item.Status}</td>
-                                   <td style='padding: 5px; border: 1px solid black;'>{item.OrderDate.ToShortDateString()}</td>
-                                   <td style='padding: 5px; border: 1px solid black;text-align:right'>{item.PaymentAmount}</td>
-                                   <td style='padding: 5px; border: 1px solid black;'>{item.PaymentTypeName}</td>
-                                   <td style='padding: 5px; border: 1px solid black;'>{item.CompanyName}</td>
+                                   <td style='padding: 5px; border: 1px solid black; text-align:right'>{item.TotalBySalePrice}</td>
+                                   <td style='padding: 5px; border: 1px solid black; text-align:right'>{item.TotalByPurchasePrice}</td>
+                                   <td style='padding: 5px; border: 1px solid black; text-align:right'>{item.Transactions}</td>
                                    </tr>");
             }
             sb.Append($"</table>");
@@ -61,24 +54,26 @@ namespace EcommerceApi.Untilities
 
             sb.Append($"<h4>{title2}</h4>");
             sb.AppendFormat($@"<table><tr>
-                                   <td style='padding: 5px; border: 1px solid black;'><b>Invoice Id</b></td>
-                                   <td style='padding: 5px; border: 1px solid black;'><b>PO Number</b></td>
-                                   <td style='padding: 5px; border: 1px solid black;'><b>Total Sale ($)</b></td>
-                                   <td style='padding: 5px; border: 1px solid black;'><b>Status</b></td>
-                                   <td style='padding: 5px; border: 1px solid black;'><b>Date</b></td>
-                                   <td style='padding: 5px; border: 1px solid black;'><b>Due Date</b></td>
-                                   <td style='padding: 5px; border: 1px solid black;'><b>Company Name</b></td>
+                                   <td style='padding: 5px; border: 1px solid black;'><b>Location</b></td>
+                                   <td style='padding: 5px; border: 1px solid black;'><b>Product Code</b></td>
+                                   <td style='padding: 5px; border: 1px solid black;'><b>Product Name</b></td>
+                                   <td style='padding: 5px; border: 1px solid black;'><b>Amount</b></td>
+                                   <td style='padding: 5px; border: 1px solid black;'><b>Avg Sales Price ($)</b></td>
+                                   <td style='padding: 5px; border: 1px solid black;'><b>Purchase Price ($)</b></td>
+                                   <td style='padding: 5px; border: 1px solid black;'><b>Total By Sales Price ($)</b></td>
+                                   <td style='padding: 5px; border: 1px solid black;'><b>Total By Purchase Price ($)</b></td>
                                    </tr>");
             foreach (var item in data2)
             {
                 sb.AppendFormat($@"<tr>
-                                   <td style='padding: 5px; border: 1px solid black;'>{item.OrderId}</td>
-                                   <td style='padding: 5px; border: 1px solid black;'>{item.PoNumber}</td>
-                                   <td style='padding: 5px; border: 1px solid black; text-align:right'>{item.Total}</td>
-                                   <td style='padding: 5px; border: 1px solid black;'>{item.Status}</td>
-                                   <td style='padding: 5px; border: 1px solid black;'>{item.OrderDate.ToShortDateString()}</td>
-                                   <td style='padding: 5px; border: 1px solid black;'>{item.DueDate.ToShortDateString()}</td>
-                                   <td style='padding: 5px; border: 1px solid black;'>{item.CompanyName}</td>
+                                   <td style='padding: 5px; border: 1px solid black;'>{item.LocationName}</td>
+                                   <td style='padding: 5px; border: 1px solid black;'>{item.ProductCode}</td>
+                                   <td style='padding: 5px; border: 1px solid black; text-align:right'>{item.ProductName}</td>
+                                   <td style='padding: 5px; border: 1px solid black;'>{item.Amount}</td>
+                                   <td style='padding: 5px; border: 1px solid black;'>{item.SalesPrice}</td>
+                                   <td style='padding: 5px; border: 1px solid black;'>{item.PurchasePrice}</td>
+                                   <td style='padding: 5px; border: 1px solid black;'>{item.TotalBySalePrice}</td>
+                                   <td style='padding: 5px; border: 1px solid black;'>{item.TotalByPurchasePrice}</td>
                                    </tr>");
             }
             sb.Append($"</table>");

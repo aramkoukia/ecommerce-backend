@@ -565,8 +565,52 @@ namespace EcommerceApi.Controllers
             return await _reportRepository.GetProductProfitReport(fromSalesDate, toSalesDate, fromPurchaseDate, toPurchaseDate);
         }
 
+        [HttpGet("SalesByPurchasePricePdf")]
+        public async Task<FileResult> GetSalesByPurchasePrice(DateTime fromDate, DateTime toDate)
+        {
+            var data1 = await GetSalesByPurchasePriceData(fromDate, toDate);
+            var data2 = await GetSalesByPurchasePriceDetailData(fromDate, toDate);
+            var globalSettings = new GlobalSettings
+            {
+                ColorMode = ColorMode.Color,
+                Orientation = Orientation.Landscape,
+                PaperSize = PaperKind.A4,
+                Margins = new MarginSettings { Top = 10 },
+                DocumentTitle = $"Sales By Purchase Price Report From Date:{fromDate.Date.ToShortDateString()} To Date:{toDate.Date.ToShortDateString()}",
+            };
+
+            var objectSettings = new ObjectSettings
+            {
+                PagesCount = true,
+                HtmlContent = SalesByPurchasePriceReportGenerator.GetHtmlString(
+                    data1, "Sales By Purchase Price",
+                    data2, "Sales By Purchase Price Detail",
+                    fromDate, toDate),
+                WebSettings = { DefaultEncoding = "utf-8", UserStyleSheet = Path.Combine(Directory.GetCurrentDirectory(), "assets", "invoice.css") },
+            };
+
+            var pdf = new HtmlToPdfDocument()
+            {
+                GlobalSettings = globalSettings,
+                Objects = { objectSettings }
+            };
+
+            var file = _converter.Convert(pdf);
+
+            var result = new FileContentResult(file, "application/pdf")
+            {
+                FileDownloadName = $"Sales By Purchase Price-From-{fromDate.Date.ToShortDateString().Replace('/', '-')}-To-{toDate.Date.ToShortDateString().Replace('/', '-')}.pdf"
+            };
+            return result;
+        }
+
         [HttpGet("SalesByPurchasePrice")]
         public async Task<IEnumerable<SalesByPurchasePriceReportViewModel>> GetSalesByPurchasePriceReport(DateTime fromDate, DateTime toDate)
+        {
+            return await GetSalesByPurchasePriceData(fromDate, toDate);
+        }
+
+        private async Task<IEnumerable<SalesByPurchasePriceReportViewModel>> GetSalesByPurchasePriceData(DateTime fromDate, DateTime toDate)
         {
             if (fromDate == DateTime.MinValue)
                 fromDate = DateTime.Now;
@@ -583,6 +627,11 @@ namespace EcommerceApi.Controllers
 
         [HttpGet("SalesByPurchasePriceDetail")]
         public async Task<IEnumerable<SalesByPurchasePriceDetailReportViewModel>> GetSalesByPurchasePriceDetailReport(DateTime fromDate, DateTime toDate)
+        {
+            return await GetSalesByPurchasePriceDetailData(fromDate, toDate);
+        }
+
+        private async Task<IEnumerable<SalesByPurchasePriceDetailReportViewModel>> GetSalesByPurchasePriceDetailData(DateTime fromDate, DateTime toDate)
         {
             if (fromDate == DateTime.MinValue)
                 fromDate = DateTime.Now;
@@ -604,7 +653,7 @@ namespace EcommerceApi.Controllers
             var data1 = await _reportRepository.GetInventoryValueTotal();
             var title1 = "Total Inventory Value";
             var data2 = await _reportRepository.GetInventoryValueTotalByCategory();
-            var title2 = "Inventory Value By Prodyct Category";
+            var title2 = "Inventory Value By Product Category";
             var data3 = await _reportRepository.GetInventoryValue();
             var title3 = "Inventory Value By Product";
 
