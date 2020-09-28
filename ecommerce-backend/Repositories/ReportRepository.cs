@@ -1201,6 +1201,7 @@ LEFT JOIN (
   GROUP BY ProductId
 ) AS OnHoldItems
   ON OnHoldItems.ProductId = Product.ProductId
+  WHERE Balance <> 0
 ";
                 conn.Open();
                 return await conn.QueryAsync<InventoryValueReportViewModel>(query);

@@ -597,6 +597,48 @@ namespace EcommerceApi.Controllers
             return await _reportRepository.GetSalesByPurchasePriceDetailReport(fromDate, toDate, user.Id);
         }
 
+        [HttpGet("InventoryValuePdf")]
+        public async Task<FileResult> GetInventoryValuePdf()
+        {
+            var date = DateTime.Now.Date.ToShortDateString();
+            var data1 = await _reportRepository.GetInventoryValueTotal();
+            var title1 = "Total Inventory Value";
+            var data2 = await _reportRepository.GetInventoryValueTotalByCategory();
+            var title2 = "Inventory Value By Prodyct Category";
+            var data3 = await _reportRepository.GetInventoryValue();
+            var title3 = "Inventory Value By Product";
+
+            var globalSettings = new GlobalSettings
+            {
+                ColorMode = ColorMode.Color,
+                Orientation = Orientation.Landscape,
+                PaperSize = PaperKind.A4,
+                Margins = new MarginSettings { Top = 10 },
+                DocumentTitle = $"Product Profit Report Date:{date}",
+            };
+
+            var objectSettings = new ObjectSettings
+            {
+                PagesCount = true,
+                HtmlContent = InventoryValueReportGenerator.GetHtmlString(data1, title1, data2, title2, data3, title3, date),
+                WebSettings = { DefaultEncoding = "utf-8", UserStyleSheet = Path.Combine(Directory.GetCurrentDirectory(), "assets", "invoice.css") },
+            };
+
+            var pdf = new HtmlToPdfDocument()
+            {
+                GlobalSettings = globalSettings,
+                Objects = { objectSettings }
+            };
+
+            var file = _converter.Convert(pdf);
+
+            var result = new FileContentResult(file, "application/pdf")
+            {
+                FileDownloadName = $"Inventory Value Report-{date.Replace('/', '-')}.pdf"
+            };
+            return result;
+        }
+
         [HttpGet("InventoryValue")]
         public async Task<IEnumerable<InventoryValueReportViewModel>> GetInventoryValue()
         {
