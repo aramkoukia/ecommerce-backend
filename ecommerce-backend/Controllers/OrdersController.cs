@@ -104,7 +104,8 @@ namespace EcommerceApi.Controllers
                 fromDate = DateTime.Now.AddYears(-10);
             if (toDate == DateTime.MinValue)
                 toDate = DateTime.Now;
-
+            
+            toDate = toDate.AddDays(1);
             return await _orderRepository.GetCustomerOrdersByDate(customerId, fromDate, toDate);
         }
 
