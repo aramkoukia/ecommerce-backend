@@ -26,19 +26,22 @@ namespace EcommerceApi.Controllers
         private readonly IReportRepository _reportRepository;
         private readonly IConverter _converter;
         private readonly IEmailSender _emailSender;
+        private readonly ICustomerStatementTemplateGenerator _customerStatementTemplateGenerator; 
 
         public CustomersController(
             EcommerceContext context,
             ICustomerRepository customerRepository,
             IReportRepository reportRepository,
             IConverter converter,
-            IEmailSender emailSender)
+            IEmailSender emailSender,
+            ICustomerStatementTemplateGenerator customerStatementTemplateGenerator)
         {
             _context = context;
             _customerRepository = customerRepository;
             _reportRepository = reportRepository;
             _converter = converter;
             _emailSender = emailSender;
+            _customerStatementTemplateGenerator = customerStatementTemplateGenerator;
         }
 
         // GET: api/Customers
@@ -290,7 +293,7 @@ namespace EcommerceApi.Controllers
             var objectSettings = new ObjectSettings
             {
                 PagesCount = true,
-                HtmlContent = CustomerStatementTemplateGenerator.GetHtmlString(customer, customerPaidOrders, customerUnPaidOrders, fromDate, toDate),
+                HtmlContent = _customerStatementTemplateGenerator.GetHtmlString(customer, customerPaidOrders, customerUnPaidOrders, fromDate, toDate),
                 WebSettings = { DefaultEncoding = "utf-8", UserStyleSheet = Path.Combine(Directory.GetCurrentDirectory(), "assets", "invoice.css") },
             };
 

@@ -12,11 +12,7 @@ namespace EcommerceApi.Untilities
         {
             _context = context;
         }
-        // private static readonly string CompanyName = "Pixel Print Ltd. GST: 823338694 RT0001";
-        // private static readonly string PhoneNumbers = "Tel: 604-559-5000 Fax:604-559-5008";
-        // private static readonly string Website = "www.LightsAndParts.com";
         private static readonly string Note1 = "Dear Customer, to pay by cheque for an invoice, Please";
-        // private static readonly string Note2 = "PAY TO THE ORDER OF: PIXEL PRINT LTD.";
         private static readonly string Note3 = "Mention your invoice number on memo.Thank you.";
         private static readonly string Note4 = "All products must be installed by certified electrician. We will not be responsible for any damage caused by incorrectly connecting or improper use of the material.";
         private static readonly string Note5 = "All returns are subject to a <b>10% restocking fees.</b> We accept return and exchange up to <b>7 Days</b> after the date of purchase in new condition, not energized and original packaging with original Invoice and receipt.";

@@ -772,42 +772,20 @@ namespace EcommerceApi.Controllers
             };
 
             var file = _converter.Convert(pdf);
-            var message = $@"
-Dear Customer,
+            var statementSetting = await _context.InvoiceEmailAndPrintSetting.FirstOrDefaultAsync();
+            var body = statementSetting.EmailBody
+                .Replace("@UserEmail", user.Email)
+                .Replace("@UserName", user.UserName);
 
+            var attachmentName = statementSetting.EmailAttachmentFileName
+                .Replace("@InvoiceNo", order.OrderId.ToString());
 
-Attached is your current invoice from LED Lights and Parts (Pixel Print Ltd). 
+            var subject = statementSetting.EmailSubject
+                .Replace("@InvoiceNo", order.OrderId.ToString());
+            var ccEmail = statementSetting.CCEmailAddress;
 
-If you have a credit account, the invoice will be marked as ACCOUNT.
-
-If you requested to hold on products, the invoice will be marked as HOLD.
-
-If you already paid, the invoice will be marked as PAID and no further action is required. 
-
-If you requested the quote, the invoice will be marked as QUOTE. 
-
-If you returned or exchanged the invoice will be marked as Return/Exchange or Credit. 
-
-Thank you for working with LED Lights and Parts! We are happy to work with you to solve any of your lighting challenges. 
-
-Sincerely,
-
-{user.UserName}
-
-3695 East 1st Ave Vancouver, BC V5M 1C2
-
-Tel: (604) 559-5000
-
-Cel: (778) 839-3352
-
-Fax: (604) 559-5008
-
-www.lightsandparts.com | {user.Email}
-            ";
             var attachment = new MemoryStream(file);
-            var attachmentName = $"Invoice No {order.OrderId}.pdf";
-            var subject = $"Pixel Print Ltd (LED Lights and Parts) Invoice No {order.OrderId}";
-
+            
             if (string.IsNullOrEmpty(email))
             {
                 email = order.Customer.Email;
@@ -817,7 +795,7 @@ www.lightsandparts.com | {user.Email}
             orderToUpdateEmail.Email = email;
             await _context.SaveChangesAsync();
 
-            _emailSender.SendEmailAsync(email, subject, message, new[] { attachment }, new[] { attachmentName }, true);
+            _emailSender.SendEmailAsync(email, subject, body, new[] { attachment }, new[] { attachmentName }, true);
             return Ok();
         }
 
