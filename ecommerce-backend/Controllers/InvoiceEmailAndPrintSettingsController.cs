@@ -8,23 +8,23 @@ using Microsoft.AspNetCore.Authorization;
 namespace EcommerceApi.Controllers
 {
     [Produces("application/json")]
-    [Route("api/CustomerStatementSettings")]
+    [Route("api/InvoiceEmailAndPrintSettings")]
     [Authorize]
-    public class CustomerStatementSettingsController : Controller
+    public class InvoiceEmailAndPrintSettingsController : Controller
     {
         private readonly EcommerceContext _context;
 
-        public CustomerStatementSettingsController(EcommerceContext context) =>
+        public InvoiceEmailAndPrintSettingsController(EcommerceContext context) =>
             _context = context;
 
-        // GET: api/CustomerStatementSettings
+        // GET: api/InvoiceEmailAndPrintSettings
         [HttpGet]
         public async Task<CustomerStatementSetting> GetSettings() =>
             await _context.CustomerStatementSetting.FirstOrDefaultAsync();
 
-        // POST: api/CustomerStatementSettings
+        // POST: api/InvoiceEmailAndPrintSettings
         [HttpPost]
-        public async Task<IActionResult> PostSettings([FromBody] CustomerStatementSetting settings)
+        public async Task<IActionResult> PostSettings([FromBody] InvoiceEmailAndPrintSetting settings)
         {
             if (!ModelState.IsValid)
             {
@@ -33,7 +33,7 @@ namespace EcommerceApi.Controllers
 
             if (_context.Settings.Any())
             {
-                var currentSetting = await _context.CustomerStatementSetting.FirstOrDefaultAsync();
+                var currentSetting = await _context.InvoiceEmailAndPrintSetting.FirstOrDefaultAsync();
                 currentSetting.CCEmailAddress = settings.CCEmailAddress;
                 currentSetting.EmailAttachmentFileName = settings.EmailAttachmentFileName;
                 currentSetting.EmailBody = settings.EmailBody;
@@ -42,7 +42,7 @@ namespace EcommerceApi.Controllers
             else
             {
                 settings.Id = 1;
-                _context.CustomerStatementSetting.Add(settings);
+                _context.InvoiceEmailAndPrintSetting.Add(settings);
             }
 
             await _context.SaveChangesAsync();
