@@ -19,8 +19,8 @@ namespace EcommerceApi.Controllers
 
         // GET: api/InvoiceEmailAndPrintSettings
         [HttpGet]
-        public async Task<CustomerStatementSetting> GetSettings() =>
-            await _context.CustomerStatementSetting.FirstOrDefaultAsync();
+        public async Task<InvoiceEmailAndPrintSetting> GetSettings() =>
+            await _context.InvoiceEmailAndPrintSetting.FirstOrDefaultAsync();
 
         // POST: api/InvoiceEmailAndPrintSettings
         [HttpPost]

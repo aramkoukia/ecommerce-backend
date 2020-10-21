@@ -47,7 +47,7 @@ namespace EcommerceApi.Untilities
                                 <div>{posSetting.LegalName}</div>
                                 <div class='xsmall-font spaceafter-10'>");
 
-            foreach (var location in _context.Location.Where(l => !l.Disabled)) {
+            foreach (var location in _context.Location.Where(l => !l.Disabled && l.ShowOnInvoice)) {
                 sbFinal.Append($@"<b>{location.LocationName}:</b> <br /> 
                                      {location.LocationAddress}, <br />
                                      {location.LocationName}, {location.Province} {location.PostalCode} <br />

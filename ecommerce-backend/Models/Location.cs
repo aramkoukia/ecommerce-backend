@@ -10,5 +10,6 @@
         public string PostalCode { get; set; }
         public string PhoneNumber { get; set; }
         public bool Disabled { get; set; }
+        public bool ShowOnInvoice { get; set; }
     }
 }
