@@ -155,6 +155,7 @@ Thanks you for your business.
         private static string GetUnPaidAmountRows(IEnumerable<CustomerUnPaidOrdersViewModel> customerUnPaidOrders)
         {
             var tableSb = new StringBuilder();
+            var total = customerUnPaidOrders.Sum(s => s.Total);
             foreach (var item in customerUnPaidOrders)
             {
                 tableSb.Append($@"<tr>
@@ -166,6 +167,15 @@ Thanks you for your business.
                     <td style='border: 1px solid black; padding:5px'>{item.DueDate.ToShortDateString()}</td>
                     <tr>");
             }
+            tableSb.Append($@"<tr>
+                    <td style='border: 1px solid black; padding:5px'></td>
+                    <td style='border: 1px solid black; padding:5px'>Total: </td>
+                    <td style='border: 1px solid black; padding:5px'>${total}</td>
+                    <td style='border: 1px solid black; padding:5px'></td>
+                    <td style='border: 1px solid black; padding:5px'></td>
+                    <td style='border: 1px solid black; padding:5px'></td>
+                    <tr>");
+
             return tableSb.ToString();
         }
     }

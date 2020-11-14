@@ -12,18 +12,13 @@ namespace EcommerceApi.Untilities
         {
             _context = context;
         }
-        private static readonly string Note1 = "Dear Customer, to pay by cheque for an invoice, Please";
-        private static readonly string Note3 = "Mention your invoice number on memo.Thank you.";
-        private static readonly string Note4 = "All products must be installed by certified electrician. We will not be responsible for any damage caused by incorrectly connecting or improper use of the material.";
-        private static readonly string Note5 = "All returns are subject to a <b>10% restocking fees.</b> We accept return and exchange up to <b>7 Days</b> after the date of purchase in new condition, not energized and original packaging with original Invoice and receipt.";
-        private static readonly string Note6 = "All Custom orders: No returns-No exchange.";
-        private static readonly string Note7 = "By signing below, you confirm that you have received all the products as per your requirement. Our company does not hold responsibility in case of any wrong order. I also agree with the above store policy.";
         private static readonly string CustomerCopy = "Customer Copy";
         private static readonly string MerchantCopy = "Merchant Copy";
 
         public string GetHtmlString(Order order, bool includeMerchantCopy)
         {
             var posSetting = _context.PortalSettings.FirstOrDefault();
+            var invoiceSetting = _context.InvoiceEmailAndPrintSetting.FirstOrDefault();
 
             var sbCustomer = new StringBuilder();
             var sbFinal = new StringBuilder();
@@ -53,8 +48,8 @@ namespace EcommerceApi.Untilities
                                 <div class='center xsmall-font'>{posSetting.InvoicePhone}</div>
                                 <div class='center xsmall-font spaceafter-10'>{posSetting.InvoiceWebsite}</div>
                                
-                                <div class='fullwidth center smaller-font spaceafter-10'>{Note1}&nbsp;<span class='red'>PAY TO THE ORDER OF: {posSetting.LegalName}</span></div>
-                                <div class='fullwidth center smaller-font spaceafter-10'>{Note3}</div>
+                                <div class='fullwidth center smaller-font spaceafter-10'>{invoiceSetting.PayNote1}&nbsp;<span class='red'>{invoiceSetting.PayNote3}: {posSetting.LegalName}</span></div>
+                                <div class='fullwidth center smaller-font spaceafter-10'>{invoiceSetting.PayNote2}</div>
                                 <hr/>
 
                                 <b>Customer:</b> {customerName}
@@ -94,7 +89,7 @@ namespace EcommerceApi.Untilities
                 <div>{posSetting.PortalTitle}</div>
                 <div class='fullwidth xsmall-font spaceafter-10'><b>{order.Location.LocationName}:</b><br/> 
                         {order.Location.LocationAddress}, <br />
-                        {order.Location.LocationName}, {order.Location.Province} {order.Location.PostalCode} <br/>
+                        {order.Location.City}, {order.Location.Province} {order.Location.PostalCode} <br/>
                         Phone: {order.Location.PhoneNumber} <br/>
                 </div>
 
@@ -103,7 +98,7 @@ namespace EcommerceApi.Untilities
                 <hr class='spaceafter-30'/>");
 
             if (order.Status.Equals(OrderStatus.Account.ToString(), System.StringComparison.InvariantCultureIgnoreCase)) {
-                sbCustomer.Append($@"<p><b>Please Note: Payment is due on {order.OrderDate.AddDays(40).Date.ToString("dd-MMM-yyyy")}. Additional charges of 2% per month are applicable after due date.</b></p>");
+                sbCustomer.Append($@"<p><b>Please Note: Payment is due on {order.OrderDate.AddDays(40).Date.ToString("dd-MMM-yyyy")}. {invoiceSetting.AdditionalChargesNote}</b></p>");
             }
                                 
 
@@ -235,10 +230,17 @@ namespace EcommerceApi.Untilities
                 sbFinal.Append($@"<div class='header'><p><b>Authorized By: </b>{order.AuthorizedBy}</p></div>");
             }
 
-            sbFinal.Append($@"
-                    <div class='header'><p><b>Attention:</b>{Note4}</p></div>
-                    <div class='header'><p><b>Store policy:</b>{Note5}</p></div>
-                    <div class='header' {pageBreak}><p><b>{Note6}</b></p></div>");
+            if (!string.IsNullOrEmpty(invoiceSetting.Attention))
+            {
+                sbFinal.Append($@"<div class='header'><p><b>Attention: </b>{invoiceSetting.Attention}</p></div>");
+            }
+
+            if (!string.IsNullOrEmpty(invoiceSetting.StorePolicy))
+            {
+                sbFinal.Append($@"<div class='header'><p><b>Store policy: </b>{invoiceSetting.StorePolicy}</p></div>");
+            }
+
+            sbFinal.Append($@"<div class='header' {pageBreak}><p><b>{invoiceSetting.Footer1}</b></p></div>");
 
             if (includeMerchantCopy)
             {
@@ -263,11 +265,27 @@ namespace EcommerceApi.Untilities
                     sbFinal.Append($@"<div class='header'><p><b>Authorized By: </b>{order.AuthorizedBy}</p></div>");
                 }
 
+                if (!string.IsNullOrEmpty(invoiceSetting.Attention))
+                {
+                    sbFinal.Append($@"<div class='header'><p><b>Attention: </b>{invoiceSetting.Attention}</p></div>");
+                }
+
+                if (!string.IsNullOrEmpty(invoiceSetting.StorePolicy))
+                {
+                    sbFinal.Append($@"<div class='header'><p><b>Store policy: </b>{invoiceSetting.StorePolicy}</p></div>");
+                }
+
+                if (!string.IsNullOrEmpty(invoiceSetting.Signature))
+                {
+                    sbFinal.Append($@"<div class='header'><p><b>Agreement: </b>{invoiceSetting.Signature}</p></div>");
+                }
+                
+                if (!string.IsNullOrEmpty(invoiceSetting.Footer1))
+                {
+                    sbFinal.Append($@"<div class='header'><p><b>{invoiceSetting.Footer1}</b></p></div>");
+                }
+
                 sbFinal.Append($@"
-                    <div class='header'><p><b>Attention:</b>{Note4}</p></div>
-                    <div class='header'><p><b>Store policy:</b>{Note5}</p></div>
-                    <div class='header'><p><b>Agreement: </b>{Note7}</p></div>
-                    <div class='header'><p><b>{Note6}</b></p></div>
                     <br />
                     <h4>Customer Signature: ___________________</h4>
                     <br />

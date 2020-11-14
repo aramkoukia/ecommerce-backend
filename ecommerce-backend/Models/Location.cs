@@ -11,5 +11,6 @@
         public string PhoneNumber { get; set; }
         public bool Disabled { get; set; }
         public bool ShowOnInvoice { get; set; }
+        public string City { get; set; }
     }
 }
