@@ -85,7 +85,7 @@ namespace EcommerceApi.Untilities
                 <div>{posSetting.PortalTitle}</div>
                 <div class='fullwidth xsmall-font spaceafter-10'><b>{order.Location.LocationName}:</b><br/> 
                         {order.Location.LocationAddress}, <br />
-                        {order.Location.LocationName}, {order.Location.Province} {order.Location.PostalCode} <br/>
+                        {order.Location.City}, {order.Location.Province} {order.Location.PostalCode} <br/>
                         Phone: {order.Location.PhoneNumber} <br/>
                 </div>
 
