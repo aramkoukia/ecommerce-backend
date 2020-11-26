@@ -33,6 +33,7 @@ namespace EcommerceApi.Controllers
         private readonly IMonerisService _monerisService;
         private readonly IHttpContextAccessor _accessor;
         private readonly IOrderTemplateGenerator _orderTemplateGenerator;
+        private readonly IShipmentSlipTemplateGenerator _shipmentSlipTemplateGenerator;
 
         public OrdersController(EcommerceContext context,
                                 UserManager<ApplicationUser> userManager,
@@ -42,6 +43,7 @@ namespace EcommerceApi.Controllers
                                 IEmailSender emailSender,
                                 IMonerisService monerisService,
                                 IOrderTemplateGenerator orderTemplateGenerator,
+                                IShipmentSlipTemplateGenerator shipmentSlipTemplateGenerator,
                                 IHttpContextAccessor accessor)
         {
             _context = context;
@@ -53,6 +55,7 @@ namespace EcommerceApi.Controllers
             _monerisService = monerisService;
             _accessor = accessor;
             _orderTemplateGenerator = orderTemplateGenerator;
+            _shipmentSlipTemplateGenerator = shipmentSlipTemplateGenerator;
         }
 
         // GET: api/Orders
@@ -889,7 +892,7 @@ namespace EcommerceApi.Controllers
             var objectSettings = new ObjectSettings
             {
                 PagesCount = true,
-                HtmlContent = ShipmentSlipTemplateGenerator.GetHtmlString(order),
+                HtmlContent = _shipmentSlipTemplateGenerator.GetHtmlString(order),
                 WebSettings = { DefaultEncoding = "utf-8", UserStyleSheet = Path.Combine(Directory.GetCurrentDirectory(), "assets", "invoice.css") },
             };
 

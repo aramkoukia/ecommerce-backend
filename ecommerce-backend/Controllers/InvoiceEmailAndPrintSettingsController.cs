@@ -38,6 +38,14 @@ namespace EcommerceApi.Controllers
                 currentSetting.EmailAttachmentFileName = settings.EmailAttachmentFileName;
                 currentSetting.EmailBody = settings.EmailBody;
                 currentSetting.EmailSubject = settings.EmailSubject;
+                currentSetting.AdditionalChargesNote = settings.AdditionalChargesNote;
+                currentSetting.Attention = settings.Attention;
+                currentSetting.Footer1 = settings.Footer1;
+                currentSetting.PayNote1 = settings.PayNote1;
+                currentSetting.PayNote2 = settings.PayNote2;
+                currentSetting.PayNote3 = settings.PayNote3;
+                currentSetting.Signature = settings.Signature;
+                currentSetting.StorePolicy = settings.StorePolicy;
             }
             else
             {

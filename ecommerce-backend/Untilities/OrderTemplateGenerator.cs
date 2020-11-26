@@ -237,7 +237,7 @@ namespace EcommerceApi.Untilities
 
             if (!string.IsNullOrEmpty(invoiceSetting.StorePolicy))
             {
-                sbFinal.Append($@"<div class='header'><p><b>Store policy: </b>{invoiceSetting.StorePolicy}</p></div>");
+                sbFinal.Append($@"<div class='header'><p>{invoiceSetting.StorePolicy}</p></div>");
             }
 
             sbFinal.Append($@"<div class='header' {pageBreak}><p><b>{invoiceSetting.Footer1}</b></p></div>");
@@ -272,7 +272,7 @@ namespace EcommerceApi.Untilities
 
                 if (!string.IsNullOrEmpty(invoiceSetting.StorePolicy))
                 {
-                    sbFinal.Append($@"<div class='header'><p><b>Store policy: </b>{invoiceSetting.StorePolicy}</p></div>");
+                    sbFinal.Append($@"<div class='header'><p>{invoiceSetting.StorePolicy}</p></div>");
                 }
 
                 if (!string.IsNullOrEmpty(invoiceSetting.Signature))

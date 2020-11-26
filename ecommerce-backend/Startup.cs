@@ -80,6 +80,7 @@ namespace EcommerceApi
             services.AddTransient<ICustomerRepository, CustomerRepository>();
             services.AddTransient<IReportRepository, ReportRepository>();
             services.AddTransient<IOrderTemplateGenerator, OrderTemplateGenerator>();
+            services.AddTransient<IShipmentSlipTemplateGenerator, ShipmentSlipTemplateGenerator>();
             services.AddTransient<ICustomerStatementTemplateGenerator, CustomerStatementTemplateGenerator>();
             services.AddTransient(_ => new AppDb("mysqlConnection"));
 
