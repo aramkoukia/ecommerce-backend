@@ -7,7 +7,6 @@ namespace EcommerceApi.Untilities
 {
     public static class CustomerOrdersReportGenerator
     {
-
         public static string GetHtmlString(
             IEnumerable<CustomerPaidOrdersViewModel> data1,
             string title1,

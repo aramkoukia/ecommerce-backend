@@ -1,4 +1,5 @@
 ﻿using EcommerceApi.Models.Moneris;
+using EcommerceApi.Models.Website;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
@@ -19,6 +20,7 @@ namespace EcommerceApi.Models
         public virtual DbSet<PaymentType> PaymentType { get; set; }
         public virtual DbSet<Product> Product { get; set; }
         public virtual DbSet<ProductWebsite> ProductWebsite { get; set; }
+        public virtual DbSet<WebsiteSlider> WebsiteSlider { get; set; }
         public virtual DbSet<ProductWebsiteImage> ProductWebsiteImage { get; set; }
         public virtual DbSet<ProductPackage> ProductPackage { get; set; }
         public virtual DbSet<ProductType> ProductType { get; set; }

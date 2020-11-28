@@ -9,10 +9,7 @@ namespace EcommerceApi.Untilities
         private static readonly string CustomerCopy = "Customer Copy";
         private readonly EcommerceContext _context;
 
-        public ShipmentSlipTemplateGenerator(EcommerceContext context)
-        {
-            _context = context;
-        }
+        public ShipmentSlipTemplateGenerator(EcommerceContext context) => _context = context;
 
         public string GetHtmlString(Order order)
         {
