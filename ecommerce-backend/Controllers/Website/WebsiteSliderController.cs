@@ -7,19 +7,29 @@ using Microsoft.AspNetCore.Authorization;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Http;
+using Microsoft.WindowsAzure.Storage;
+using System;
+using Microsoft.Extensions.Configuration;
 
 namespace EcommerceApi.Controllers
 {
     [Produces("application/json")]
-    [Route("api/WebsiteSlider")]
+    [Route("api/WebsiteSliders")]
     [Authorize()]
     public class WebsiteSliderController : Controller
     {
         private readonly EcommerceContext _context;
+        private readonly IConfiguration _config;
+        private const string ContentContainerName = "websiteslider";
 
-        public WebsiteSliderController(EcommerceContext context) =>
-          _context = context;
-
+        public WebsiteSliderController(
+            EcommerceContext context,
+            IConfiguration config
+            ) {
+            _context = context;
+            _config = config;
+        }
+         
         // GET: api/Website/Slider
         [HttpGet]
         [AllowAnonymous]
@@ -108,6 +118,39 @@ namespace EcommerceApi.Controllers
             await _context.SaveChangesAsync();
 
             return Ok(websiteSlider);
+        }
+
+        [HttpPost]
+        [Route("{id}/Upload")]
+        [AllowAnonymous]
+        public async Task<IActionResult> UploadAsync([FromRoute] int id, IFormFile file)
+        {
+            var exisintgWebsiteSlider = await _context.WebsiteSlider.FirstOrDefaultAsync(m => m.Id == id);
+            if (exisintgWebsiteSlider == null)
+            {
+                return BadRequest($"WebsiteSliderId {id} not found.");
+            }
+
+            var storageConnectionString = _config.GetConnectionString("AzureStorageConnectionString");
+
+            if (!CloudStorageAccount.TryParse(storageConnectionString, out CloudStorageAccount storageAccount))
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            }
+            var blobClient = storageAccount.CreateCloudBlobClient();
+
+            var container = blobClient.GetContainerReference(ContentContainerName);
+
+            await container.CreateIfNotExistsAsync();
+
+            //MS: Don't rely on or trust the FileName property without validation. The FileName property should only be used for display purposes.
+            var picBlob = container.GetBlockBlobReference(Guid.NewGuid().ToString() + "-" + file.FileName);
+
+            await picBlob.UploadFromStreamAsync(file.OpenReadStream());
+
+            exisintgWebsiteSlider.Image = picBlob.Uri.AbsoluteUri;
+            await _context.SaveChangesAsync();
+            return Ok(exisintgWebsiteSlider);
         }
 
         private bool WebsiteSliderExists(int id)
