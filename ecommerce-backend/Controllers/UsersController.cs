@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Identity;
 using System.Linq;
 using System;
 using EcommerceApi.Services;
+using Microsoft.AspNetCore.Http;
 
 namespace EcommerceApi.Controllers
 {
@@ -20,17 +21,20 @@ namespace EcommerceApi.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly IEmailSender _emailSender;
+        private readonly IHttpContextAccessor _accessor;
 
         public UsersController(
             EcommerceContext context,
             RoleManager<IdentityRole> roleManager,
             IEmailSender emailSender,
-            UserManager<ApplicationUser> userManager)
+            UserManager<ApplicationUser> userManager, 
+            IHttpContextAccessor accessor)
         {
             _context = context;
             _userManager = userManager;
             _roleManager = roleManager;
             _emailSender = emailSender;
+            _accessor = accessor;
         }
 
         // GET: api/Users
@@ -72,6 +76,19 @@ namespace EcommerceApi.Controllers
                     }
                 }
             }
+
+            var clientIp = _accessor.HttpContext.Connection.RemoteIpAddress.ToString().Replace("{", "").Replace("}", "");
+            _context.LoginHistory.Add(
+                new LoginHistory
+                {
+                    ClientIp = clientIp,
+                    DisplayName = user.GivenName,
+                    UserId = user.Id,
+                    CreatedDate = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateTime.UtcNow, "Pacific Standard Time"),
+                    LoginType = "Entered Pass Code"
+                }
+            );
+            _context.SaveChanges();
 
             return Ok(
                 new

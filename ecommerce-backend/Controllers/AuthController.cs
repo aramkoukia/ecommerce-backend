@@ -124,6 +124,18 @@ namespace EcommerceApi.Controllers
               expires: DateTime.Now.AddMinutes(540),
               signingCredentials: creds);
 
+            _context.LoginHistory.Add(
+                new LoginHistory
+                {
+                    ClientIp = clientIp,
+                    DisplayName = user.GivenName,
+                    UserId = user.Id,
+                    CreatedDate = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateTime.UtcNow, "Pacific Standard Time"),
+                    LoginType = "User Login"
+                }
+            );
+            _context.SaveChanges();
+
             return Ok(
                 new
                 {

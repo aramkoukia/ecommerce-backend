@@ -25,7 +25,6 @@ namespace EcommerceApi.Middleware
 
         public async Task Invoke(HttpContext context, EcommerceContext dbContext)
         {
-
             var adminSafeList = dbContext.Settings.AsNoTracking().FirstOrDefault().AllowedIPAddresses;
             var remoteIp = context.Connection.RemoteIpAddress;
             // _logger.LogDebug($"Request from Remote IP address: {remoteIp}");

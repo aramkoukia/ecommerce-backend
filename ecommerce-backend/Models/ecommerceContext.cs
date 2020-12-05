@@ -23,6 +23,7 @@ namespace EcommerceApi.Models
         public virtual DbSet<WebsiteSlider> WebsiteSlider { get; set; }
         public virtual DbSet<ProductWebsiteImage> ProductWebsiteImage { get; set; }
         public virtual DbSet<ProductPackage> ProductPackage { get; set; }
+        public virtual DbSet<LoginHistory> LoginHistory { get; set; }
         public virtual DbSet<ProductType> ProductType { get; set; }
         public virtual DbSet<Tax> Tax { get; set; }
         public virtual DbSet<ProductInventory> ProductInventory { get; set; }
