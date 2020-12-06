@@ -12,5 +12,6 @@ namespace EcommerceApi.Repositories
         Task<IEnumerable<WebsiteProductsInCategoryViewModel>> GetWebsiteProductsByProductType(string id);
         Task<IEnumerable<string>> GetWebsiteProductSlugs();
         Task<WebsiteProductViewModel> GetWebsiteProduct(string id);
+        Task<IEnumerable<WebsiteProductsInCategoryViewModel>> GetWebsiteProducts();
     }
 }

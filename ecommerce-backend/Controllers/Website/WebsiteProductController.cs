@@ -16,6 +16,12 @@ namespace EcommerceApi.Controllers
           _productTypeRepository = productTypeRepository;
 
         // GET: api/ProductTypes/{id}/Products
+        [HttpGet("Products")]
+        public async Task<IEnumerable<WebsiteProductsInCategoryViewModel>> GetAsync() =>
+          await _productTypeRepository.GetWebsiteProducts();
+
+
+        // GET: api/ProductTypes/{id}/Products
         [HttpGet("ProductTypes/{id}/Products")]
         public async Task<IEnumerable<WebsiteProductsInCategoryViewModel>> GetAsync(string id) =>
           await _productTypeRepository.GetWebsiteProductsByProductType(id);
