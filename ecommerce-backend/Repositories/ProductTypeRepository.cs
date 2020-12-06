@@ -173,6 +173,7 @@ LEFT JOIN (
 ) AS ProductInventory
 ON ProductInventory.ProductId = Product.ProductId
 WHERE Product.Disabled = 0
+      AND ImagePath IS NOT NULL
 ";
                 conn.Open();
                 return await conn.QueryAsync<WebsiteProductsInCategoryViewModel>(query);
