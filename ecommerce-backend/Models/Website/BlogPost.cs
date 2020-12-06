@@ -1,4 +1,6 @@
-﻿namespace EcommerceApi.Models.Website
+﻿using System;
+
+namespace EcommerceApi.Models.Website
 {
     public partial class BlogPost
     {
@@ -13,6 +15,9 @@
         public string Tags { get; set; }
         public string SmallImagePath { get; set; }
         public string LargeImagePath { get; set; }
-        public string CreatedDate { get; set; }
+        public DateTime CreatedDate { get; set; }
+        public DateTime ModifiedDate { get; set; }
+        public DateTime PublishedDate { get; set; }
+        public bool Published { get; set; }
     }
 }
