@@ -625,7 +625,6 @@ namespace EcommerceApi.Controllers
 
             System.Security.Claims.ClaimsPrincipal currentUser = this.User;
             var userId = _userManager.GetUserId(User);
-            var orderPayments = updateOrderPayment.OrderPayment.Select(m => new { m.PaymentTypeId, m.PaymentAmount, m.ChequeNo }).Distinct().ToList();
             var originalPaymentTypes = string.Join(",", order.OrderPayment.Select(m => m.PaymentType.PaymentTypeName).ToArray());
             var originalPaymentAmount = string.Join(",", order.OrderPayment.Select(m => m.PaymentAmount).ToArray());
             var originalAmountTotal = order.OrderPayment.Sum(m => m.PaymentAmount);
@@ -654,6 +653,7 @@ namespace EcommerceApi.Controllers
                 order.IsAccountReturn = false;
             }
 
+            var orderPayments = updateOrderPayment.OrderPayment.Select(m => new { m.PaymentTypeId, m.PaymentAmount, m.ChequeNo }).Distinct().ToList();
             // fighting with JS rounding issues
             var totalPayment = orderPayments.Sum(p => p.PaymentAmount);
             if (Math.Abs(order.Total - totalPayment) < new decimal(0.05))
@@ -661,6 +661,7 @@ namespace EcommerceApi.Controllers
                 order.Total = totalPayment;
             }
 
+            order.OrderPayment.Clear();
             foreach (var payment in orderPayments)
             {
                 order.OrderPayment.Add(new OrderPayment
