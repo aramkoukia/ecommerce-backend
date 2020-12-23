@@ -100,7 +100,7 @@ ON Images.ProductId = Product.ProductId
 LEFT JOIN ProductWebsite
 ON ProductWebsite.ProductId = Product.ProductId
 WHERE Product.Disabled = 0
-      AND ProductType.SlugsUrl = @slugsUrl
+      AND (ProductType.SlugsUrl = @slugsUrl or @slugsUrl = 'all-categories')
 ";
                 conn.Open();
                 return await conn.QueryAsync<WebsiteProductsInCategoryViewModel>(query, new { slugsUrl });
