@@ -32,7 +32,7 @@ namespace EcommerceApi.Repositories
             using (IDbConnection conn = Connection)
             {
                 string query = $@"
-SELECT ProductType.*, ProductCount, RANK() OVER (ORDER BY Sales.Total DESC) AS Rank  
+SELECT ProductType.*, ProductCount, 0 AS Rank  
 FROM ProductType
 INNER JOIN (
   SELECT ProductTypeId, COUNT(*) AS ProductCount
@@ -41,21 +41,20 @@ INNER JOIN (
   GROUP BY ProductTypeId
 ) Product
 ON Product.ProductTypeId = ProductType.ProductTypeId
-LEFT JOIN (
-	SELECT ProductTypeId, SUM(OrderDetail.Total) AS Total
-	FROM OrderDetail
-	INNER JOIN [Order]
-	  ON [Order].OrderId = OrderDetail.OrderId
-	INNER JOIN Product
-	  ON OrderDetail.ProductId = Product.ProductId
-	WHERE [Order].OrderDate >= DATEADD(MONTH, -6, GETDATE())
-	GROUP BY ProductTypeId
-) Sales
-ON Product.ProductTypeId = Sales.ProductTypeId
 WHERE ProductType.Disabled = 0
 ";
                 conn.Open();
                 return await conn.QueryAsync<WebsiteProductTypeViewModel>(query);
+            }
+        }
+
+        public async Task<WebsiteProductTypeViewModel> GetWebsiteProductType(string slugsUrl)
+        {
+            using (IDbConnection conn = Connection)
+            {
+                string query = $@"SELECT ProductType.* FROM ProductType WHERE ProductType.SlugsUrl = @slugsUrl";
+                conn.Open();
+                return await conn.QueryFirstAsync<WebsiteProductTypeViewModel>(query, new { slugsUrl });
             }
         }
 
@@ -64,7 +63,7 @@ WHERE ProductType.Disabled = 0
             using (IDbConnection conn = Connection)
             {
                 string query = $@"
-SELECT ProductType.*, ProductCount, RANK() OVER (ORDER BY Sales.Total DESC) AS Rank  
+SELECT ProductType.*, ProductCount, 0 AS Rank  
 FROM ProductType
 LEFT JOIN (
   SELECT ProductTypeId, COUNT(*) AS ProductCount
@@ -73,17 +72,6 @@ LEFT JOIN (
   GROUP BY ProductTypeId
 ) Product
 ON Product.ProductTypeId = ProductType.ProductTypeId
-LEFT JOIN (
-	SELECT ProductTypeId, SUM(OrderDetail.Total) AS Total
-	FROM OrderDetail
-	INNER JOIN [Order]
-	  ON [Order].OrderId = OrderDetail.OrderId
-	INNER JOIN Product
-	  ON OrderDetail.ProductId = Product.ProductId
-	WHERE [Order].OrderDate >= DATEADD(MONTH, -6, GETDATE())
-	GROUP BY ProductTypeId
-) Sales
-ON Product.ProductTypeId = Sales.ProductTypeId
 ";
                 conn.Open();
                 return await conn.QueryAsync<ProductTypeViewModel>(query);
@@ -95,22 +83,11 @@ ON Product.ProductTypeId = Sales.ProductTypeId
             using (IDbConnection conn = Connection)
             {
                 string query = $@"
-SELECT Product.ProductId, ProductCode, ProductName, ProductTypeName, Product.ProductDescription, RANK() OVER (ORDER BY Sales.Total DESC) AS Rank, Images.ImagePath, ProductWebsite.SlugsUrl,
-       CASE WHEN ProductInventory.Balance > 0 THEN 'In Stock' ELSE 'Out Of Stock' END AS Balance
+SELECT Product.ProductId, ProductCode, ProductName, ProductTypeName, Product.ProductDescription, 0 AS Rank, Images.ImagePath, ProductWebsite.SlugsUrl,
+       'In Stock' AS Balance
 FROM Product
 INNER JOIN ProductType
 ON Product.ProductTypeId = ProductType.ProductTypeId
-LEFT JOIN (
-	SELECT Product.ProductId, SUM(OrderDetail.Total) AS Total
-	FROM OrderDetail
-	INNER JOIN [Order]
-	  ON [Order].OrderId = OrderDetail.OrderId
-	INNER JOIN Product
-	  ON OrderDetail.ProductId = Product.ProductId
-	WHERE [Order].OrderDate >= DATEADD(MONTH, -6, GETDATE())
-	GROUP BY Product.ProductId
-) Sales
-ON Product.ProductId = Sales.ProductId
 LEFT JOIN (
 	SELECT  ProductId, ImagePath
 	FROM (
@@ -122,11 +99,6 @@ LEFT JOIN (
 ON Images.ProductId = Product.ProductId
 LEFT JOIN ProductWebsite
 ON ProductWebsite.ProductId = Product.ProductId
-LEFT JOIN (
-	SELECT ProductId, SUM(Balance) AS Balance from ProductInventory
-	GROUP BY ProductId
-) AS ProductInventory
-ON ProductInventory.ProductId = Product.ProductId
 WHERE Product.Disabled = 0
       AND ProductType.SlugsUrl = @slugsUrl
 ";
@@ -140,22 +112,11 @@ WHERE Product.Disabled = 0
             using (IDbConnection conn = Connection)
             {
                 string query = $@"
-SELECT TOP 10 Product.ProductId, ProductCode, ProductName, ProductTypeName, Product.ProductDescription, RANK() OVER (ORDER BY Sales.Total DESC) AS Rank, Images.ImagePath, ProductWebsite.SlugsUrl,
-       CASE WHEN ProductInventory.Balance > 0 THEN 'In Stock' ELSE 'Out Of Stock' END AS Balance
+SELECT TOP 10 Product.ProductId, ProductCode, ProductName, ProductTypeName, Product.ProductDescription, 0 AS Rank, Images.ImagePath, ProductWebsite.SlugsUrl,
+       'In Stock'AS Balance
 FROM Product
 INNER JOIN ProductType
 ON Product.ProductTypeId = ProductType.ProductTypeId
-LEFT JOIN (
-	SELECT Product.ProductId, SUM(OrderDetail.Total) AS Total
-	FROM OrderDetail
-	INNER JOIN [Order]
-	  ON [Order].OrderId = OrderDetail.OrderId
-	INNER JOIN Product
-	  ON OrderDetail.ProductId = Product.ProductId
-	WHERE [Order].OrderDate >= DATEADD(MONTH, -6, GETDATE())
-	GROUP BY Product.ProductId
-) Sales
-ON Product.ProductId = Sales.ProductId
 LEFT JOIN (
 	SELECT  ProductId, ImagePath
 	FROM (
@@ -167,11 +128,6 @@ LEFT JOIN (
 ON Images.ProductId = Product.ProductId
 LEFT JOIN ProductWebsite
 ON ProductWebsite.ProductId = Product.ProductId
-LEFT JOIN (
-	SELECT ProductId, SUM(Balance) AS Balance from ProductInventory
-	GROUP BY ProductId
-) AS ProductInventory
-ON ProductInventory.ProductId = Product.ProductId
 WHERE Product.Disabled = 0
       AND ImagePath IS NOT NULL
 ";
@@ -205,28 +161,19 @@ SELECT TOP 1 Product.ProductId,
        ProductCode, 
        ProductName, 
 	   ProductTypeName, Product.ProductDescription, 
-	   RANK() OVER (ORDER BY Sales.Total DESC) AS Rank, Images.ImagePath, ProductWebsite.SlugsUrl,
+	   0 AS Rank, 
+	   Images.ImagePath, 
+	   ProductWebsite.SlugsUrl,
 	   ProductWebsite.Description,
 	   ProductWebsite.Detail,
 	   ProductWebsite.SlugsUrl,
 	   ProductWebsite.UserManualPath,
 	   ProductWebsite.WarrantyInformation,
 	   ProductWebsite.AdditionalInformation,
-       CASE WHEN ProductInventory.Balance > 0 THEN 'In Stock' ELSE 'Out Of Stock' END AS Balance
+       'In Stock'AS Balance
 FROM Product
 INNER JOIN ProductType
 ON Product.ProductTypeId = ProductType.ProductTypeId
-LEFT JOIN (
-	SELECT Product.ProductId, SUM(OrderDetail.Total) AS Total
-	FROM OrderDetail
-	INNER JOIN [Order]
-	  ON [Order].OrderId = OrderDetail.OrderId
-	INNER JOIN Product
-	  ON OrderDetail.ProductId = Product.ProductId
-	WHERE [Order].OrderDate >= DATEADD(MONTH, -6, GETDATE())
-	GROUP BY Product.ProductId
-) Sales
-ON Product.ProductId = Sales.ProductId
 LEFT JOIN (
     SELECT TOP 1 ProductWebsiteImage.ProductId, ImagePath
     FROM ProductWebsiteImage
@@ -237,11 +184,6 @@ LEFT JOIN (
 ON Images.ProductId = Product.ProductId
 LEFT JOIN ProductWebsite
 ON ProductWebsite.ProductId = Product.ProductId
-LEFT JOIN (
-	SELECT ProductId, SUM(Balance) AS Balance from ProductInventory
-	GROUP BY ProductId
-) AS ProductInventory
-ON ProductInventory.ProductId = Product.ProductId
 WHERE Product.Disabled = 0
 AND ProductWebsite.SlugsUrl = @slugsUrl;
 

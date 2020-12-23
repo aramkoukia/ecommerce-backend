@@ -8,6 +8,7 @@ namespace EcommerceApi.Repositories
     public interface IProductTypeRepository
     {
         Task<IEnumerable<WebsiteProductTypeViewModel>> GetWebsiteProductTypes();
+        Task<WebsiteProductTypeViewModel> GetWebsiteProductType(string slug);
         Task<IEnumerable<ProductTypeViewModel>> GetProductTypes();
         Task<IEnumerable<WebsiteProductsInCategoryViewModel>> GetWebsiteProductsByProductType(string id);
         Task<IEnumerable<string>> GetWebsiteProductSlugs();
