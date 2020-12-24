@@ -15,11 +15,19 @@ namespace EcommerceApi.Controllers
         public WebsiteProductController(IProductTypeRepository productTypeRepository) =>
           _productTypeRepository = productTypeRepository;
 
-        // GET: api/ProductTypes/{id}/Products
+        // GET: api/website/products
         [HttpGet("Products")]
         public async Task<IEnumerable<WebsiteProductsInCategoryViewModel>> GetAsync() =>
           await _productTypeRepository.GetWebsiteProducts();
 
+        // GET: api/website/products
+        [HttpGet("Products/New")]
+        public async Task<IEnumerable<WebsiteProductsInCategoryViewModel>> GetNewAsync() =>
+          await _productTypeRepository.GetNewWebsiteProducts();
+
+        [HttpGet("Products/Popular")]
+        public async Task<IEnumerable<WebsiteProductsInCategoryViewModel>> GetPopularAsync() =>
+          await _productTypeRepository.GetPopularWebsiteProducts();
 
         // GET: api/ProductTypes/{id}/Products
         [HttpGet("ProductTypes/{id}/Products")]

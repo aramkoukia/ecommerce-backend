@@ -315,6 +315,39 @@ namespace EcommerceApi.Controllers
             return Ok(exisintgProductType);
         }
 
+        [HttpPost]
+        [Route("{id}/UploadHeaderImage")]
+        [AllowAnonymous]
+        public async Task<IActionResult> UploadHeaderImageAsync([FromRoute] int id, IFormFile file)
+        {
+            var exisintgProductType = await _context.ProductType.FirstOrDefaultAsync(m => m.ProductTypeId == id);
+            if (exisintgProductType == null)
+            {
+                return BadRequest($"ProductTypeId {id} not found.");
+            }
+
+            var storageConnectionString = _config.GetConnectionString("AzureStorageConnectionString");
+
+            if (!CloudStorageAccount.TryParse(storageConnectionString, out CloudStorageAccount storageAccount))
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            }
+            var blobClient = storageAccount.CreateCloudBlobClient();
+
+            var container = blobClient.GetContainerReference(ContentContainerName);
+
+            await container.CreateIfNotExistsAsync();
+
+            //MS: Don't rely on or trust the FileName property without validation. The FileName property should only be used for display purposes.
+            var picBlob = container.GetBlockBlobReference(Guid.NewGuid().ToString() + "-" + file.FileName);
+
+            await picBlob.UploadFromStreamAsync(file.OpenReadStream());
+
+            exisintgProductType.HeaderImagePath = picBlob.Uri.AbsoluteUri;
+            await _context.SaveChangesAsync();
+            return Ok(exisintgProductType);
+        }
+
         private bool ProductTypeExists(int id)
         {
             return _context.ProductType.Any(e => e.ProductTypeId == id);
