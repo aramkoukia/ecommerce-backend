@@ -120,15 +120,44 @@ AND ProductWebsite.SlugsUrl = @slugsUrl
             using (IDbConnection conn = Connection)
             {
                 string query = $@"
-SELECT Product.ProductId, ProductCode, ProductName, ProductTypeName, Product.ProductDescription, 0 AS Rank, ProductWebsite.SlugsUrl,
-       'In Stock'AS Balance
+SELECT ProductCode, 
+	   ProductName, 
+	   ProductTypeName, 
+	   ProductWebsite.SlugsUrl, 
+       'In Stock' AS Balance
 FROM Product
 INNER JOIN ProductType
 ON Product.ProductTypeId = ProductType.ProductTypeId
 LEFT JOIN ProductWebsite
 ON ProductWebsite.ProductId = Product.ProductId
 WHERE Product.Disabled = 0
-      AND Product.ProductId in ( SELECT ProductId FROM ProductWebsiteImage )
+";
+                conn.Open();
+                return await conn.QueryAsync<WebsiteProductsInCategoryViewModel>(query);
+            }
+        }
+
+        public async Task<IEnumerable<WebsiteProductsInCategoryViewModel>> GetWebsiteProductDetails()
+        {
+            using (IDbConnection conn = Connection)
+            {
+                string query = $@"
+SELECT Product.ProductId, 
+       ProductCode, 
+	   ProductName, 
+	   ProductTypeName, 
+	   ProductWebsite.SlugsUrl, 
+	   ProductWebsite.Description, 
+	   ProductWebsite.WarrantyInformation, 
+	   ProductWebsite.UserManualPath, 
+	   ProductWebsite.HeaderImagePath,
+       'In Stock' AS Balance
+FROM Product
+INNER JOIN ProductType
+ON Product.ProductTypeId = ProductType.ProductTypeId
+LEFT JOIN ProductWebsite
+ON ProductWebsite.ProductId = Product.ProductId
+WHERE Product.Disabled = 0
 
 SELECT ProductWebsite.ProductId, ImagePath
 FROM ProductWebsiteImage
@@ -263,6 +292,7 @@ SELECT TOP 1 Product.ProductId,
 	   ProductWebsite.UserManualPath,
 	   ProductWebsite.WarrantyInformation,
 	   ProductWebsite.AdditionalInformation,
+       ProductWebsite.HeaderImagePath,
        'In Stock'AS Balance
 FROM Product
 INNER JOIN ProductType

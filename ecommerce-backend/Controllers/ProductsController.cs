@@ -9,6 +9,9 @@ using EcommerceApi.ViewModel;
 using EcommerceApi.Repositories;
 using System;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
+using Microsoft.WindowsAzure.Storage;
 
 namespace EcommerceApi.Controllers
 {
@@ -20,15 +23,19 @@ namespace EcommerceApi.Controllers
         private readonly EcommerceContext _context;
         private readonly IProductRepository _productRepository;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IConfiguration _config;
+        private const string ContentContainerName = "products";
 
         public ProductsController(
             EcommerceContext context, 
             IProductRepository productRepository,
-            UserManager<ApplicationUser> userManager)
+            UserManager<ApplicationUser> userManager,
+            IConfiguration config)
         {
             _context = context;
             _productRepository = productRepository;
             _userManager = userManager;
+            _config = config;
         }
 
         // GET: api/Products
@@ -214,6 +221,101 @@ namespace EcommerceApi.Controllers
             return Ok();
         }
 
+        [HttpPost]
+        [Route("{id}/Upload")]
+        [AllowAnonymous]
+        public async Task<IActionResult> UploadAsync([FromRoute] int id, IFormFile file)
+        {
+            var exisintgProduct = await _context.Product.FirstOrDefaultAsync(m => m.ProductId == id);
+            if (exisintgProduct == null)
+            {
+                return BadRequest($"ProductId {id} not found.");
+            }
+
+            var storageConnectionString = _config.GetConnectionString("AzureStorageConnectionString");
+
+            if (!CloudStorageAccount.TryParse(storageConnectionString, out CloudStorageAccount storageAccount))
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            }
+            var blobClient = storageAccount.CreateCloudBlobClient();
+
+            var container = blobClient.GetContainerReference(ContentContainerName);
+
+            await container.CreateIfNotExistsAsync();
+
+            //MS: Don't rely on or trust the FileName property without validation. The FileName property should only be used for display purposes.
+            var picBlob = container.GetBlockBlobReference(Guid.NewGuid().ToString() + "-" + file.FileName);
+
+            await picBlob.UploadFromStreamAsync(file.OpenReadStream());
+
+            var exisintgProductImage = await _context.ProductWebsiteImage.FirstOrDefaultAsync(m => m.ProductId == id);
+
+            if (exisintgProductImage != null)
+            {
+                exisintgProductImage.ImagePath = picBlob.Uri.AbsoluteUri;
+            }
+            else
+            {
+                _context.ProductWebsiteImage.Add(
+                    new ProductWebsiteImage
+                    {
+                        ProductId = id,
+                        ImagePath = picBlob.Uri.AbsoluteUri
+                    });
+            }
+            await _context.SaveChangesAsync();
+
+            return Ok(exisintgProductImage);
+        }
+
+        [HttpPost]
+        [Route("{id}/UploadHeaderImage")]
+        [AllowAnonymous]
+        public async Task<IActionResult> UploadHeaderImageAsync([FromRoute] int id, IFormFile file)
+        {
+            var exisintgProduct = await _context.Product.FirstOrDefaultAsync(m => m.ProductId == id);
+            if (exisintgProduct == null)
+            {
+                return BadRequest($"ProductId {id} not found.");
+            }
+
+            var storageConnectionString = _config.GetConnectionString("AzureStorageConnectionString");
+
+            if (!CloudStorageAccount.TryParse(storageConnectionString, out CloudStorageAccount storageAccount))
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            }
+            var blobClient = storageAccount.CreateCloudBlobClient();
+
+            var container = blobClient.GetContainerReference(ContentContainerName);
+
+            await container.CreateIfNotExistsAsync();
+
+            //MS: Don't rely on or trust the FileName property without validation. The FileName property should only be used for display purposes.
+            var picBlob = container.GetBlockBlobReference(Guid.NewGuid().ToString() + "-" + file.FileName);
+
+            await picBlob.UploadFromStreamAsync(file.OpenReadStream());
+
+            var exisintgProductWebsite = await _context.ProductWebsite.FirstOrDefaultAsync(m => m.ProductId == id);
+
+            if (exisintgProductWebsite != null)
+            {
+                exisintgProductWebsite.HeaderImagePath = picBlob.Uri.AbsoluteUri;
+            }
+            else
+            {
+                _context.ProductWebsite.Add(
+                    new ProductWebsite
+                    {
+                        ProductId = id,
+                        HeaderImagePath = picBlob.Uri.AbsoluteUri
+                    });
+            }
+            await _context.SaveChangesAsync();
+
+            return Ok(exisintgProductWebsite);
+        }
         private bool ProductExists(int id)
         {
             return _context.Product.Any(e => e.ProductId == id);

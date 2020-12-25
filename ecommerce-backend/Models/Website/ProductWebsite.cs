@@ -14,5 +14,6 @@
         public string WarrantyInformation { get; set; }
         public string AdditionalInformation { get; set; }
         public string UserManualPath { get; set; }
+        public string HeaderImagePath { get; set; }
     }
 }

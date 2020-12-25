@@ -20,6 +20,10 @@ namespace EcommerceApi.Controllers
         public async Task<IEnumerable<WebsiteProductsInCategoryViewModel>> GetAsync() =>
           await _productTypeRepository.GetWebsiteProducts();
 
+        [HttpGet("ProductDetails")]
+        public async Task<IEnumerable<WebsiteProductsInCategoryViewModel>> GetDetailsAsync() =>
+           await _productTypeRepository.GetWebsiteProductDetails();
+
         // GET: api/website/products
         [HttpGet("Products/New")]
         public async Task<IEnumerable<WebsiteProductsInCategoryViewModel>> GetNewAsync() =>
