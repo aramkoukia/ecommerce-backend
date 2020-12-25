@@ -316,6 +316,159 @@ namespace EcommerceApi.Controllers
 
             return Ok(exisintgProductWebsite);
         }
+
+        // PUT: api/Products/5/Description
+        [HttpPut("{id}/Description")]
+        public async Task<IActionResult> PutProductDescription([FromRoute] int id, [FromBody] ProductWebsite product)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            if (id != product.ProductId)
+            {
+                return BadRequest();
+            }
+
+            var exisintgProductWebsite = await _context.ProductWebsite.FirstOrDefaultAsync(m => m.ProductId == id);
+            if (exisintgProductWebsite == null)
+            {
+                _context.ProductWebsite.Add(new ProductWebsite
+                {
+                    ProductId= id,
+                    Description = product.Description
+                });
+            }
+            else
+            {
+                exisintgProductWebsite.Description = product.Description;
+            }
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+               throw;
+            }
+            return NoContent();
+        }
+
+        // PUT: api/Products/5/Description
+        [HttpPut("{id}/AdditionalInfo")]
+        public async Task<IActionResult> PutProductAdditionalInfo([FromRoute] int id, [FromBody] ProductWebsite product)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            if (id != product.ProductId)
+            {
+                return BadRequest();
+            }
+
+            var exisintgProductWebsite = await _context.ProductWebsite.FirstOrDefaultAsync(m => m.ProductId == id);
+            if (exisintgProductWebsite == null)
+            {
+                _context.ProductWebsite.Add(new ProductWebsite
+                {
+                    ProductId = id,
+                    AdditionalInformation = product.AdditionalInformation
+                });
+            }
+            else
+            {
+                exisintgProductWebsite.AdditionalInformation = product.AdditionalInformation;
+            }
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                throw;
+            }
+            return NoContent();
+        }
+
+        // PUT: api/Products/5/Detail
+        [HttpPut("{id}/Detail")]
+        public async Task<IActionResult> PutProductDetail([FromRoute] int id, [FromBody] ProductWebsite product)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            if (id != product.ProductId)
+            {
+                return BadRequest();
+            }
+
+            var exisintgProductWebsite = await _context.ProductWebsite.FirstOrDefaultAsync(m => m.ProductId == id);
+            if (exisintgProductWebsite == null)
+            {
+                _context.ProductWebsite.Add(new ProductWebsite
+                {
+                    ProductId = id,
+                    Detail = product.Detail
+                });
+            }
+            else
+            {
+                exisintgProductWebsite.Detail = product.Detail;
+            }
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                throw;
+            }
+            return NoContent();
+        }
+
+        // PUT: api/Products/5/Warranty
+        [HttpPut("{id}/Warranty")]
+        public async Task<IActionResult> PutProductWarrantyInformation([FromRoute] int id, [FromBody] ProductWebsite product)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            if (id != product.ProductId)
+            {
+                return BadRequest();
+            }
+
+            var exisintgProductWebsite = await _context.ProductWebsite.FirstOrDefaultAsync(m => m.ProductId == id);
+            if (exisintgProductWebsite == null)
+            {
+                _context.ProductWebsite.Add(new ProductWebsite
+                {
+                    ProductId = id,
+                    WarrantyInformation = product.WarrantyInformation
+                });
+            }
+            else
+            {
+                exisintgProductWebsite.WarrantyInformation = product.WarrantyInformation;
+            }
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                throw;
+            }
+            return NoContent();
+        }
+
         private bool ProductExists(int id)
         {
             return _context.Product.Any(e => e.ProductId == id);
