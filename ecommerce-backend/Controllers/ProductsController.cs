@@ -225,7 +225,7 @@ namespace EcommerceApi.Controllers
         [HttpPost]
         [Route("{id}/Upload")]
         [AllowAnonymous]
-        public async Task<IActionResult> UploadAsync([FromRoute] int id, IFormFile file)
+        public async Task<IActionResult> UploadAsync([FromRoute] int id, ICollection<IFormFile> files)
         {
             var exisintgProduct = await _context.Product.FirstOrDefaultAsync(m => m.ProductId == id);
             if (exisintgProduct == null)
@@ -245,28 +245,31 @@ namespace EcommerceApi.Controllers
 
             await container.CreateIfNotExistsAsync();
 
-            //MS: Don't rely on or trust the FileName property without validation. The FileName property should only be used for display purposes.
-            var picBlob = container.GetBlockBlobReference(Guid.NewGuid().ToString() + "-" + file.FileName);
-
-            await picBlob.UploadFromStreamAsync(file.OpenReadStream());
-
             var exisintgProductImage = await _context.ProductWebsiteImage.FirstOrDefaultAsync(m => m.ProductId == id);
 
-            if (exisintgProductImage != null)
+            foreach (var file in files)
             {
-                exisintgProductImage.ImagePath = picBlob.Uri.AbsoluteUri;
-            }
-            else
-            {
-                _context.ProductWebsiteImage.Add(
-                    new ProductWebsiteImage
-                    {
-                        ProductId = id,
-                        ImagePath = picBlob.Uri.AbsoluteUri
-                    });
-            }
-            await _context.SaveChangesAsync();
+                //MS: Don't rely on or trust the FileName property without validation. The FileName property should only be used for display purposes.
+                var picBlob = container.GetBlockBlobReference(Guid.NewGuid().ToString() + "-" + file.FileName);
 
+                await picBlob.UploadFromStreamAsync(file.OpenReadStream());
+
+                if (exisintgProductImage != null)
+                {
+                    exisintgProductImage.ImagePath = picBlob.Uri.AbsoluteUri;
+                }
+                else
+                {
+                    _context.ProductWebsiteImage.Add(
+                        new ProductWebsiteImage
+                        {
+                            ProductId = id,
+                            ImagePath = picBlob.Uri.AbsoluteUri
+                        });
+                }
+            }
+
+            await _context.SaveChangesAsync();
             return Ok(exisintgProductImage);
         }
 
