@@ -25,6 +25,7 @@ namespace EcommerceApi.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IConfiguration _config;
         private const string ContentContainerName = "products";
+        private const string ProductManualsContainerName = "productmanuals";
 
         public ProductsController(
             EcommerceContext context, 
@@ -310,6 +311,54 @@ namespace EcommerceApi.Controllers
                     {
                         ProductId = id,
                         HeaderImagePath = picBlob.Uri.AbsoluteUri
+                    });
+            }
+            await _context.SaveChangesAsync();
+
+            return Ok(exisintgProductWebsite);
+        }
+
+        [HttpPost]
+        [Route("{id}/UserManual")]
+        [AllowAnonymous]
+        public async Task<IActionResult> UploadUserManualAsync([FromRoute] int id, IFormFile file)
+        {
+            var exisintgProduct = await _context.Product.FirstOrDefaultAsync(m => m.ProductId == id);
+            if (exisintgProduct == null)
+            {
+                return BadRequest($"ProductId {id} not found.");
+            }
+
+            var storageConnectionString = _config.GetConnectionString("AzureStorageConnectionString");
+
+            if (!CloudStorageAccount.TryParse(storageConnectionString, out CloudStorageAccount storageAccount))
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            }
+            var blobClient = storageAccount.CreateCloudBlobClient();
+
+            var container = blobClient.GetContainerReference(ProductManualsContainerName);
+
+            await container.CreateIfNotExistsAsync();
+
+            //MS: Don't rely on or trust the FileName property without validation. The FileName property should only be used for display purposes.
+            var picBlob = container.GetBlockBlobReference(Guid.NewGuid().ToString() + "-" + file.FileName);
+
+            await picBlob.UploadFromStreamAsync(file.OpenReadStream());
+
+            var exisintgProductWebsite = await _context.ProductWebsite.FirstOrDefaultAsync(m => m.ProductId == id);
+
+            if (exisintgProductWebsite != null)
+            {
+                exisintgProductWebsite.UserManualPath = picBlob.Uri.AbsoluteUri;
+            }
+            else
+            {
+                _context.ProductWebsite.Add(
+                    new ProductWebsite
+                    {
+                        ProductId = id,
+                        UserManualPath = picBlob.Uri.AbsoluteUri
                     });
             }
             await _context.SaveChangesAsync();
