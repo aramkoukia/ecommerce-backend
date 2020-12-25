@@ -131,9 +131,25 @@ ON Product.ProductTypeId = ProductType.ProductTypeId
 LEFT JOIN ProductWebsite
 ON ProductWebsite.ProductId = Product.ProductId
 WHERE Product.Disabled = 0
+
+SELECT ProductWebsite.ProductId, ImagePath
+FROM ProductWebsiteImage
+INNER JOIN ProductWebsite
+	ON ProductWebsiteImage.ProductId = ProductWebsite.ProductId
+INNER JOIN Product
+    ON Product.ProductId = ProductWebsiteImage.ProductId
+WHERE Product.Disabled = 0
 ";
                 conn.Open();
-                return await conn.QueryAsync<WebsiteProductsInCategoryViewModel>(query);
+                var result = await conn.QueryMultipleAsync(query);
+                var products = result.Read<WebsiteProductsInCategoryViewModel>().ToList();
+                var images = result.Read<ProductImage>().ToList();
+
+                foreach (var product in products)
+                {
+                    product.Images.AddRange(images.Where(p => p.ProductId == product.ProductId));
+                }
+                return products;
             }
         }
 
