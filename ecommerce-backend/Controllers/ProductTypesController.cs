@@ -27,7 +27,7 @@ namespace EcommerceApi.Controllers
         private readonly EcommerceContext _context;
         private readonly IConfiguration _config;
         private readonly IProductTypeRepository _productTypeRepository;
-        private const string ContentContainerName = "content";
+        private const string ProductTypeContainerName = "producttype";
 
         public ProductTypesController(EcommerceContext context,
                                       IProductTypeRepository productTypeRepository,
@@ -87,7 +87,7 @@ namespace EcommerceApi.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError);
             }
             var blobClient = storageAccount.CreateCloudBlobClient();
-            var container = blobClient.GetContainerReference(ContentContainerName);
+            var container = blobClient.GetContainerReference(ProductTypeContainerName);
             await container.CreateIfNotExistsAsync();
 
 
@@ -301,16 +301,35 @@ namespace EcommerceApi.Controllers
             }
             var blobClient = storageAccount.CreateCloudBlobClient();
 
-            var container = blobClient.GetContainerReference(ContentContainerName);
+            var container = blobClient.GetContainerReference(ProductTypeContainerName);
 
             await container.CreateIfNotExistsAsync();
 
+            // Delete existing files
+            if (!string.IsNullOrEmpty(exisintgProductType.ThumbnailImagePath))
+            {
+                Uri uri = new Uri(exisintgProductType.ThumbnailImagePath);
+                if (uri.IsFile)
+                {
+                    string fileName = Path.GetFileName(uri.LocalPath);
+                    var existingBlob = container.GetBlockBlobReference(fileName);
+                    await existingBlob.DeleteIfExistsAsync();
+                }
+                exisintgProductType.ThumbnailImagePath = null;
+                await _context.SaveChangesAsync();
+
+                if (file == null)
+                {
+                    return Ok();
+                }
+            }
+
             //MS: Don't rely on or trust the FileName property without validation. The FileName property should only be used for display purposes.
             var picBlob = container.GetBlockBlobReference(Guid.NewGuid().ToString() + "-" + file.FileName);
-
             await picBlob.UploadFromStreamAsync(file.OpenReadStream());
 
             exisintgProductType.ThumbnailImagePath = picBlob.Uri.AbsoluteUri;
+            exisintgProductType.ThumbnailImageSize = file.Length.ToString();
             await _context.SaveChangesAsync();
             return Ok(exisintgProductType);
         }
@@ -334,16 +353,35 @@ namespace EcommerceApi.Controllers
             }
             var blobClient = storageAccount.CreateCloudBlobClient();
 
-            var container = blobClient.GetContainerReference(ContentContainerName);
+            var container = blobClient.GetContainerReference(ProductTypeContainerName);
 
             await container.CreateIfNotExistsAsync();
 
+            // Delete existing files
+            if (!string.IsNullOrEmpty(exisintgProductType.ThumbnailImagePath))
+            {
+                Uri uri = new Uri(exisintgProductType.ThumbnailImagePath);
+                if (uri.IsFile)
+                {
+                    string fileName = Path.GetFileName(uri.LocalPath);
+                    var existingBlob = container.GetBlockBlobReference(fileName);
+                    await existingBlob.DeleteIfExistsAsync();
+                }
+                exisintgProductType.HeaderImagePath = null;
+                await _context.SaveChangesAsync();
+
+                if (file == null)
+                {
+                    return Ok();
+                }
+            }
+
             //MS: Don't rely on or trust the FileName property without validation. The FileName property should only be used for display purposes.
             var picBlob = container.GetBlockBlobReference(Guid.NewGuid().ToString() + "-" + file.FileName);
-
             await picBlob.UploadFromStreamAsync(file.OpenReadStream());
 
             exisintgProductType.HeaderImagePath = picBlob.Uri.AbsoluteUri;
+            exisintgProductType.HeaderImageSize = file.Length.ToString();
             await _context.SaveChangesAsync();
             return Ok(exisintgProductType);
         }

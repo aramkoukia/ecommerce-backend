@@ -15,5 +15,6 @@
         public string AdditionalInformation { get; set; }
         public string UserManualPath { get; set; }
         public string HeaderImagePath { get; set; }
+        public string HeaderImageSize { get; set; }
     }
 }

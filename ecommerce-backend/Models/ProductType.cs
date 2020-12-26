@@ -16,5 +16,7 @@ namespace EcommerceApi.Models
         public string Description { get; set; }
         public string SlugsUrl { get; set; }
         public bool ShowOnWebsite { get; set; }
+        public string HeaderImageSize { get; set; }
+        public string ThumbnailImageSize { get; set; }
     }
 }

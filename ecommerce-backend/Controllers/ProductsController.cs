@@ -24,7 +24,7 @@ namespace EcommerceApi.Controllers
         private readonly IProductRepository _productRepository;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IConfiguration _config;
-        private const string ContentContainerName = "products";
+        private const string ProductsContainerName = "products";
         private const string ProductManualsContainerName = "productmanuals";
 
         public ProductsController(
@@ -225,7 +225,7 @@ namespace EcommerceApi.Controllers
         [HttpPost]
         [Route("{id}/Upload")]
         [AllowAnonymous]
-        public async Task<IActionResult> UploadAsync([FromRoute] int id, ICollection<IFormFile> files)
+        public async Task<IActionResult> UploadAsync([FromRoute] int id, ICollection<IFormFile> file)
         {
             var exisintgProduct = await _context.Product.FirstOrDefaultAsync(m => m.ProductId == id);
             if (exisintgProduct == null)
@@ -241,36 +241,46 @@ namespace EcommerceApi.Controllers
             }
             var blobClient = storageAccount.CreateCloudBlobClient();
 
-            var container = blobClient.GetContainerReference(ContentContainerName);
+            var container = blobClient.GetContainerReference(ProductsContainerName);
 
             await container.CreateIfNotExistsAsync();
 
-            var exisintgProductImage = await _context.ProductWebsiteImage.FirstOrDefaultAsync(m => m.ProductId == id);
-
-            foreach (var file in files)
-            {
-                //MS: Don't rely on or trust the FileName property without validation. The FileName property should only be used for display purposes.
-                var picBlob = container.GetBlockBlobReference(Guid.NewGuid().ToString() + "-" + file.FileName);
-
-                await picBlob.UploadFromStreamAsync(file.OpenReadStream());
-
-                if (exisintgProductImage != null)
+            // Delete existing files
+            var exisintgProductImages = _context.ProductWebsiteImage.Where(m => m.ProductId == id);
+            foreach (var image in exisintgProductImages) {
+                Uri uri = new Uri(image.ImagePath);
+                if (uri.IsFile)
                 {
-                    exisintgProductImage.ImagePath = picBlob.Uri.AbsoluteUri;
+                    string fileName = System.IO.Path.GetFileName(uri.LocalPath);
+                    var picBlob = container.GetBlockBlobReference(fileName);
+                    await picBlob.DeleteIfExistsAsync();
                 }
-                else
-                {
-                    _context.ProductWebsiteImage.Add(
-                        new ProductWebsiteImage
-                        {
-                            ProductId = id,
-                            ImagePath = picBlob.Uri.AbsoluteUri
-                        });
-                }
+                _context.ProductWebsiteImage.Remove(image);
             }
 
             await _context.SaveChangesAsync();
-            return Ok(exisintgProductImage);
+
+            if (file == null) {
+                return Ok();
+            }
+
+            // Add the new files
+            foreach (var f in file)
+            {
+                //MS: Don't rely on or trust the FileName property without validation. The FileName property should only be used for display purposes.
+                var picBlob = container.GetBlockBlobReference(Guid.NewGuid().ToString() + "-" + f.FileName);
+
+                await picBlob.UploadFromStreamAsync(f.OpenReadStream());
+                _context.ProductWebsiteImage.Add(
+                    new ProductWebsiteImage
+                    {
+                        ProductId = id,
+                        ImagePath = picBlob.Uri.AbsoluteUri,
+                        ImageSize = f.Length.ToString()
+                    });
+            }
+            await _context.SaveChangesAsync();
+            return Ok();
         }
 
         [HttpPost]
@@ -292,16 +302,33 @@ namespace EcommerceApi.Controllers
             }
             var blobClient = storageAccount.CreateCloudBlobClient();
 
-            var container = blobClient.GetContainerReference(ContentContainerName);
+            var container = blobClient.GetContainerReference(ProductsContainerName);
 
             await container.CreateIfNotExistsAsync();
 
+            // Delete existing files
+            var exisintgProductWebsite = await _context.ProductWebsite.FirstOrDefaultAsync(m => m.ProductId == id);
+            if (exisintgProductWebsite != null && !string.IsNullOrEmpty(exisintgProductWebsite.HeaderImagePath))
+            {
+                Uri uri = new Uri(exisintgProductWebsite.HeaderImagePath);
+                if (uri.IsFile)
+                {
+                    string fileName = System.IO.Path.GetFileName(uri.LocalPath);
+                    var existingBlob = container.GetBlockBlobReference(fileName);
+                    await existingBlob.DeleteIfExistsAsync();
+                }
+                exisintgProductWebsite.HeaderImagePath = null;
+                await _context.SaveChangesAsync();
+
+                if (file == null)
+                {
+                    return Ok();
+                }
+            }
+
             //MS: Don't rely on or trust the FileName property without validation. The FileName property should only be used for display purposes.
             var picBlob = container.GetBlockBlobReference(Guid.NewGuid().ToString() + "-" + file.FileName);
-
             await picBlob.UploadFromStreamAsync(file.OpenReadStream());
-
-            var exisintgProductWebsite = await _context.ProductWebsite.FirstOrDefaultAsync(m => m.ProductId == id);
 
             if (exisintgProductWebsite != null)
             {
@@ -313,7 +340,8 @@ namespace EcommerceApi.Controllers
                     new ProductWebsite
                     {
                         ProductId = id,
-                        HeaderImagePath = picBlob.Uri.AbsoluteUri
+                        HeaderImagePath = picBlob.Uri.AbsoluteUri,
+                        HeaderImageSize = file.Length.ToString()
                     });
             }
             await _context.SaveChangesAsync();
@@ -344,12 +372,29 @@ namespace EcommerceApi.Controllers
 
             await container.CreateIfNotExistsAsync();
 
+            // Delete existing files
+            var exisintgProductWebsite = await _context.ProductWebsite.FirstOrDefaultAsync(m => m.ProductId == id);
+            if (exisintgProductWebsite != null && !string.IsNullOrEmpty(exisintgProductWebsite.UserManualPath))
+            {
+                Uri uri = new Uri(exisintgProductWebsite.UserManualPath);
+                if (uri.IsFile)
+                {
+                    string fileName = System.IO.Path.GetFileName(uri.LocalPath);
+                    var existingBlob = container.GetBlockBlobReference(fileName);
+                    await existingBlob.DeleteIfExistsAsync();
+                }
+                exisintgProductWebsite.UserManualPath = null;
+                await _context.SaveChangesAsync();
+
+                if (file == null)
+                {
+                    return Ok();
+                }
+            }
+
             //MS: Don't rely on or trust the FileName property without validation. The FileName property should only be used for display purposes.
             var picBlob = container.GetBlockBlobReference(Guid.NewGuid().ToString() + "-" + file.FileName);
-
             await picBlob.UploadFromStreamAsync(file.OpenReadStream());
-
-            var exisintgProductWebsite = await _context.ProductWebsite.FirstOrDefaultAsync(m => m.ProductId == id);
 
             if (exisintgProductWebsite != null)
             {
