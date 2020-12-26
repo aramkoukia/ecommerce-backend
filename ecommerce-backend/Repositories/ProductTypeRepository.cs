@@ -41,7 +41,7 @@ INNER JOIN (
   GROUP BY ProductTypeId
 ) Product
 ON Product.ProductTypeId = ProductType.ProductTypeId
-WHERE ProductType.Disabled = 0
+WHERE ProductType.Disabled = 0 And ISNULL(ThumbnailImagePath, '') <> ''
 ";
                 conn.Open();
                 return await conn.QueryAsync<WebsiteProductTypeViewModel>(query);
