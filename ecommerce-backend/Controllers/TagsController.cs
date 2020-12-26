@@ -23,42 +23,29 @@ namespace EcommerceApi.Controllers
         [HttpGet]
         public async Task<IActionResult> GetTags()
         {
-            var tags = await _context.Tags.ToListAsync();
+            var tags = await _context.Tag.ToListAsync();
             return Ok(tags);
-        }
-
-        // GET: api/Tags/
-        [HttpGet("{name}")]
-        public async Task<IActionResult> GetTag([FromRoute] string name)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            var tag = await _context.Tags.SingleOrDefaultAsync(m => m.TagName == name);
-
-            if (tag == null)
-            {
-                return NotFound();
-            }
-
-            return Ok(tag);
         }
 
         // POST: api/Tags
         [HttpPost]
-        public async Task<IActionResult> PostTag([FromBody] string name)
+        public async Task<IActionResult> PostTag([FromBody] Tag tag)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
-            var tag = new Tag
+
+            if (_context.Tag.Count() == 0)
             {
-                TagName = name
-            };
-            _context.Tags.Add(tag);
+                tag.TagId = 1;
+            }
+            else
+            {
+                tag.TagId = _context.Tag.Max(l => l.TagId) + 1;
+            }
+
+            _context.Tag.Add(tag);
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetTag", new { id = tag.TagId }, tag);
@@ -107,12 +94,12 @@ namespace EcommerceApi.Controllers
                 return BadRequest(ModelState);
             }
 
-            var tag = await _context.Tags.SingleOrDefaultAsync(m => m.TagId == id);
+            var tag = await _context.Tag.SingleOrDefaultAsync(m => m.TagId == id);
             if (tag == null)
             {
                 return NotFound();
             }
-            _context.Tags.Remove(tag);
+            _context.Tag.Remove(tag);
             await _context.SaveChangesAsync();
 
             return Ok(tag);
@@ -120,7 +107,7 @@ namespace EcommerceApi.Controllers
 
         private bool TagExists(int id)
         {
-            return _context.Tags.Any(e => e.TagId == id);
+            return _context.Tag.Any(e => e.TagId == id);
         }
     }
 }

@@ -37,7 +37,8 @@ namespace EcommerceApi.Models
         public virtual DbSet<MonerisTransactionLog> MonerisTransactionLog { get; set; }
         public virtual DbSet<MonerisCallbackLog> MonerisCallbackLog { get; set; }
         public virtual DbSet<ClientPosSettings> ClientPosSettings { get; set; }
-        public virtual DbSet<Tag> Tags { get; set; }
+        public virtual DbSet<Tag> Tag { get; set; }
+        public virtual DbSet<ProductTag> ProductTag { get; set; }
         public virtual DbSet<CustomerStatementSetting> CustomerStatementSetting { get; set; }
         public virtual DbSet<InvoiceEmailAndPrintSetting> InvoiceEmailAndPrintSetting { get; set; }
 
