@@ -4,6 +4,7 @@ using System.Data.SqlClient;
 using System.Linq;
 using System.Threading.Tasks;
 using Dapper;
+using EcommerceApi.Models;
 using EcommerceApi.ViewModel;
 using EcommerceApi.ViewModel.Website;
 using Microsoft.Extensions.Configuration;
@@ -332,24 +333,47 @@ INNER JOIN ProductWebsite
 	ON ProductWebsiteImage.ProductId = ProductWebsite.ProductId
 AND ProductWebsite.SlugsUrl = @slugsUrl
 
-SELECT ProductId, ProductTag.TagId, TagName
+SELECT ProductTag.ProductId, ProductTag.TagId, TagName
 FROM ProductTag
 INNER JOIN Tag
 	ON ProductTag.TagId = Tag.TagId
 INNER JOIN ProductWebsite
 	ON ProductTag.ProductId = ProductWebsite.ProductId
 AND ProductWebsite.SlugsUrl = @slugsUrl
-
 ";
                 conn.Open();
                 var result = await conn.QueryMultipleAsync(query, new { slugsUrl });
                 var product = result.Read<WebsiteProductViewModel>().ToList().FirstOrDefault();
-                var tags = result.Read<WebsiteProductTag>().ToList();
                 var images = result.Read<string>().ToList();
+                var tags = result.Read<WebsiteProductTag>().ToList();
 
-                product.ImagePaths = images.ToArray();
-                product.Tags.AddRange(tags);
+                if (images != null)
+                {
+                    product.ImagePaths = images.ToArray();
+                }
+
+                if (tags != null)
+                {
+                    product.Tags.AddRange(tags);
+                }
                 return product;
+            }
+        }
+
+        public async Task<IEnumerable<Tag>> GetWebsiteProductTags()
+        {
+            using (IDbConnection conn = Connection)
+            {
+                string query = $@"
+SELECT DISTINCT ProductTag.TagId, TagName
+FROM ProductTag
+INNER JOIN Tag
+	ON ProductTag.TagId = Tag.TagId
+INNER JOIN ProductWebsite
+	ON ProductTag.ProductId = ProductWebsite.ProductId
+";
+                conn.Open();
+                return await conn.QueryAsync<Tag>(query);
             }
         }
     }

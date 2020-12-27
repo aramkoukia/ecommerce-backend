@@ -1,4 +1,5 @@
-﻿using EcommerceApi.ViewModel;
+﻿using EcommerceApi.Models;
+using EcommerceApi.ViewModel;
 using EcommerceApi.ViewModel.Website;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -12,6 +13,7 @@ namespace EcommerceApi.Repositories
         Task<IEnumerable<ProductTypeViewModel>> GetProductTypes();
         Task<IEnumerable<WebsiteProductsInCategoryViewModel>> GetWebsiteProductsByProductType(string id);
         Task<IEnumerable<string>> GetWebsiteProductSlugs();
+        Task<IEnumerable<Tag>> GetWebsiteProductTags();
         Task<WebsiteProductViewModel> GetWebsiteProduct(string id);
         Task<IEnumerable<WebsiteProductsInCategoryViewModel>> GetWebsiteProducts();
         Task<IEnumerable<WebsiteProductsInCategoryViewModel>> GetWebsiteProductDetails();

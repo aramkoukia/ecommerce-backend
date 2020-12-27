@@ -4,6 +4,10 @@ namespace EcommerceApi.ViewModel.Website
 {
     public class WebsiteProductViewModel
     {
+        public WebsiteProductViewModel()
+        {
+            Tags = new List<WebsiteProductTag>();
+        }
         public string ProductCode { get; set; }
         public string ProductName { get; set; }
         public string ProductTypeName { get; set; }

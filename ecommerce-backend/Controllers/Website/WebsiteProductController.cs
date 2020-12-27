@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using EcommerceApi.Repositories;
 using System.Threading.Tasks;
 using EcommerceApi.ViewModel.Website;
+using EcommerceApi.Models;
 
 namespace EcommerceApi.Controllers
 {
@@ -42,6 +43,11 @@ namespace EcommerceApi.Controllers
         [HttpGet("Products/Slugs")]
         public async Task<IEnumerable<string>> GetSlugsAsync() =>
           await _productTypeRepository.GetWebsiteProductSlugs();
+
+        // GET: api/Website/products/tags
+        [HttpGet("Products/Tags")]
+        public async Task<IEnumerable<Tag>> GetTagsAsync() =>
+          await _productTypeRepository.GetWebsiteProductTags();
 
         // GET: api/Website/Products/{id}
         [HttpGet("Products/{id}/detail")]
