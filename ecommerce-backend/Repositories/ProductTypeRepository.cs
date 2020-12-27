@@ -181,16 +181,22 @@ SELECT ProductWebsite.ProductId, ImagePath
 FROM ProductWebsiteImage
 INNER JOIN ProductWebsite
 	ON ProductWebsiteImage.ProductId = ProductWebsite.ProductId
-ORDER BY ProductWebsite.ProductId DESC
+
+SELECT ProductId, ProductTag.TagId, TagName
+FROM ProductTag
+INNER JOIN Tag
+	ON ProductTag.TagId = Tag.TagId
 ";
                 conn.Open();
                 var result = await conn.QueryMultipleAsync(query);
                 var products = result.Read<WebsiteProductsInCategoryViewModel>().ToList();
                 var images = result.Read<ProductImage>().ToList();
+                var tags = result.Read<WebsiteProductTag>().ToList();
 
                 foreach (var product in products)
                 {
                     product.Images.AddRange(images.Where(p => p.ProductId == product.ProductId));
+                    product.Tags.AddRange(tags.Where(p => p.ProductId == product.ProductId));
                 }
                 return products;
             }
@@ -325,12 +331,24 @@ FROM ProductWebsiteImage
 INNER JOIN ProductWebsite
 	ON ProductWebsiteImage.ProductId = ProductWebsite.ProductId
 AND ProductWebsite.SlugsUrl = @slugsUrl
+
+SELECT ProductId, ProductTag.TagId, TagName
+FROM ProductTag
+INNER JOIN Tag
+	ON ProductTag.TagId = Tag.TagId
+INNER JOIN ProductWebsite
+	ON ProductTag.ProductId = ProductWebsite.ProductId
+AND ProductWebsite.SlugsUrl = @slugsUrl
+
 ";
                 conn.Open();
                 var result = await conn.QueryMultipleAsync(query, new { slugsUrl });
                 var product = result.Read<WebsiteProductViewModel>().ToList().FirstOrDefault();
+                var tags = result.Read<WebsiteProductTag>().ToList();
                 var images = result.Read<string>().ToList();
+
                 product.ImagePaths = images.ToArray();
+                product.Tags.AddRange(tags);
                 return product;
             }
         }

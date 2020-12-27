@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using EcommerceApi.Models;
+using System.Collections.Generic;
 
 namespace EcommerceApi.ViewModel.Website
 {
@@ -7,6 +8,7 @@ namespace EcommerceApi.ViewModel.Website
         public WebsiteProductsInCategoryViewModel()
         {
             Images = new List<ProductImage>();
+            Tags = new List<WebsiteProductTag>();
         }
 
         public int ProductId { get; set; }
@@ -23,5 +25,6 @@ namespace EcommerceApi.ViewModel.Website
         public string UserManualPath { get; set; }
         public string HeaderImagePath { get; set; }
         public List<ProductImage> Images { get; set; }
+        public List<WebsiteProductTag> Tags { get; set; }
     }
 }

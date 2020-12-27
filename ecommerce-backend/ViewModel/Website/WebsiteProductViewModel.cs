@@ -1,4 +1,6 @@
-﻿namespace EcommerceApi.ViewModel.Website
+﻿using System.Collections.Generic;
+
+namespace EcommerceApi.ViewModel.Website
 {
     public class WebsiteProductViewModel
     {
@@ -14,5 +16,6 @@
         public string Detail { get; set; }
         public string SlugsUrl { get; set; }
         public string[] ImagePaths { get; set; }
+        public List<WebsiteProductTag> Tags { get; set; }
     }
 }

@@ -566,6 +566,22 @@ namespace EcommerceApi.Controllers
             return NoContent();
         }
 
+        [HttpPost("{id}/ProductTag")]
+        public async Task<IActionResult> CreateProductTags([FromRoute] int id, [FromBody] List<ProductTag> model)
+        {
+            var tags = _context.ProductTag.Where(p => p.ProductId == id);
+            _context.ProductTag.RemoveRange(tags);
+            await _context.SaveChangesAsync();
+
+            foreach (var tag in model)
+            {
+                tag.ProductId = id;
+                _context.ProductTag.Add(tag);
+            }
+            await _context.SaveChangesAsync();
+            return Ok();
+        }
+
         private bool ProductExists(int id)
         {
             return _context.Product.Any(e => e.ProductId == id);
