@@ -19,10 +19,6 @@ namespace EcommerceApi.Models
         public virtual DbSet<OrderTax> OrderTax { get; set; }
         public virtual DbSet<PaymentType> PaymentType { get; set; }
         public virtual DbSet<Product> Product { get; set; }
-        public virtual DbSet<ProductWebsite> ProductWebsite { get; set; }
-        public virtual DbSet<WebsiteSlider> WebsiteSlider { get; set; }
-        public virtual DbSet<BlogPost> BlogPost { get; set; }
-        public virtual DbSet<ProductWebsiteImage> ProductWebsiteImage { get; set; }
         public virtual DbSet<ProductPackage> ProductPackage { get; set; }
         public virtual DbSet<LoginHistory> LoginHistory { get; set; }
         public virtual DbSet<ProductType> ProductType { get; set; }
@@ -41,7 +37,13 @@ namespace EcommerceApi.Models
         public virtual DbSet<ProductTag> ProductTag { get; set; }
         public virtual DbSet<CustomerStatementSetting> CustomerStatementSetting { get; set; }
         public virtual DbSet<InvoiceEmailAndPrintSetting> InvoiceEmailAndPrintSetting { get; set; }
-
+        public virtual DbSet<ProductWebsite> ProductWebsite { get; set; }
+        public virtual DbSet<WebsiteSlider> WebsiteSlider { get; set; }
+        public virtual DbSet<BlogPost> BlogPost { get; set; }
+        public virtual DbSet<ProductWebsiteImage> ProductWebsiteImage { get; set; }
+        public virtual DbSet<WebsiteAbout> WebsiteAbout { get; set; }
+        public virtual DbSet<WebsiteAboutPopOver> WebsiteAboutPopOver { get; set; }
+        public virtual DbSet<WebsiteFaq> WebsiteFaq { get; set; }
         public EcommerceContext(DbContextOptions<EcommerceContext> options) : base(options)
         {
         }
