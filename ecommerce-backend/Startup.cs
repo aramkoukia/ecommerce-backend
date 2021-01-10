@@ -117,6 +117,7 @@ namespace EcommerceApi
             services.Configure<JwtOptions>(Configuration.GetSection("jwt"));
             services.AddResponseCompression();
             services.AddCors();
+            services.AddDistributedMemoryCache();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
