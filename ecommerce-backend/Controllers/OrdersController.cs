@@ -16,6 +16,7 @@ using System.IO;
 using EcommerceApi.Services;
 using EcommerceApi.Services.PaymentPlatform;
 using Microsoft.AspNetCore.Http;
+using EcommerceApi.Filters;
 
 namespace EcommerceApi.Controllers
 {
@@ -171,6 +172,7 @@ namespace EcommerceApi.Controllers
         }
 
         [HttpPost]
+        // [Idempotent(ExpireHours = 48)]
         public async Task<IActionResult> PostOrder([FromBody] Order order)
         {
             if (!ModelState.IsValid)
@@ -417,7 +419,8 @@ namespace EcommerceApi.Controllers
         }
 
         // PUT: api/Orders/5/Status
-        [HttpPut("{id}/Status")]
+        [HttpPost("{id}/Status")]
+        // [Idempotent(ExpireHours = 48)]
         public async Task<IActionResult> PutOrderStatus([FromRoute] int id, [FromBody] UpdateOrderStatus updateOrderStatus)
         {
             if (!ModelState.IsValid)
@@ -603,7 +606,8 @@ namespace EcommerceApi.Controllers
             return Ok(order);
         }
 
-        [HttpPut("{id}/Payment")]
+        [HttpPost("{id}/Payment")]
+        // [Idempotent(ExpireHours = 48)]
         public async Task<IActionResult> PutOrderPayment([FromRoute] int id, [FromBody] UpdateOrderPayment updateOrderPayment)
         {
             if (!ModelState.IsValid)
