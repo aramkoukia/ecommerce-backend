@@ -196,30 +196,30 @@ namespace EcommerceApi.Core
             }
 
             // Form-Files data:
-            if (httpRequest.Form != null
-                && httpRequest.Form.Files != null
-                && httpRequest.Form.Files.Count > 0)
-            {
-                foreach (IFormFile formFile in httpRequest.Form.Files)
-                {
-                    Stream fileStream = formFile.OpenReadStream();
-                    if (fileStream.CanRead
-                        && fileStream.CanSeek
-                        && fileStream.Length > 0)
-                    {
-                        using (MemoryStream memoryStream = new MemoryStream())
-                        {
-                            fileStream.Position = 0;
-                            fileStream.CopyTo(memoryStream);
-                            requestsData.Add(memoryStream.ToArray());
-                        }
-                    }
-                    else
-                    {
-                        requestsData.Add(formFile.FileName + "_" + formFile.Length.ToString() + "_" + formFile.Name);
-                    }
-                }
-            }
+            //if (httpRequest.Form != null
+            //    && httpRequest.Form.Files != null
+            //    && httpRequest.Form.Files.Count > 0)
+            //{
+            //    foreach (IFormFile formFile in httpRequest.Form.Files)
+            //    {
+            //        Stream fileStream = formFile.OpenReadStream();
+            //        if (fileStream.CanRead
+            //            && fileStream.CanSeek
+            //            && fileStream.Length > 0)
+            //        {
+            //            using (MemoryStream memoryStream = new MemoryStream())
+            //            {
+            //                fileStream.Position = 0;
+            //                fileStream.CopyTo(memoryStream);
+            //                requestsData.Add(memoryStream.ToArray());
+            //            }
+            //        }
+            //        else
+            //        {
+            //            requestsData.Add(formFile.FileName + "_" + formFile.Length.ToString() + "_" + formFile.Name);
+            //        }
+            //    }
+            //}
 
             // The request's URL:
             if (httpRequest.Path.HasValue)

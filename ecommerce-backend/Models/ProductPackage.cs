@@ -2,6 +2,7 @@
 
 namespace EcommerceApi.Models
 {
+    [Serializable]
     public class ProductPackage
     {
         public int ProductPackageId { get; set; }

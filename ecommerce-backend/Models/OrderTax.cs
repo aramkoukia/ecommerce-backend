@@ -1,6 +1,9 @@
-﻿namespace EcommerceApi.Models
+﻿using System;
+
+namespace EcommerceApi.Models
 {
-    public partial class OrderTax
+    [Serializable]
+    public class OrderTax
     {
         public int OrderTaxId { get; set; }
         public int OrderId { get; set; }

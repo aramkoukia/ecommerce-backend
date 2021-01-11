@@ -1,7 +1,9 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using System;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace EcommerceApi.Models
 {
+    [Serializable]
     public class Customer
     {
         public int CustomerId { get; set; }

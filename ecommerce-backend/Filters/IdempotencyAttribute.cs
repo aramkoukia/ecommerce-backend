@@ -19,7 +19,7 @@ namespace EcommerceApi.Filters
 
         public string DistributedCacheKeysPrefix { get; set; } = "IdempAPI_";
 
-        public string HeaderKeyName { get; set; } = "IdempotencyKey";
+        public string HeaderKeyName { get; set; } = "idempotency-key";
 
         public IFilterMetadata CreateInstance(IServiceProvider serviceProvider)
         {

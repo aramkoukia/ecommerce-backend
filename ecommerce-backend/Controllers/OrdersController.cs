@@ -40,7 +40,7 @@ namespace EcommerceApi.Controllers
                                 UserManager<ApplicationUser> userManager,
                                 IOrderRepository orderRepository,
                                 ICustomerRepository customerRepository,
-                                IConverter converter,
+                                // IConverter converter,
                                 IEmailSender emailSender,
                                 IMonerisService monerisService,
                                 IOrderTemplateGenerator orderTemplateGenerator,
@@ -51,7 +51,7 @@ namespace EcommerceApi.Controllers
             _userManager = userManager;
             _orderRepository = orderRepository;
             _customerRepository = customerRepository;
-            _converter = converter;
+            // _converter = converter;
             _emailSender = emailSender;
             _monerisService = monerisService;
             _accessor = accessor;
@@ -172,7 +172,7 @@ namespace EcommerceApi.Controllers
         }
 
         [HttpPost]
-        // [Idempotent(ExpireHours = 48)]
+        [Idempotent(ExpireHours = 48)]
         public async Task<IActionResult> PostOrder([FromBody] Order order)
         {
             if (!ModelState.IsValid)
@@ -420,7 +420,7 @@ namespace EcommerceApi.Controllers
 
         // PUT: api/Orders/5/Status
         [HttpPost("{id}/Status")]
-        // [Idempotent(ExpireHours = 48)]
+        [Idempotent(ExpireHours = 48)]
         public async Task<IActionResult> PutOrderStatus([FromRoute] int id, [FromBody] UpdateOrderStatus updateOrderStatus)
         {
             if (!ModelState.IsValid)
@@ -445,6 +445,11 @@ namespace EcommerceApi.Controllers
                 var userId = _userManager.GetUserId(User);
                 if (updateOrderStatus.OrderPayment != null && updateOrderStatus.OrderPayment.Any())
                 {
+                    foreach (var payment in order.OrderPayment)
+                    {
+                        _context.OrderPayment.Remove(payment);
+                    }
+
                     var orderPayments = updateOrderStatus.OrderPayment.Select(m=> new { m.PaymentTypeId, m.PaymentAmount, m.ChequeNo }).Distinct().ToList();
                     foreach (var payment in orderPayments)
                     {
@@ -607,7 +612,7 @@ namespace EcommerceApi.Controllers
         }
 
         [HttpPost("{id}/Payment")]
-        // [Idempotent(ExpireHours = 48)]
+        [Idempotent(ExpireHours = 48)]
         public async Task<IActionResult> PutOrderPayment([FromRoute] int id, [FromBody] UpdateOrderPayment updateOrderPayment)
         {
             if (!ModelState.IsValid)

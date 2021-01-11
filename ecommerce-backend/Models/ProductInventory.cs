@@ -2,7 +2,8 @@
 
 namespace EcommerceApi.Models
 {
-    public partial class ProductInventory
+    [Serializable]
+    public class ProductInventory
     {
         public int ProductInventoryId { get; set; }
         public int ProductId { get; set; }

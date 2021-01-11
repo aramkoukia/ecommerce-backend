@@ -2,7 +2,8 @@
 
 namespace EcommerceApi.Models
 {
-    public partial class Tax
+    [Serializable]
+    public class Tax
     {
         public int TaxId { get; set; }
         public string TaxName { get; set; }

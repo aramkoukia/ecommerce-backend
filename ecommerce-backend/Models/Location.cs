@@ -1,5 +1,8 @@
-﻿namespace EcommerceApi.Models
+﻿using System;
+
+namespace EcommerceApi.Models
 {
+    [Serializable]
     public class Location
     {
         public int LocationId { get; set; }

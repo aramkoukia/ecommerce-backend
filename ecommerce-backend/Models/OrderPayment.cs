@@ -2,7 +2,8 @@
 
 namespace EcommerceApi.Models
 {
-    public partial class OrderPayment
+    [Serializable]
+    public class OrderPayment
     {
         public int OrderPaymentId { get; set; }
         public int? OrderId { get; set; }

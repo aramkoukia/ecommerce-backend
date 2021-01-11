@@ -2,7 +2,8 @@
 
 namespace EcommerceApi.Models
 {
-    public partial class ProductType
+    [Serializable]
+    public class ProductType
     {
         public ProductType()
         {

@@ -1,6 +1,9 @@
-﻿namespace EcommerceApi.Models
+﻿using System;
+
+namespace EcommerceApi.Models
 {
-    public partial class PaymentType
+    [Serializable]
+    public class PaymentType
     {
         public int PaymentTypeId { get; set; }
         public string PaymentTypeName { get; set; }

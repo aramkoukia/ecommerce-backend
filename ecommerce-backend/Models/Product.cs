@@ -3,7 +3,8 @@ using System.Collections.Generic;
 
 namespace EcommerceApi.Models
 {
-    public partial class Product
+    [Serializable]
+    public class Product
     {
         public Product()
         {
