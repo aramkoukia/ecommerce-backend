@@ -14,7 +14,7 @@ using Microsoft.Extensions.Configuration;
 namespace EcommerceApi.Controllers
 {
     [Produces("application/json")]
-    [Route("api/WebsiteAbout")]
+    [Route("api/websiteabout")]
     [Authorize()]
     public class WebsiteAboutController : Controller
     {
@@ -97,7 +97,7 @@ namespace EcommerceApi.Controllers
                 }
             }
 
-            return CreatedAtAction("GetWebsiteAbout", new { id = websiteAbout.Id }, websiteAbout);
+            return Ok(websiteAbout);
         }
 
         // DELETE: api/WebsiteAbout/5

@@ -1,6 +1,6 @@
 ﻿namespace EcommerceApi.Models
 {
-    public partial class WebsiteAbout
+    public class WebsiteAbout
     {
         public WebsiteAbout()
         {
