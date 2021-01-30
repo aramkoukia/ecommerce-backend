@@ -12,5 +12,7 @@
         public string InvoicePhone { get; set; }
         public string InvoiceLogoImage { get; set; }
         public string InvoiceWebsite { get; set; }
+        public string WebsiteLogoUrl { get; set; }
+
     }
 }
