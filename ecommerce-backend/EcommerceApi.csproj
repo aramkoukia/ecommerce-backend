@@ -14,10 +14,12 @@
     <None Remove="libwkhtmltox.so" />
     <None Remove="Public\lights-parts-logo.png" />
     <None Remove="Public\lightsandparts.png" />
+    <None Remove="Public\lightsparts-favicon.ico" />
     <None Remove="Public\sidebar-1.jpg" />
     <None Remove="Public\sidebar-2.jpg" />
     <None Remove="Public\sidebar-3.jpg" />
     <None Remove="Public\sidebar-4.jpg" />
+    <None Remove="Public\veroboard-favicon.png" />
     <None Remove="Public\veroboard-logo.png" />
     <None Remove="Public\veroboard.png" />
   </ItemGroup>
@@ -44,6 +46,9 @@
     <Content Include="Public\lightsandparts.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="Public\lightsparts-favicon.ico">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="Public\sidebar-1.jpg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -54,6 +59,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Public\sidebar-4.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Public\veroboard-favicon.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Public\veroboard-logo.png">
