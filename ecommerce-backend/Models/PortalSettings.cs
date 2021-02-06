@@ -15,5 +15,10 @@
         public string WebsiteLogoUrl { get; set; }
         public string WebsiteFavIconUrl { get; set; }
         public string PublicWebsiteUrl { get; set; }
+        public string TwitterUrl { get; set; }
+        public string FacebookUrl { get; set; }
+        public string InstagramUrl { get; set; }
+        public string YoutubeUrl { get; set; }
+
     }
 }

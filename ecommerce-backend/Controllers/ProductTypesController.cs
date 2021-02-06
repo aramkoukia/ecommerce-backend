@@ -44,17 +44,17 @@ namespace EcommerceApi.Controllers
             => await _productTypeRepository.GetProductTypes();
 
         [HttpGet("updateslugs")]
-        // [AllowAnonymous]
+        //[AllowAnonymous]
         public async Task<IActionResult> UpdateSlugs()
         {
-            var productTypes = _context.ProductType;
+            var productTypes = _context.ProductType.ToList();
             foreach (var item in productTypes)
             {
                 item.SlugsUrl = SlugGenerator.ToSlug(item.ProductTypeName);
             }
             _context.SaveChanges();
 
-            var products = _context.Product;
+            var products = _context.Product.ToList();
             foreach (var item in products)
             {
                 var slugsUrl = SlugGenerator.ToSlug(item.ProductName);
