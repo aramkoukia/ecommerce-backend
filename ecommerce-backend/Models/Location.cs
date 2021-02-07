@@ -15,5 +15,8 @@ namespace EcommerceApi.Models
         public bool Disabled { get; set; }
         public bool ShowOnInvoice { get; set; }
         public string City { get; set; }
+        public string MapUrl { get; set; }
+        public string WorkingHours { get; set; }
+
     }
 }
