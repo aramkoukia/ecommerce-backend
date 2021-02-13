@@ -19,7 +19,7 @@ namespace EcommerceApi.Controllers
     {
         private readonly EcommerceContext _context;
         private readonly IConfiguration _config;
-        private const string ContentContainerName = "websiteabout";
+        private const string ContentContainerName = "websitefaq";
 
         public WebsiteFaqController(
             EcommerceContext context,
@@ -29,15 +29,30 @@ namespace EcommerceApi.Controllers
             _config = config;
         }
 
-        // GET: api/Website/Slider
+        // GET: api/Website/Faq
         [HttpGet]
-        [AllowAnonymous]
         public IEnumerable<WebsiteFaq> GetAsync() =>
           _context.WebsiteFaq.OrderBy(b => b.SortOrder).ToList();
 
+        [HttpGet("Formatted")]
+        [AllowAnonymous]
+        public IEnumerable<WebsiteFaqModel> GetFormattedAsync() =>
+            _context.WebsiteFaq.ToList().Select(w => w.Section).Distinct()
+                .Select(s=> new WebsiteFaqModel { 
+                     Section = s,
+                     Questions = new List<WebsiteFaqDetailModel> (
+                        _context.WebsiteFaq.Where(w=>w.Section == s).OrderBy(o => o.SortOrder).ToList().AsEnumerable()
+                          .Select(d => new WebsiteFaqDetailModel {
+                             Question = d.Question,
+                             Answer = d.Answer
+                          }) 
+                     )
+                }).ToList();
+
+
         // PUT: api/WebsiteFaq/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutWebsiteSlider([FromRoute] int id, [FromBody] WebsiteFaq websiteFaq)
+        public async Task<IActionResult> PutWebsiteFaq([FromRoute] int id, [FromBody] WebsiteFaq websiteFaq)
         {
             if (!ModelState.IsValid)
             {
@@ -147,8 +162,6 @@ namespace EcommerceApi.Controllers
 
             await picBlob.UploadFromStreamAsync(file.OpenReadStream());
 
-            exisintgWebsiteFaq.HeaderImagePath = picBlob.Uri.AbsoluteUri;
-            exisintgWebsiteFaq.HeaderImageSize = file.Length.ToString();
             await _context.SaveChangesAsync();
             return Ok(exisintgWebsiteFaq);
         }

@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Authorization;
 namespace EcommerceApi.Controllers
 {
     [Produces("application/json")]
-    [Route("api/websiteabout")]
+    [Route("api/websitecontact")]
     [AllowAnonymous()]
     public class WebsiteContactController : Controller
     {

@@ -17,6 +17,8 @@ namespace EcommerceApi.Models
         public string City { get; set; }
         public string MapUrl { get; set; }
         public string WorkingHours { get; set; }
+        public string Email { get; set; }
+        public int SortOrder { get; set; }
 
     }
 }
