@@ -966,6 +966,7 @@ LEFT JOIN PaymentType
 WHERE [Order].CustomerId = @customerId
       AND [Order].[Status] IN ('Paid', 'Return')
       AND OrderDate BETWEEN @FromDate AND @ToDate
+	  AND ISNULL(OrderPayment.PaymentAmount, 0) <> 0
                                  ";
                 conn.Open();
                 return await conn.QueryAsync<CustomerPaidOrdersViewModel>(query, new { customerId, fromDate, toDate });
@@ -977,14 +978,25 @@ WHERE [Order].CustomerId = @customerId
             using (IDbConnection conn = Connection)
             {
                 string query = $@"
-SELECT [Order].OrderId, PoNumber, OrderDate, DateAdd(DAY, 30, OrderDate) As DueDate, [Order].Total, CASE [Order].[Status] WHEN 'Account' THEN 'Awaiting Payment' END AS [Status], Customer.CompanyName, Customer.CustomerCode, Customer.[Address], Customer.City, Customer.Province, Customer.PostalCode
+SELECT [Order].OrderId, PoNumber, OrderDate, DateAdd(DAY, 30, OrderDate) As DueDate, [Order].Total, 
+       CASE [Order].[Status] 
+	   WHEN 'Account' THEN 'Awaiting Payment'
+	   WHEN 'Return' THEN 'Return Awaiting Payment'
+	   END AS [Status], 
+       Customer.CompanyName, Customer.CustomerCode, Customer.[Address], Customer.City, Customer.Province, Customer.PostalCode
 FROM [Order]
 INNER JOIN Customer
 	ON Customer.CustomerId = [Order].CustomerId
+LEFT JOIN 
+( 
+	SELECT OrderId, PaymentDate, PaymentTypeId, SUM(PaymentAmount) AS PaymentAmount
+	FROM OrderPayment
+	GROUP BY OrderId, PaymentDate, PaymentTypeId
+) OrderPayment
+ON [Order].OrderId = OrderPayment.OrderId
 WHERE [Order].CustomerId = @customerId 
-      AND [Order].[Status] IN ('Account')
-      AND OrderDate <= @ToDate
-                                 ";
+      AND ([Order].[Status] = 'Account' OR ([Order].[Status] = 'Return' AND  ISNULL(OrderPayment.PaymentAmount, 0) = 0))
+      AND OrderDate <= @ToDate";
                 conn.Open();
                 return await conn.QueryAsync<CustomerUnPaidOrdersViewModel>(query, new { customerId, toDate });
             }
