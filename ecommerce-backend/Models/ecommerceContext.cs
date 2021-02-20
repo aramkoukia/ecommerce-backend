@@ -44,6 +44,7 @@ namespace EcommerceApi.Models
         public virtual DbSet<WebsiteAbout> WebsiteAbout { get; set; }
         public virtual DbSet<WebsiteAboutPopOver> WebsiteAboutPopOver { get; set; }
         public virtual DbSet<WebsiteFaq> WebsiteFaq { get; set; }
+        public virtual DbSet<WebsitePage> WebsitePage { get; set; }
         public EcommerceContext(DbContextOptions<EcommerceContext> options) : base(options)
         {
         }
