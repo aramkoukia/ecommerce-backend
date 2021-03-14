@@ -32,8 +32,7 @@ namespace EcommerceApi.Controllers
         public async Task<IEnumerable<CustomApplicationViewModel>> Get()
             => await _customApplicationRepository.GetCustomApplicationSteps();
 
-        // GET: api/custom-applications/5/steps
-        [HttpGet("{id}/steps")]
+        [HttpGet("steps/{id}/step-details")]
         public async Task<IActionResult> GetSteps([FromRoute] int id)
         {
             if (!ModelState.IsValid)
@@ -44,43 +43,28 @@ namespace EcommerceApi.Controllers
             return Ok(stepDetails);
         }
 
-        // PUT: api/custom-applications/5/step
-        [HttpPut("{id}/step")]
-        public async Task<IActionResult> PutStep([FromRoute] int id, [FromBody] ApplicationStep step)
+        [HttpDelete("steps/{id}")]
+        public async Task<IActionResult> DeleteStep([FromBody] int id)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
-
-            if (id != step.ApplicationStepId)
+            
+            var applicationStep = await _context.ApplicationStep.SingleOrDefaultAsync(m => m.ApplicationStepId == id);
+            if (applicationStep == null)
             {
-                return BadRequest();
+                return NotFound();
             }
 
-            var existingStep = await _context.ApplicationStep.FirstOrDefaultAsync(a => a.ApplicationStepId == id);
-            existingStep.StepTitle = step.StepTitle;
-            existingStep.StepDescription = step.StepDescription;
-            existingStep.IsRangeValue = step.IsRangeValue;
-            existingStep.MaxValue = step.MaxValue;
-            existingStep.MinValue = step.MinValue;
-            existingStep.SortOrder = step.SortOrder;
-            existingStep.ValueUnit = step.ValueUnit;
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                throw;
-            }
+            _context.ApplicationStep.Remove(applicationStep);
+            await _context.SaveChangesAsync();
 
-            return Ok(step);
+            return Ok(applicationStep);
         }
 
-        // POST: api/custom-applications/5/step
-        [HttpPost("{id}/step")]
-        public async Task<IActionResult> PostApplication([FromBody] ApplicationStep step)
+        [HttpPost("steps")]
+        public async Task<IActionResult> PostStep([FromBody] ApplicationStep step)
         {
             if (!ModelState.IsValid)
             {
@@ -100,8 +84,40 @@ namespace EcommerceApi.Controllers
             return CreatedAtAction("GetApplciation", new { id = step.ApplicationStepId }, step);
         }
 
-        // PUT: api/custom-applications/5/step-detail
-        [HttpPut("{id}/step-detail")]
+        [HttpPut("steps/{id}")]
+        public async Task<IActionResult> PutStep([FromRoute] int id, [FromBody] ApplicationStep step)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            if (id != step.ApplicationStepId)
+            {
+                return BadRequest();
+            }
+
+            var existingStep = await _context.ApplicationStep.FirstOrDefaultAsync(a => a.ApplicationStepId == id);
+            existingStep.StepTitle = step.StepTitle;
+            existingStep.StepDescription = step.StepDescription;
+            // existingStep.IsRangeValue = step.IsRangeValue;
+            // existingStep.MaxValue = step.MaxValue;
+            // existingStep.MinValue = step.MinValue;
+            existingStep.SortOrder = step.SortOrder;
+            // existingStep.ValueUnit = step.ValueUnit;
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                throw;
+            }
+
+            return Ok(step);
+        }
+
+        [HttpPut("steps/step-details/{id}")]
         public async Task<IActionResult> PutStepDetail([FromRoute] int id, [FromBody] ApplicationStepDetail stepDetail)
         {
             if (!ModelState.IsValid)
@@ -114,7 +130,7 @@ namespace EcommerceApi.Controllers
                 return BadRequest();
             }
 
-            var existingStepDetail = await _context.ApplicationStepDetail.FirstOrDefaultAsync(a => a.ApplicationStepDetailId == id);
+            var existingStepDetail = await _context.ApplicationStepDetail.FirstOrDefaultAsync(a => a.ApplicationStepDetailId == detailid);
             existingStepDetail.StepDetailDescription = stepDetail.StepDetailDescription;
             existingStepDetail.SortOrder = stepDetail.SortOrder;
             existingStepDetail.StepDetailTitle = stepDetail.StepDetailTitle;
@@ -129,5 +145,45 @@ namespace EcommerceApi.Controllers
             return Ok(stepDetail);
         }
 
+        [HttpPost("steps/step-details")]
+        public async Task<IActionResult> PostStepDetail([FromBody] ApplicationStepDetail stepDetail)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            stepDetail.ApplicationStepId = _context.ApplicationStepDetail.Max(l => l.ApplicationStepDetailId) + 1;
+            _context.ApplicationStepDetail.Add(stepDetail);
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                throw;
+            }
+            return Ok(stepDetail);
+        }
+
+        [HttpDelete("steps/step-details/{id}")]
+        public async Task<IActionResult> DeleteStepDetail([FromBody] int id)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var applicationStepDetail = await _context.ApplicationStepDetail.SingleOrDefaultAsync(m => m.ApplicationStepDetailId == id);
+            if (applicationStepDetail == null)
+            {
+                return NotFound();
+            }
+
+            _context.ApplicationStepDetail.Remove(applicationStepDetail);
+            await _context.SaveChangesAsync();
+
+            return Ok(applicationStepDetail);
+        }
     }
 }

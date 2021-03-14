@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.WindowsAzure.Storage;
 using System;
 using Microsoft.Extensions.Configuration;
+using System.Web;
 
 namespace EcommerceApi.Controllers
 {
@@ -34,6 +35,11 @@ namespace EcommerceApi.Controllers
         [AllowAnonymous]
         public IEnumerable<WebsitePage> GetAsync() =>
           _context.WebsitePage.ToList();
+
+        [HttpGet("{url}")]
+        [AllowAnonymous]
+        public WebsitePage GetAsync(string url) =>
+          _context.WebsitePage.FirstOrDefault(p => p.Url.ToLower() == HttpUtility.UrlDecode(url).ToLower());
 
         // PUT: api/WebsitePage/5
         [HttpPut("{url}")]
@@ -120,10 +126,11 @@ namespace EcommerceApi.Controllers
         }
 
         [HttpPost]
-        [Route("{id}/Upload")]
+        [Route("{encodedUrl}/Upload")]
         [AllowAnonymous]
-        public async Task<IActionResult> UploadAsync([FromRoute] string url, IFormFile file)
+        public async Task<IActionResult> UploadAsync([FromRoute] string encodedUrl, IFormFile file)
         {
+            var url = HttpUtility.UrlDecode(encodedUrl);
             var exisintgWebsitePage = await _context.WebsitePage.FirstOrDefaultAsync(m => m.Url == url);
             if (exisintgWebsitePage == null)
             {
