@@ -7,6 +7,11 @@ using Microsoft.AspNetCore.Authorization;
 using System.Linq;
 using EcommerceApi.Repositories;
 using EcommerceApi.ViewModel;
+using Microsoft.AspNetCore.Http;
+using Microsoft.WindowsAzure.Storage;
+using System;
+using System.IO;
+using Microsoft.Extensions.Configuration;
 
 namespace EcommerceApi.Controllers
 {
@@ -16,15 +21,19 @@ namespace EcommerceApi.Controllers
     public class CustomApplicationsController : Controller
     {
         private readonly EcommerceContext _context;
+        private readonly IConfiguration _config;
         private readonly ICustomApplicationRepository _customApplicationRepository;
+        private const string CustomSolutionsContainerName = "customsolutions";
 
         public CustomApplicationsController(
             EcommerceContext context,
-            ICustomApplicationRepository customApplicationRepository
+            ICustomApplicationRepository customApplicationRepository,
+            IConfiguration config
             )
         {
             _context = context;
             _customApplicationRepository = customApplicationRepository;
+            _config = config;
         }
 
         // GET: api/custom-applications
@@ -188,6 +197,58 @@ namespace EcommerceApi.Controllers
             await _context.SaveChangesAsync();
 
             return Ok(applicationStepDetail);
+        }
+
+        [HttpPost]
+        [Route("step-details/{id}/Upload")]
+        [AllowAnonymous]
+        public async Task<IActionResult> UploadAsync([FromRoute] int id, IFormFile file)
+        {
+            var exisintgApplicationStepDetail = await _context.ApplicationStepDetail.FirstOrDefaultAsync(m => m.ApplicationStepDetailId == id);
+            if (exisintgApplicationStepDetail == null)
+            {
+                return BadRequest($"ApplicationStepDetailId {id} not found.");
+            }
+
+            var storageConnectionString = _config.GetConnectionString("AzureStorageConnectionString");
+
+            if (!CloudStorageAccount.TryParse(storageConnectionString, out CloudStorageAccount storageAccount))
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            }
+            var blobClient = storageAccount.CreateCloudBlobClient();
+
+            var container = blobClient.GetContainerReference(CustomSolutionsContainerName);
+
+            await container.CreateIfNotExistsAsync();
+
+            // Delete existing files
+            if (!string.IsNullOrEmpty(exisintgApplicationStepDetail.ThumbnailImagePath))
+            {
+                Uri uri = new Uri(exisintgApplicationStepDetail.ThumbnailImagePath);
+                if (uri.IsFile)
+                {
+                    string fileName = Path.GetFileName(uri.LocalPath);
+                    var existingBlob = container.GetBlockBlobReference(fileName);
+                    await existingBlob.DeleteIfExistsAsync();
+                }
+                exisintgApplicationStepDetail.ThumbnailImagePath = null;
+                await _context.SaveChangesAsync();
+
+                if (file == null)
+                {
+                    return Ok();
+                }
+            }
+
+            //MS: Don't rely on or trust the FileName property without validation. The FileName property should only be used for display purposes.
+            var picBlob = container.GetBlockBlobReference(Guid.NewGuid().ToString() + "-" + file.FileName);
+            await picBlob.UploadFromStreamAsync(file.OpenReadStream());
+
+            exisintgApplicationStepDetail.ThumbnailImagePath = picBlob.Uri.AbsoluteUri;
+            exisintgApplicationStepDetail.ThumbnailImageSize = file.Length.ToString();
+            await _context.SaveChangesAsync();
+            return Ok(exisintgApplicationStepDetail);
         }
     }
 }
