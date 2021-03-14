@@ -21,11 +21,23 @@ namespace EcommerceApi.ViewModel
 
     public class CustomApplicationDetail
     {
+        public CustomApplicationDetail()
+        {
+            Tags = new List<CustomApplicationStepDetailTag>();
+        }
         public int ApplicationStepDetailId { get; set; }
         public int ApplicationStepId { get; set; }
         public string StepDetailTitle { get; set; }
         public string StepDetailDescription { get; set; }
         public string ThumbnailImagePath { get; set; }
         public int SortOrder { get; set; }
+        public List<CustomApplicationStepDetailTag> Tags { get; set; }
+    }
+
+    public class CustomApplicationStepDetailTag
+    {
+        public int ApplicationStepDetailId { get; set; }
+        public int TagId { get; set; }
+        public string TagName { get; set; }
     }
 }
