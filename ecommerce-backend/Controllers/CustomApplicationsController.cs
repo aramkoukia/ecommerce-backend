@@ -44,7 +44,7 @@ namespace EcommerceApi.Controllers
         }
 
         [HttpDelete("steps/{id}")]
-        public async Task<IActionResult> DeleteStep([FromBody] int id)
+        public async Task<IActionResult> DeleteStep([FromRoute] int id)
         {
             if (!ModelState.IsValid)
             {
@@ -71,6 +71,10 @@ namespace EcommerceApi.Controllers
                 return BadRequest(ModelState);
             }
             step.ApplicationStepId = _context.ApplicationStep.Max(l => l.ApplicationStepId) + 1;
+            step.IsRangeValue = false;
+            step.MaxValue = (decimal)0.00;
+            step.MinValue = (decimal)0.00;
+            step.ValueUnit = "-";
             _context.ApplicationStep.Add(step);
             try
             {
@@ -100,10 +104,10 @@ namespace EcommerceApi.Controllers
             var existingStep = await _context.ApplicationStep.FirstOrDefaultAsync(a => a.ApplicationStepId == id);
             existingStep.StepTitle = step.StepTitle;
             existingStep.StepDescription = step.StepDescription;
+            existingStep.SortOrder = step.SortOrder;
             // existingStep.IsRangeValue = step.IsRangeValue;
             // existingStep.MaxValue = step.MaxValue;
             // existingStep.MinValue = step.MinValue;
-            existingStep.SortOrder = step.SortOrder;
             // existingStep.ValueUnit = step.ValueUnit;
             try
             {
@@ -130,7 +134,7 @@ namespace EcommerceApi.Controllers
                 return BadRequest();
             }
 
-            var existingStepDetail = await _context.ApplicationStepDetail.FirstOrDefaultAsync(a => a.ApplicationStepDetailId == detailid);
+            var existingStepDetail = await _context.ApplicationStepDetail.FirstOrDefaultAsync(a => a.ApplicationStepDetailId == id);
             existingStepDetail.StepDetailDescription = stepDetail.StepDetailDescription;
             existingStepDetail.SortOrder = stepDetail.SortOrder;
             existingStepDetail.StepDetailTitle = stepDetail.StepDetailTitle;
@@ -152,7 +156,7 @@ namespace EcommerceApi.Controllers
             {
                 return BadRequest(ModelState);
             }
-            stepDetail.ApplicationStepId = _context.ApplicationStepDetail.Max(l => l.ApplicationStepDetailId) + 1;
+            stepDetail.ApplicationStepDetailId = _context.ApplicationStepDetail.Max(l => l.ApplicationStepDetailId) + 1;
             _context.ApplicationStepDetail.Add(stepDetail);
 
             try
@@ -167,7 +171,7 @@ namespace EcommerceApi.Controllers
         }
 
         [HttpDelete("steps/step-details/{id}")]
-        public async Task<IActionResult> DeleteStepDetail([FromBody] int id)
+        public async Task<IActionResult> DeleteStepDetail([FromRoute] int id)
         {
             if (!ModelState.IsValid)
             {
