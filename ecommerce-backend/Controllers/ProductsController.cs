@@ -581,7 +581,6 @@ namespace EcommerceApi.Controllers
             await _context.SaveChangesAsync();
             return Ok();
         }
-
         private bool ProductExists(int id)
         {
             return _context.Product.Any(e => e.ProductId == id);

@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Dapper;
 using EcommerceApi.ViewModel;
+using EcommerceApi.ViewModel.Website;
 using Microsoft.Extensions.Configuration;
 
 namespace EcommerceApi.Repositories
@@ -57,6 +58,33 @@ INNER JOIN Tag
                 }
 
                 return steps;
+            }
+        }
+
+        public async Task<IEnumerable<WebsiteProductsInCategoryViewModel>> GetCustomApplicationResult(string[] selectedOptions)
+        {
+            // selectedOptions
+            // todo: query step ids with the names passed in.
+            var ids = new int[1, 2, 5, 8];
+            using (IDbConnection conn = Connection)
+            {
+                string query = $@"
+SELECT DISTINCT ProductCode, ProductName, SlugsUrl, Detail, Description, WarrantyInformation, AdditionalInformation
+FROM Product
+INNER JOIN ProductTag
+	ON Product.ProductId = ProductTag.ProductId
+LEFT JOIN ProductWebsite
+	ON ProductWebsite.ProductId = Product.ProductId
+WHERE TagId IN (
+	SELECT DISTINCT TagId 
+	FROM ApplicationStepDetailTag
+	INNER JOIN ApplicationStepDetail
+	ON ApplicationStepDetailTag.ApplicationStepDetailId = ApplicationStepDetail.ApplicationStepDetailId
+	WHERE StepDetailTitle IN @selectedOptions
+)
+";
+                conn.Open();
+                return await conn.QueryAsync<WebsiteProductsInCategoryViewModel>(query, new { selectedOptions });
             }
         }
     }

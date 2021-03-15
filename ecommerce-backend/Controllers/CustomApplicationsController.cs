@@ -250,5 +250,21 @@ namespace EcommerceApi.Controllers
             await _context.SaveChangesAsync();
             return Ok(exisintgApplicationStepDetail);
         }
+
+        [HttpPost("step-details/{id}/tags")]
+        public async Task<IActionResult> PostStepDetailTags([FromRoute] int id, [FromBody] List<ApplicationStepDetailTag> model)
+        {
+            var tags = _context.ApplicationStepDetailTag.Where(p => p.ApplicationStepDetailId == id);
+            _context.ApplicationStepDetailTag.RemoveRange(tags);
+            await _context.SaveChangesAsync();
+
+            foreach (var tag in model)
+            {
+                tag.ApplicationStepDetailId = id;
+                _context.ApplicationStepDetailTag.Add(tag);
+            }
+            await _context.SaveChangesAsync();
+            return Ok();
+        }
     }
 }

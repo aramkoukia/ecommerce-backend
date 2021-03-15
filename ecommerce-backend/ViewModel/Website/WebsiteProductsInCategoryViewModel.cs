@@ -1,5 +1,4 @@
-﻿using EcommerceApi.Models;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace EcommerceApi.ViewModel.Website
 {

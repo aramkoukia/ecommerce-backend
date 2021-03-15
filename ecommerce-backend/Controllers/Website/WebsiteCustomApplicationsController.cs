@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using EcommerceApi.Repositories;
 using System.Threading.Tasks;
 using EcommerceApi.ViewModel;
+using EcommerceApi.ViewModel.Website;
 
 namespace EcommerceApi.Controllers
 {
@@ -19,5 +20,10 @@ namespace EcommerceApi.Controllers
         [HttpGet("custom-applications")]
         public async Task<IEnumerable<CustomApplicationViewModel>> Get()
           => await _customApplicationRepository.GetCustomApplicationSteps();
+
+        // GET: api/website/custom-applications/result
+        [HttpPost("custom-applications/result")]
+        public async Task<IEnumerable<WebsiteProductsInCategoryViewModel>> GetResult([FromBody] string[] selectedOptions)
+          => await _customApplicationRepository.GetCustomApplicationResult(selectedOptions);
     }
 }

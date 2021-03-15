@@ -13,6 +13,7 @@ namespace EcommerceApi.Models
         public virtual DbSet<Location> Location { get; set; }
         public virtual DbSet<ApplicationStep> ApplicationStep { get; set; }
         public virtual DbSet<ApplicationStepDetail> ApplicationStepDetail { get; set; }
+        public virtual DbSet<ApplicationStepDetailTag> ApplicationStepDetailTag { get; set; }
         public virtual DbSet<Order> Order { get; set; }
         public virtual DbSet<OrderDetail> OrderDetail { get; set; }
         public virtual DbSet<OrderPayment> OrderPayment { get; set; }
