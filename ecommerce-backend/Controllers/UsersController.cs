@@ -114,6 +114,22 @@ namespace EcommerceApi.Controllers
             }
         }
 
+        [HttpPost("register")]
+        public async Task<IActionResult> RegisterUser([FromBody] ApplicationUser user)
+        {
+            if (await _userManager.FindByEmailAsync(user.Email) == null
+                && await _userManager.FindByNameAsync(user.UserName) == null)
+            {
+                user.EmailConfirmed = false;
+                await _userManager.CreateAsync(user, user.PasswordHash);
+                return Ok(user);
+            }
+            else
+            {
+                return BadRequest();
+            }
+        }
+
         // GET: api/Users/id/Roles
         [HttpGet("{email}/Roles")]
         public async Task<IEnumerable<string>> GetUserRoles(string email)
