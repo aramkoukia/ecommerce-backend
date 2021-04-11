@@ -9,6 +9,8 @@ using System.Linq;
 using System;
 using EcommerceApi.Services;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.WebUtilities;
+using System.Text;
 
 namespace EcommerceApi.Controllers
 {
@@ -149,9 +151,31 @@ namespace EcommerceApi.Controllers
             var result = await _userManager.CreateAsync(user, user.PasswordHash);
             if (result.Succeeded)
             {
+                var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+                code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
+                var portal = await _context.PortalSettings.FirstOrDefaultAsync();
+                var url = $"{portal.PublicWebsiteUrl}confirm-email?userid={user.Id}&code={code}";
                 _emailSender.SendEmailAsync(
                     user.Email,
-                    "User Registration", $"Thanks for your registration. <br> user this link to activate your account: https://veroboard.com/activate/${user.Id}");
+                    $"{portal.PortalTitle} Registration - Confirm Email", 
+                    $"Thanks for your Registration {user.GivenName}. \n" +
+                    $"Use this link to activate your account: \n" +
+                    $"{url}");
+                return Ok(user);
+            }
+            else
+            {
+                return BadRequest(result.Errors);
+            }
+        }
+
+        [HttpPost("confim-email")]
+        [AllowAnonymous]
+        public async Task<IActionResult> ConfirmEmail([FromBody] ApplicationUser user, [FromBody] string token)
+        {
+            var result = await _userManager.ConfirmEmailAsync(user, token);
+            if (result.Succeeded)
+            {
                 return Ok(user);
             }
             else
