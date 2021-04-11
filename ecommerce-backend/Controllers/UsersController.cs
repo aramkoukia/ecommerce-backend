@@ -105,6 +105,7 @@ namespace EcommerceApi.Controllers
                 && await _userManager.FindByNameAsync(user.UserName) == null)
             {
                 user.EmailConfirmed = true;
+                user.IsCustomer = false;
                 await _userManager.CreateAsync(user, user.PasswordHash);
                 return Ok(user);
             }
@@ -115,18 +116,47 @@ namespace EcommerceApi.Controllers
         }
 
         [HttpPost("register")]
+        [AllowAnonymous]
         public async Task<IActionResult> RegisterUser([FromBody] ApplicationUser user)
         {
-            if (await _userManager.FindByEmailAsync(user.Email) == null
-                && await _userManager.FindByNameAsync(user.UserName) == null)
+            if (await _userManager.FindByEmailAsync(user.Email) != null)
             {
-                user.EmailConfirmed = false;
-                await _userManager.CreateAsync(user, user.PasswordHash);
+                return BadRequest(
+                new[] {
+                    new
+                    {
+                        Code = "AlreadyExists",
+                        PhoneNumbers = "Email already registered!"
+                    }
+                });
+            }
+
+            if (await _userManager.FindByNameAsync(user.UserName) != null)
+            {
+                return BadRequest(
+                new[] {
+                    new
+                    {
+                        Code = "AlreadyExists",
+                        PhoneNumbers = "User Name already registered!"
+                    }
+                });
+            }
+
+            user.EmailConfirmed = false;
+            user.IsCustomer = true;
+            user.AuthCode = "";
+            var result = await _userManager.CreateAsync(user, user.PasswordHash);
+            if (result.Succeeded)
+            {
+                _emailSender.SendEmailAsync(
+                    user.Email,
+                    "User Registration", $"Thanks for your registration. <br> user this link to activate your account: https://veroboard.com/activate/${user.Id}");
                 return Ok(user);
             }
             else
             {
-                return BadRequest();
+                return BadRequest(result.Errors);
             }
         }
 

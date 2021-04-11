@@ -8,6 +8,7 @@ namespace EcommerceApi.Models
         public string GivenName { get; set; }
         public string AuthCode { get; set; }
         public bool Disabled { get; set; }
+        public bool IsCustomer { get; set; }
 
         [NotMapped]
         public string Roles { get; set; }
