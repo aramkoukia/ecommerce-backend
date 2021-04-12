@@ -70,6 +70,15 @@ namespace EcommerceApi.Controllers
                 });
             }
 
+            if (user != null && user.IsCustomer)
+            {
+                return BadRequest(new
+                {
+                    error = "", //OpenIdConnectConstants.Errors.InvalidGrant,
+                    error_description = "Invalid User Name."
+                });
+            }
+
             if (user == null || !await _userManager.CheckPasswordAsync(user, password))
             {
                 return BadRequest(new
