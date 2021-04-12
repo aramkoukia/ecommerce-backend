@@ -128,7 +128,7 @@ namespace EcommerceApi.Controllers
                     new
                     {
                         Code = "AlreadyExists",
-                        PhoneNumbers = "Email already registered!"
+                        Description = "Email already registered!"
                     }
                 });
             }
@@ -140,7 +140,7 @@ namespace EcommerceApi.Controllers
                     new
                     {
                         Code = "AlreadyExists",
-                        PhoneNumbers = "User Name already registered!"
+                        Description = "User Name already registered!"
                     }
                 });
             }
@@ -151,10 +151,11 @@ namespace EcommerceApi.Controllers
             var result = await _userManager.CreateAsync(user, user.PasswordHash);
             if (result.Succeeded)
             {
+                user = await _userManager.FindByEmailAsync(user.Email);
                 var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
                 code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
                 var portal = await _context.PortalSettings.FirstOrDefaultAsync();
-                var url = $"{portal.PublicWebsiteUrl}confirm-email?userid={user.Id}&code={code}";
+                var url = $"{portal.PublicWebsiteUrl}confirm-email?userId={user.Id}&code={code}";
                 _emailSender.SendEmailAsync(
                     user.Email,
                     $"{portal.PortalTitle} Registration - Confirm Email", 
@@ -169,11 +170,25 @@ namespace EcommerceApi.Controllers
             }
         }
 
-        [HttpPost("confim-email")]
+        [HttpPost("confirm-email")]
         [AllowAnonymous]
-        public async Task<IActionResult> ConfirmEmail([FromBody] ApplicationUser user, [FromBody] string token)
+        public async Task<IActionResult> ConfirmEmail([FromQuery] string userId, [FromQuery] string token)
         {
-            var result = await _userManager.ConfirmEmailAsync(user, token);
+            var user = await _userManager.FindByIdAsync(userId);
+
+            if (user == null)
+            {
+                return BadRequest(
+                new[] {
+                    new
+                    {
+                        Code = "UserNotFound",
+                        Description = "Specified User Was Not Found!"
+                    }
+                });
+            }
+
+            var result = await _userManager.ConfirmEmailAsync(user, Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(token)));
             if (result.Succeeded)
             {
                 return Ok(user);
