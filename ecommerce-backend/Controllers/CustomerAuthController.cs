@@ -34,12 +34,12 @@ namespace EcommerceApi.Controllers
         [AllowAnonymous]
         [HttpPost("api/customer/auth/login")]
         [Produces("application/json")]
-        public async Task<IActionResult> Login(string username, string password)
+        public async Task<IActionResult> Login([FromBody] ApplicationUser user)
         {
             // Ensure the username and password is valid.
-            var user = await _userManager.FindByNameAsync(username);
+            var foundUser = await _userManager.FindByNameAsync(user.UserName);
 
-            if (user != null && user.Disabled)
+            if (foundUser != null && foundUser.Disabled)
             {
                 return BadRequest(new
                 {
@@ -48,40 +48,40 @@ namespace EcommerceApi.Controllers
                 });
             }
 
-            if (user != null && !user.IsCustomer)
+            if (foundUser != null && !foundUser.IsCustomer)
             {
                 return BadRequest(new
                 {
                     error = "", //OpenIdConnectConstants.Errors.InvalidGrant,
-                    error_description = "Invalid User Name."
+                    error_description = "Username or password is invalid."
                 });
             }
 
-            if (user == null || !await _userManager.CheckPasswordAsync(user, password))
+            if (foundUser == null || !await _userManager.CheckPasswordAsync(foundUser, foundUser.PasswordHash))
             {
                 return BadRequest(new
                 {
                     error = "", //OpenIdConnectConstants.Errors.InvalidGrant,
-                    error_description = "The username or password is invalid."
+                    error_description = "Username or password is invalid."
                 });
             }
 
             // Ensure the email is confirmed.
-            if (!await _userManager.IsEmailConfirmedAsync(user))
+            if (!await _userManager.IsEmailConfirmedAsync(foundUser))
             {
                 return BadRequest(new
                 {
                     error = "email_not_confirmed",
-                    error_description = "You must have a confirmed email to log in."
+                    error_description = "You must confirm your email to log in."
                 });
             }
 
-            _logger.LogInformation($"User logged in (id: {user.Id})");
+            _logger.LogInformation($"User logged in (id: {foundUser.Id})");
 
             // Generate and issue a JWT token
             var claims = new List<Claim> {
-                new Claim(ClaimTypes.Name, user.Email),
-                new Claim(JwtRegisteredClaimNames.Sub, user.Email),
+                new Claim(ClaimTypes.Name, foundUser.Email),
+                new Claim(JwtRegisteredClaimNames.Sub, foundUser.Email),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
             };
 
