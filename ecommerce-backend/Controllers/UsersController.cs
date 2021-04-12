@@ -170,7 +170,7 @@ namespace EcommerceApi.Controllers
             }
         }
 
-        [HttpPost("confirm-email")]
+        [HttpGet("confirm-email")]
         [AllowAnonymous]
         public async Task<IActionResult> ConfirmEmail([FromQuery] string userId, [FromQuery] string token)
         {
