@@ -147,7 +147,7 @@ namespace EcommerceApi.Controllers
 
             user.EmailConfirmed = false;
             user.IsCustomer = true;
-            user.AuthCode = "";
+            user.AuthCode = Guid.NewGuid().ToString();
             var result = await _userManager.CreateAsync(user, user.PasswordHash);
             if (result.Succeeded)
             {

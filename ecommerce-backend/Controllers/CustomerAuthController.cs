@@ -34,12 +34,21 @@ namespace EcommerceApi.Controllers
         [AllowAnonymous]
         [HttpPost("api/customer/auth/login")]
         [Produces("application/json")]
-        public async Task<IActionResult> Login([FromBody] ApplicationUser user)
+        public async Task<IActionResult> Login(string username, string password)
         {
             // Ensure the username and password is valid.
-            var foundUser = await _userManager.FindByNameAsync(user.UserName);
+            var foundUser = await _userManager.FindByNameAsync(username);
 
-            if (foundUser != null && foundUser.Disabled)
+            if (foundUser == null)
+            {
+                return BadRequest(new
+                {
+                    error = "", //OpenIdConnectConstants.Errors.InvalidGrant,
+                    error_description = "Invalid User Name."
+                });
+            }
+
+            if (foundUser.Disabled)
             {
                 return BadRequest(new
                 {
@@ -48,21 +57,12 @@ namespace EcommerceApi.Controllers
                 });
             }
 
-            if (foundUser != null && !foundUser.IsCustomer)
+            if (!foundUser.IsCustomer)
             {
                 return BadRequest(new
                 {
                     error = "", //OpenIdConnectConstants.Errors.InvalidGrant,
-                    error_description = "Username or password is invalid."
-                });
-            }
-
-            if (foundUser == null || !await _userManager.CheckPasswordAsync(foundUser, foundUser.PasswordHash))
-            {
-                return BadRequest(new
-                {
-                    error = "", //OpenIdConnectConstants.Errors.InvalidGrant,
-                    error_description = "Username or password is invalid."
+                    error_description = "User Name is invalid."
                 });
             }
 
@@ -73,6 +73,15 @@ namespace EcommerceApi.Controllers
                 {
                     error = "email_not_confirmed",
                     error_description = "You must confirm your email to log in."
+                });
+            }
+
+            if (!await _userManager.CheckPasswordAsync(foundUser, password))
+            {
+                return BadRequest(new
+                {
+                    error = "", //OpenIdConnectConstants.Errors.InvalidGrant,
+                    error_description = $"Username or password is invalid."
                 });
             }
 
