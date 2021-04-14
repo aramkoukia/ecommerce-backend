@@ -158,7 +158,7 @@ namespace EcommerceApi.Controllers
                 var url = $"{portal.PublicWebsiteUrl}confirm-email?userId={user.Id}&code={code}";
                 _emailSender.SendEmailAsync(
                     user.Email,
-                    $"{portal.PortalTitle} Registration - Confirm Email", 
+                    $"{portal.PortalTitle} Registration - Confirm Email",
                     $"Thanks for your Registration {user.GivenName}. \n" +
                     $"Use this link to activate your account: \n" +
                     $"{url}");

@@ -34,10 +34,10 @@ namespace EcommerceApi.Controllers
         [AllowAnonymous]
         [HttpPost("api/customer/auth/login")]
         [Produces("application/json")]
-        public async Task<IActionResult> Login(string username, string password)
+        public async Task<IActionResult> Login([FromBody] LoginInfo user)
         {
             // Ensure the username and password is valid.
-            var foundUser = await _userManager.FindByNameAsync(username);
+            var foundUser = await _userManager.FindByNameAsync(user.username);
 
             if (foundUser == null)
             {
@@ -76,7 +76,7 @@ namespace EcommerceApi.Controllers
                 });
             }
 
-            if (!await _userManager.CheckPasswordAsync(foundUser, password))
+            if (!await _userManager.CheckPasswordAsync(foundUser, user.password))
             {
                 return BadRequest(new
                 {
