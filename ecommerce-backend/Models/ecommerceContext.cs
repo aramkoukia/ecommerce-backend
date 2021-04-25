@@ -9,6 +9,8 @@ namespace EcommerceApi.Models
     {
         public virtual DbSet<Contact> Contacts { get; set; }
         public virtual DbSet<Customer> Customer { get; set; }
+        public virtual DbSet<CustomerUsers> CustomerUsers { get; set; }
+
         public virtual DbSet<CustomerStoreCredit> CustomerStoreCredit { get; set; }
         public virtual DbSet<Location> Location { get; set; }
         public virtual DbSet<ApplicationStep> ApplicationStep { get; set; }
