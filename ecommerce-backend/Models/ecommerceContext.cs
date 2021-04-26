@@ -64,6 +64,8 @@ namespace EcommerceApi.Models
         {
             base.OnModelCreating(modelBuilder);
 
+            modelBuilder.Entity<CustomerUsers>().HasKey(c => new { c.UserId, c.CustomerId });
+
             foreach (var entity in modelBuilder.Model.GetEntityTypes())
             {
                 // Remove 'AspNet' prefix and convert table name from PascalCase to snake_case. E.g. AspNetRoleClaims -> role_claims

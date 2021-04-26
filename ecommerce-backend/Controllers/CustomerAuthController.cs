@@ -113,7 +113,7 @@ namespace EcommerceApi.Controllers
             //    }
             //}
 
-            var completeProfile = _context.CustomerUsers.FirstOrDefault(c => c.UserId == foundUser.Id) == null ? false : true;
+            var completeProfile = _context.CustomerUsers.Any(c => c.UserId == foundUser.Id);
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtOptions.key));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
