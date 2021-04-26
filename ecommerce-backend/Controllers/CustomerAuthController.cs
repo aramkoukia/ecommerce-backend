@@ -12,22 +12,26 @@ using System.Text;
 using EcommerceApi.Models;
 using EcommerceApi.Services;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace EcommerceApi.Controllers
 {
     public class CustomerAuthController : Controller
     {
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly EcommerceContext _context;
         private readonly JwtOptions _jwtOptions;
         private readonly ILogger _logger;
 
         public CustomerAuthController(
             UserManager<ApplicationUser> userManager,
             IOptions<JwtOptions> jwtOptions,
+            EcommerceContext context,
             ILoggerFactory loggerFactory)
         {
             _userManager = userManager;
             _jwtOptions = jwtOptions.Value;
+            _context = context;
             _logger = loggerFactory.CreateLogger<AuthController>();
         }
 
@@ -109,6 +113,7 @@ namespace EcommerceApi.Controllers
             //    }
             //}
 
+            var completeProfile = _context.CustomerUsers.FirstOrDefault(c => c.UserId == foundUser.Id) == null ? false : true;
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtOptions.key));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
@@ -136,6 +141,7 @@ namespace EcommerceApi.Controllers
                 new
                 {
                     token = new JwtSecurityTokenHandler().WriteToken(token),
+                    completeProfile
                 });
         }
     }
