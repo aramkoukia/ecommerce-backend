@@ -103,17 +103,24 @@ namespace EcommerceApi.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateUser([FromBody] ApplicationUser user)
         {
-            if (await _userManager.FindByEmailAsync(user.Email) == null 
+            if (await _userManager.FindByEmailAsync(user.Email) == null
                 && await _userManager.FindByNameAsync(user.UserName) == null)
             {
                 user.EmailConfirmed = true;
                 user.IsCustomer = false;
-                await _userManager.CreateAsync(user, user.PasswordHash);
-                return Ok(user);
+                var result = await _userManager.CreateAsync(user, user.PasswordHash);
+                if (result.Succeeded)
+                {
+                    return Ok(user);
+                }
+                else
+                { 
+                    return BadRequest(result.Errors.Select(e => e.Description).ToArray());
+                }
             }
             else
             {
-                return BadRequest();
+                return BadRequest(new[] { "UserName or Email already exists!" });
             }
         }
 
