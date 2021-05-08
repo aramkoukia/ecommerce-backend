@@ -141,7 +141,7 @@ Group BY status, CustomerId";
             }
         }
 
-        public async Task<IEnumerable<CustomerAwaitingPaymentViewModel>> GetCustomerAwaitingPaymentOrders()
+        public async Task<IEnumerable<CustomerAwaitingPaymentViewModel>> GetCustomerAwaitingPaymentOrders(bool showOverDue)
         {
             using (IDbConnection conn = Connection)
             {
@@ -149,28 +149,40 @@ Group BY status, CustomerId";
 SELECT Customer.* , AwaitingOrders.OrderCount, AwaitingOrders.Total
 FROM Customer
 INNER JOIN  (
-	SELECT DISTINCT CustomerId, SUM(Total) AS Total, Count(OrderId) AS OrderCount
+	SELECT DISTINCT 
+	CustomerId, SUM(Total) AS Total, Count(OrderId) AS OrderCount
 	FROM [Order]
 	WHERE [Order].[Status] IN ('Account')
+	AND (@showOverDue = 0 OR DATEADD(DAY, 40, [OrderDate]) <= GETDATE())
 	GROUP BY CustomerId
 ) AwaitingOrders
 ON AwaitingOrders.CustomerId = Customer.CustomerId;
 
 SELECT 
 [Order].OrderId, PoNumber, 
-OrderDate, DateAdd(DAY, 30, OrderDate) As DueDate, 
+OrderDate, 
+	CASE WHEN [Order].[Status] = 'Account' THEN FORMAT(DATEADD(DAY, 40, [OrderDate]), 'dd/MM/yyyy hh:mm tt') ELSE NULL END AS DueDate,
+	CASE WHEN [Order].[Status] = 'Account' THEN CASE WHEN DATEADD(DAY, 40, [OrderDate]) <= GETDATE() THEN 'Yes' ELSE 'No' END ELSE NULL END AS OverDue, 
 [Order].Total, 
 CASE [Order].[Status] WHEN 'Account' THEN 'Awaiting Payment' END AS [Status], 
 Customer.CompanyName, Customer.CustomerCode, Customer.[Address], 
-Customer.City, Customer.Province, Customer.PostalCode, Customer.CustomerId
+Customer.City, Customer.Province, Customer.PostalCode, Customer.CustomerId,
+Location.LocationName,
+[Order].CreatedByUserId,
+[Users].GivenName
 FROM [Order]
 INNER JOIN Customer
 	ON Customer.CustomerId = [Order].CustomerId
+INNER JOIN Location
+	ON Location.LocationId = [Order].LocationId
+INNER JOIN [Users]
+    ON [Order].CreatedByUserId = [Users].Id
 WHERE [Order].[Status] IN ('Account')
+  	  AND (@showOverDue = 0 OR DATEADD(DAY, 40, [OrderDate]) <= GETDATE())
 ";
                 conn.Open();
 
-                var result = await conn.QueryMultipleAsync(query);
+                var result = await conn.QueryMultipleAsync(query, new { showOverDue });
 
                 var customers = result.Read<CustomerAwaitingPaymentViewModel>().ToList();
                 var orders = result.Read<CustomerAwaitingPaymentDetail>().ToList();

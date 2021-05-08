@@ -58,9 +58,9 @@ namespace EcommerceApi.Controllers
         }
 
         [HttpGet("AwaitingPayments")]
-        public async Task<IEnumerable<CustomerAwaitingPaymentViewModel>> GetCustomerAwaitingPayments()
+        public async Task<IEnumerable<CustomerAwaitingPaymentViewModel>> GetCustomerAwaitingPayments(bool showOverDue)
         {
-            return await _customerRepository.GetCustomerAwaitingPaymentOrders();
+            return await _customerRepository.GetCustomerAwaitingPaymentOrders(showOverDue);
         }
 
         // GET: api/Customers/5

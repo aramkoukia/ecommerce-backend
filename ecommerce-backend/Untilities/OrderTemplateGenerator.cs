@@ -56,7 +56,7 @@ namespace EcommerceApi.Untilities
                                 {customerAddress}                                    
                                 {customerCity} {customerProvince} {customerPostalCode}
                                 {customerPhone}
-
+                                
                                 <table style='width:100%'>
                                 <tr><td style='vertical-align: top; width:50%'>
 
@@ -210,9 +210,15 @@ namespace EcommerceApi.Untilities
 
             sbFinal.Append(sbCustomer);
 
+            var storeCredit = "";
+            if (order.OrderPayment.Any() && order.OrderPayment.Any(p => p.PaymentType.PaymentTypeId == 26)) // Store Credit
+            {
+                storeCredit = $@"<div>Store Credit Balance: ${order.Customer.StoreCredit}</div>";
+            }
+
             sbFinal.Append($@"
                     </table>
-
+                    {storeCredit}
                     <hr class='spaceafter-30'/>
 
                     <div>{CustomerCopy}</div>
@@ -248,6 +254,7 @@ namespace EcommerceApi.Untilities
                 sbFinal.Append(sbMerchangt.ToString());
                 sbFinal.Append($@"
                     </table>
+                    {storeCredit}
                     <hr class='spaceafter-30'/>
                     <div>{MerchantCopy}</div>
                     <hr class='spaceafter-30'/>");

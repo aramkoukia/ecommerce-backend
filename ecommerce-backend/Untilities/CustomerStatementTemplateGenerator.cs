@@ -55,7 +55,7 @@ namespace EcommerceApi.Untilities
                                 ");
             }
 
-                                sbFinal.Append($@"</div><hr />
+            sbFinal.Append($@"</div><hr />
                                 <table style='width:100%'>
 <tr>
   <td style='width:33%'><td style='width:33%;text-align:center'><h3>Monthly Statement</h3></td><td style='width:33%'></td>
@@ -106,6 +106,11 @@ namespace EcommerceApi.Untilities
 </tr>
 {GetUnPaidAmountRows(customerUnPaidOrders)}
 </table>
+<p>
+<b>
+  <span style='fond-size:20px;'>Store Credit Balance: ${customer.StoreCredit}</span>
+</b>
+</p>
 
 <p>
 <b>
