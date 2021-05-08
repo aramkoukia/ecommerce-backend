@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
+using System.Linq;
 using System.Threading.Tasks;
 using Dapper;
 using EcommerceApi.ViewModel;
@@ -137,6 +138,48 @@ WHERE CustomerId = @customerId
 Group BY status, CustomerId";
                 conn.Open();
                 return await conn.QueryAsync<CustomerOrderSummaryViewModel>(query, new { customerId });
+            }
+        }
+
+        public async Task<IEnumerable<CustomerAwaitingPaymentViewModel>> GetCustomerAwaitingPaymentOrders()
+        {
+            using (IDbConnection conn = Connection)
+            {
+                string query = $@"
+SELECT Customer.* , AwaitingOrders.OrderCount, AwaitingOrders.Total
+FROM Customer
+INNER JOIN  (
+	SELECT DISTINCT CustomerId, SUM(Total) AS Total, Count(OrderId) AS OrderCount
+	FROM [Order]
+	WHERE [Order].[Status] IN ('Account')
+	GROUP BY CustomerId
+) AwaitingOrders
+ON AwaitingOrders.CustomerId = Customer.CustomerId;
+
+SELECT 
+[Order].OrderId, PoNumber, 
+OrderDate, DateAdd(DAY, 30, OrderDate) As DueDate, 
+[Order].Total, 
+CASE [Order].[Status] WHEN 'Account' THEN 'Awaiting Payment' END AS [Status], 
+Customer.CompanyName, Customer.CustomerCode, Customer.[Address], 
+Customer.City, Customer.Province, Customer.PostalCode, Customer.CustomerId
+FROM [Order]
+INNER JOIN Customer
+	ON Customer.CustomerId = [Order].CustomerId
+WHERE [Order].[Status] IN ('Account')
+";
+                conn.Open();
+
+                var result = await conn.QueryMultipleAsync(query);
+
+                var customers = result.Read<CustomerAwaitingPaymentViewModel>().ToList();
+                var orders = result.Read<CustomerAwaitingPaymentDetail>().ToList();
+                foreach (var customer in customers)
+                {
+                    customer.CustomerAwaitingPaymentDetail.AddRange(orders.Where(p => p.CustomerId == customer.CustomerId));
+                }
+
+                return customers;
             }
         }
     }

@@ -11,5 +11,6 @@ namespace EcommerceApi.Repositories
         Task<CustomerViewModel> GetCustomer(int customerId);
         Task<decimal> GetCustomerBalance(int customerId);
         Task<IEnumerable<CustomerOrderSummaryViewModel>> GetCustomerOrderSummary(int customerId);
+        Task<IEnumerable<CustomerAwaitingPaymentViewModel>> GetCustomerAwaitingPaymentOrders();
     }
 }

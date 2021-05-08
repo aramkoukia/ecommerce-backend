@@ -57,6 +57,12 @@ namespace EcommerceApi.Controllers
             return await _customerRepository.GetCustomersWithBalance(showDisabled);
         }
 
+        [HttpGet("AwaitingPayments")]
+        public async Task<IEnumerable<CustomerAwaitingPaymentViewModel>> GetCustomerAwaitingPayments()
+        {
+            return await _customerRepository.GetCustomerAwaitingPaymentOrders();
+        }
+
         // GET: api/Customers/5
         [HttpGet("{id}")]
         public async Task<IActionResult> GetCustomer([FromRoute] int id)
