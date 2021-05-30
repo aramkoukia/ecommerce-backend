@@ -330,7 +330,7 @@ namespace EcommerceApi.Controllers
         [HttpPut("link-customer")]
         public async Task<IActionResult> LinkCustomer([FromBody] CustomerUserLinkViewModel model)
         {
-            ApplicationUser user = await _userManager.FindByIdAsync(model.UserName);
+            ApplicationUser user = await _userManager.FindByNameAsync(model.UserName);
             if (user == null) 
             {
                 return BadRequest("User not found");
@@ -357,8 +357,10 @@ namespace EcommerceApi.Controllers
                 CreatorUserId = userId
             });
 
+            await _context.SaveChangesAsync();
+
             _emailSender.SendEmailAsync(
-                user.Email, "User Account Linked to Customer", $"<br> User: {user.UserName} {user.GivenName} is now linked to Customer Account: {customer.CustomerCode} {customer.CompanyName}", null, null, true, "aramkoukia@gmail.com");
+                user.Email, "User Account Linked to Customer", $"User with User Name: {user.UserName}, Full Name: {user.GivenName}, Email: {user.Email} is now linked to Customer Account, Code: {customer.CustomerCode}, Company Name:{customer.CompanyName}.", null, null, true, "aramkoukia@gmail.com");
 
             return Ok(new { Succeeded = true });
         }
