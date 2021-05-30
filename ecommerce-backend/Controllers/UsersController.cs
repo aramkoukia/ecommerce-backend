@@ -39,6 +39,13 @@ namespace EcommerceApi.Controllers
             _accessor = accessor;
         }
 
+        // GET: api/website-users
+        [HttpGet("website-users")]
+        public async Task<IEnumerable<ApplicationUser>> GetWebsiteUsers()
+        {
+            return await _userManager.Users.Where(u => u.IsCustomer).ToListAsync();
+        }
+
         // GET: api/Users
         [HttpGet]
         public async Task<IEnumerable<ApplicationUser>> Get()
@@ -318,6 +325,42 @@ namespace EcommerceApi.Controllers
                 user.Email, "Passcode Reset", $"Your passcode is reset. <br> Your new passcode is: {passcodeResetInfo.NewPasscode}");
 
             return Ok( new { Succeeded = true });
+        }
+
+        [HttpPut("link-customer")]
+        public async Task<IActionResult> LinkCustomer([FromBody] CustomerUserLinkViewModel model)
+        {
+            ApplicationUser user = await _userManager.FindByIdAsync(model.UserName);
+            if (user == null) 
+            {
+                return BadRequest("User not found");
+            }
+
+            var customer = await _context.Customer.FirstOrDefaultAsync(c => c.CustomerCode == model.CustomerCode);
+            if (customer == null)
+            {
+                return BadRequest("Customer not found");
+            }
+            
+            var existingLinks = _context.CustomerUsers.Where(c => c.UserId == user.Id);
+            _context.CustomerUsers.RemoveRange(existingLinks);
+            await _context.SaveChangesAsync();
+            var date = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateTime.UtcNow, "Pacific Standard Time");
+            System.Security.Claims.ClaimsPrincipal currentUser = this.User;
+            var userId = _userManager.GetUserId(User);
+            _context.CustomerUsers.Add(new CustomerUsers
+            {
+                CustomerId = customer.CustomerId,
+                UserId = user.Id,
+                CreatedDate = date,
+                CreationMethod = "Manual",
+                CreatorUserId = userId
+            });
+
+            _emailSender.SendEmailAsync(
+                user.Email, "User Account Linked to Customer", $"<br> User: {user.UserName} {user.GivenName} is now linked to Customer Account: {customer.CustomerCode} {customer.CompanyName}", null, null, true, "aramkoukia@gmail.com");
+
+            return Ok(new { Succeeded = true });
         }
 
         [HttpDelete("{userName}")]
