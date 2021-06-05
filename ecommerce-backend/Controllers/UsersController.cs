@@ -50,7 +50,7 @@ namespace EcommerceApi.Controllers
         [HttpGet]
         public async Task<IEnumerable<ApplicationUser>> Get()
         {
-            var users = await _userManager.Users.Where(u => !u.Disabled).ToListAsync();
+            var users = await _userManager.Users.Where(u => !u.Disabled && !u.IsCustomer).ToListAsync();
             foreach (var user in users)
             {
                 var locations = _context.UserLocation.AsNoTracking().Include(l => l.Location).Where(u => u.UserId == user.Id).Select(l => l.Location.LocationName);
